@@ -25,100 +25,11 @@ const items = [
   { key: "3", label: "Delete" },
 ];
 
-const data: DataType[] = [
-  {
-    key: "1",
-    name: "Sumarmo",
-    ptkp: "K/2",
-    gajiPokok: 4100000,
-    gajiBruto: 4100000,
-    gajiNeto: 4100000,
-    monthlyTax: 0,
-  },
-  {
-    key: "2",
-    name: "Edi Wahyono",
-    ptkp: "K/2",
-    gajiPokok: 3600000,
-    gajiBruto: 3600000,
-    gajiNeto: 3600000,
-    monthlyTax: 0,
-  },
-  {
-    key: "3",
-    name: "Dimas Maulana Walidayni",
-    ptkp: "TK/0",
-    gajiPokok: 1700000,
-    gajiBruto: 1700000,
-    gajiNeto: 1700000,
-    monthlyTax: 0,
-  },
-  {
-    key: "4",
-    name: "Priyo Adi Prayogo",
-    ptkp: "TK/0",
-    gajiPokok: 1560000,
-    gajiBruto: 1560000,
-    gajiNeto: 1560000,
-    monthlyTax: 0,
-  },
-  {
-    key: "5",
-    name: "Andika Adnan Husaini",
-    ptkp: "TK/0",
-    gajiPokok: 1600000,
-    gajiBruto: 1600000,
-    gajiNeto: 1600000,
-    monthlyTax: 0,
-  },
-  {
-    key: "6",
-    name: "Puji Suryanto",
-    ptkp: "TK/0",
-    gajiPokok: 1447000,
-    gajiBruto: 1447000,
-    gajiNeto: 1447000,
-    monthlyTax: 0,
-  },
-  {
-    key: "7",
-    name: "Abdullah Wafi ",
-    ptkp: "K/2",
-    gajiPokok: 1447000,
-    gajiBruto: 1447000,
-    gajiNeto: 1447000,
-    monthlyTax: 0,
-  },
-  {
-    key: "8",
-    name: "Sri Pujo Adi",
-    ptkp: "TK/0",
-    gajiPokok: 1447000,
-    gajiBruto: 1447000,
-    gajiNeto: 1447000,
-    monthlyTax: 0,
-  },
-  {
-    key: "9",
-    name: "Khairus saleh,SP",
-    ptkp: "K/0",
-    gajiPokok: 1447000,
-    gajiBruto: 1447000,
-    gajiNeto: 1447000,
-    monthlyTax: 0,
-  },
-  {
-    key: "10",
-    name: "Dandi kurnia Putra",
-    ptkp: "TK/0",
-    gajiPokok: 1447000,
-    gajiBruto: 1447000,
-    gajiNeto: 1447000,
-    monthlyTax: 0,
-  },
-];
+interface AnotherTableProps {
+  data: DataType[];
+}
 
-const AnotherTable: React.FC = () => {
+const AnotherTable: React.FC<AnotherTableProps> = ({ data }) => {
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
   const searchInput = useRef<InputRef>(null);
@@ -244,41 +155,27 @@ const AnotherTable: React.FC = () => {
       dataIndex: "ptkp",
       key: "ptkp",
       width: "10%",
-      //   ...getColumnSearchProps("ptkp"),
     },
     {
-      title: "Gaji Pokok",
-      dataIndex: "gajiPokok",
-      key: "gajiPokok",
+      title: "Gaji Bersih",
+      dataIndex: "gajiNeto",
+      key: "gajiNeto",
       width: "15%",
-      render: (price: number) => <span>{formatRupiah(price)}</span>, // Format Rupiah
-      //   ...getColumnSearchProps("gajiPokok"),
-      //   sorter: (a, b) => a.gajiPokok.length - b.gajiPokok.length,
-      //   sortDirections: ["descend", "ascend"],
+      render: (price: number) => <span>{formatRupiah(price)}</span>, 
     },
     {
       title: "Gaji Bruto",
       dataIndex: "gajiBruto",
       key: "gajiBruto",
       width: "15%",
-      render: (price: number) => <span>{formatRupiah(price)}</span>, // Format Rupiah
-      //   ...getColumnSearchProps("gajiBruto"),
-    },
-    {
-      title: "Gaji Neto",
-      dataIndex: "gajiNeto",
-      key: "gajiNeto",
-      width: "15%",
-      render: (price: number) => <span>{formatRupiah(price)}</span>, // Format Rupiah
-      //   ...getColumnSearchProps("gajiBruto"),
+      render: (price: number) => <span>{formatRupiah(price)}</span>,
     },
     {
       title: "Pajak Bulanan",
       dataIndex: "monthlyTax",
       key: "monthlyTax",
       width: "15%",
-      render: (price: number) => <span>{formatRupiah(price)}</span>, // Format Rupiah
-      //   ...getColumnSearchProps("monthlyTax"),
+      render: (price: number) => <span>{formatRupiah(price)}</span>, 
     },
     {
       title: "Action",
@@ -300,7 +197,7 @@ const AnotherTable: React.FC = () => {
     <Table<DataType>
       columns={columns}
       dataSource={data}
-      pagination={{ pageSize: 5 }} // 👈 Batasi 3 item per halaman
+      pagination={{ pageSize: 5 }}
     />
   );
 };

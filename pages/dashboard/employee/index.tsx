@@ -1,23 +1,136 @@
 import { useState } from "react";
 import Layout from "@/components/layouts/Layout";
-import Table from "@/components/core/Table";
 import AnotherTable from "@/components/core/AnotherTable";
+import { Button, Modal, Input } from "antd";
+import { calculateGajiBruto } from "@/helpers/taxCalc";
+
+interface DataType {
+  key: string;
+  name: string;
+  ptkp: string;
+  gajiPokok: number;
+  gajiBruto: number;
+  gajiNeto: number;
+  monthlyTax: number;
+}
 
 export default function List() {
-  const [data, setData] = useState([
-    { id: 1, name: "John Doe", email: "john@example.com" },
-    { id: 2, name: "Jane Doe", email: "jane@example.com" },
+  const [data, setData] = useState<DataType[]>([
+    {
+      key: "1",
+      name: "Sumarmo",
+      ptkp: "K/2",
+      gajiPokok: 4100000,
+      gajiBruto: 4100000,
+      gajiNeto: 4100000,
+      monthlyTax: 0,
+    },
+    {
+      key: "2",
+      name: "Edi Wahyono",
+      ptkp: "K/2",
+      gajiPokok: 3600000,
+      gajiBruto: 3600000,
+      gajiNeto: 3600000,
+      monthlyTax: 0,
+    },
+    {
+      key: "3",
+      name: "Dimas Maulana Walidayni",
+      ptkp: "TK/0",
+      gajiPokok: 1700000,
+      gajiBruto: 1700000,
+      gajiNeto: 1700000,
+      monthlyTax: 0,
+    },
+    {
+      key: "4",
+      name: "Priyo Adi Prayogo",
+      ptkp: "TK/0",
+      gajiPokok: 1560000,
+      gajiBruto: 1560000,
+      gajiNeto: 1560000,
+      monthlyTax: 0,
+    },
+    {
+      key: "5",
+      name: "Andika Adnan Husaini",
+      ptkp: "TK/0",
+      gajiPokok: 1600000,
+      gajiBruto: 1600000,
+      gajiNeto: 1600000,
+      monthlyTax: 0,
+    },
+    {
+      key: "6",
+      name: "Puji Suryanto",
+      ptkp: "TK/0",
+      gajiPokok: 1447000,
+      gajiBruto: 1447000,
+      gajiNeto: 1447000,
+      monthlyTax: 0,
+    },
+    {
+      key: "7",
+      name: "Abdullah Wafi ",
+      ptkp: "K/2",
+      gajiPokok: 1447000,
+      gajiBruto: 1447000,
+      gajiNeto: 1447000,
+      monthlyTax: 0,
+    },
+    {
+      key: "8",
+      name: "Sri Pujo Adi",
+      ptkp: "TK/0",
+      gajiPokok: 1447000,
+      gajiBruto: 1447000,
+      gajiNeto: 1447000,
+      monthlyTax: 0,
+    },
+    {
+      key: "9",
+      name: "Khairus saleh,SP",
+      ptkp: "K/0",
+      gajiPokok: 1447000,
+      gajiBruto: 1447000,
+      gajiNeto: 1447000,
+      monthlyTax: 0,
+    },
+    {
+      key: "10",
+      name: "Dandi kurnia Putra",
+      ptkp: "TK/0",
+      gajiPokok: 1447000,
+      gajiBruto: 1447000,
+      gajiNeto: 1447000,
+      monthlyTax: 0,
+    },
   ]);
-  const [isOpen, setIsOpen] = useState(false);
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [newName, setNewName] = useState("");
-  const [newEmail, setNewEmail] = useState("");
+  const [newPtkp, setNewPtkp] = useState("");
+  const [newGajiPokok, setNewGajiPokok] = useState("");
 
   const handleAdd = () => {
-    if (newName && newEmail) {
-      setData([...data, { id: data.length + 1, name: newName, email: newEmail }]);
+    if (newName && newPtkp && newGajiPokok) {
+      setData([
+        ...data,
+        {
+          key: (data.length + 1).toString(),
+          name: newName,
+          ptkp: newPtkp,
+          gajiPokok: parseFloat(newGajiPokok),
+          gajiBruto: calculateGajiBruto(parseFloat(newGajiPokok)),
+          gajiNeto: parseFloat(newGajiPokok),
+          monthlyTax: 0,
+        },
+      ]);
       setNewName("");
-      setNewEmail("");
-      setIsOpen(false);
+      setNewPtkp("");
+      setNewGajiPokok("");
+      setIsModalOpen(false);
     }
   };
 
@@ -26,44 +139,46 @@ export default function List() {
       <div className="bg-white p-6 rounded-lg shadow-md">
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-2xl font-bold">List Data Karyawan</h1>
-          <button onClick={() => setIsOpen(true)} className="bg-blue-500 text-white px-4 py-2 rounded-md">
+          <Button type="primary" onClick={() => setIsModalOpen(true)}>
             Add Data
-          </button>
+          </Button>
         </div>
-        {/* <Table data={data} /> */}
-        <AnotherTable/>
+        <AnotherTable data={data} />
       </div>
 
       {/* Modal Add Data */}
-      {isOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-          <div className="bg-white p-6 rounded-lg shadow-lg w-96">
-            <h2 className="text-xl font-bold mb-4">Add New Data</h2>
-            <input
-              type="text"
-              placeholder="Enter Name"
-              className="w-full border p-2 mb-2 rounded"
-              value={newName}
-              onChange={(e) => setNewName(e.target.value)}
-            />
-            <input
-              type="email"
-              placeholder="Enter Email"
-              className="w-full border p-2 mb-4 rounded"
-              value={newEmail}
-              onChange={(e) => setNewEmail(e.target.value)}
-            />
-            <div className="flex justify-end space-x-2">
-              <button onClick={() => setIsOpen(false)} className="bg-gray-400 text-white px-4 py-2 rounded">
-                Cancel
-              </button>
-              <button onClick={handleAdd} className="bg-green-500 text-white px-4 py-2 rounded">
-                Add
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <Modal
+        title="Tambah Data Karyawan"
+        open={isModalOpen}
+        onCancel={() => setIsModalOpen(false)}
+        footer={[
+          <Button key="cancel" onClick={() => setIsModalOpen(false)}>
+            Cancel
+          </Button>,
+          <Button key="add" type="primary" onClick={handleAdd}>
+            Add
+          </Button>,
+        ]}
+      >
+        <Input
+          placeholder="Masukkan Nama"
+          value={newName}
+          onChange={(e) => setNewName(e.target.value)}
+          className="mb-3"
+        />
+        <Input
+          placeholder="Masukkan PTKP"
+          value={newPtkp}
+          onChange={(e) => setNewPtkp(e.target.value)}
+          className="mb-3"
+        />
+        <Input
+          placeholder="Masukkan Gaji Pokok"
+          type="number"
+          value={newGajiPokok}
+          onChange={(e) => setNewGajiPokok(e.target.value)}
+        />
+      </Modal>
     </Layout>
   );
 }
