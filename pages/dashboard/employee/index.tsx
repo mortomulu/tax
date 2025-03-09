@@ -119,9 +119,9 @@ export default function List() {
     if (newName && newPtkp && newGajiPokok) {
       const brutoSalary = calculateGajiBruto(parseFloat(newGajiPokok));
       const yearlyBrutoSalary = brutoSalary * 12;
-  
+
       const monthlyTax = calculateTax(yearlyBrutoSalary, newPtkp);
-  
+
       setData([
         ...data,
         {
@@ -134,7 +134,7 @@ export default function List() {
           monthlyTax: monthlyTax,
         },
       ]);
-      
+
       setNewName("");
       setNewPtkp("");
       setNewGajiPokok("");
@@ -158,9 +158,18 @@ export default function List() {
       <Modal
         title="Tambah Data Karyawan"
         open={isModalOpen}
-        onCancel={() => setIsModalOpen(false)}
+        onCancel={() => {
+          setNewPtkp("");
+          setIsModalOpen(false);
+        }}
         footer={[
-          <Button key="cancel" onClick={() => setIsModalOpen(false)}>
+          <Button
+            key="cancel"
+            onClick={() => {
+              setIsModalOpen(false);
+              setNewPtkp("");
+            }}
+          >
             Cancel
           </Button>,
           <Button key="add" type="primary" onClick={handleAdd}>
@@ -176,6 +185,7 @@ export default function List() {
         />
         <Select
           placeholder="Pilih PTKP"
+          value={newPtkp || undefined} 
           onChange={(value) => setNewPtkp(value)}
           className="mb-3"
           style={{ width: "100%" }}
@@ -186,6 +196,7 @@ export default function List() {
             </Select.Option>
           ))}
         </Select>
+
         <Input
           placeholder="Masukkan Gaji Pokok"
           type="number"
