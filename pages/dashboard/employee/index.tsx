@@ -2,7 +2,7 @@ import { useState } from "react";
 import Layout from "@/components/layouts/Layout";
 import AnotherTable from "@/components/core/AnotherTable";
 import { Button, Modal, Input, Select } from "antd";
-import { calculateGajiBruto } from "@/helpers/taxCalc";
+import { calculateGajiBruto, calculateTax } from "@/helpers/taxCalc";
 
 interface DataType {
   key: string;
@@ -117,6 +117,11 @@ export default function List() {
 
   const handleAdd = () => {
     if (newName && newPtkp && newGajiPokok) {
+      const brutoSalary = calculateGajiBruto(parseFloat(newGajiPokok));
+      const yearlyBrutoSalary = brutoSalary * 12;
+  
+      const monthlyTax = calculateTax(yearlyBrutoSalary, newPtkp);
+  
       setData([
         ...data,
         {
@@ -124,11 +129,12 @@ export default function List() {
           name: newName,
           ptkp: newPtkp,
           gajiPokok: parseFloat(newGajiPokok),
-          gajiBruto: calculateGajiBruto(parseFloat(newGajiPokok)),
+          gajiBruto: brutoSalary,
           gajiNeto: parseFloat(newGajiPokok),
-          monthlyTax: 0,
+          monthlyTax: monthlyTax,
         },
       ]);
+      
       setNewName("");
       setNewPtkp("");
       setNewGajiPokok("");
