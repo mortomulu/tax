@@ -9,9 +9,11 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "antd": "^5.24.3",
     "next": "14.0.0",
     "react": "^18",
     "react-dom": "^18",
+    "react-highlight-words": "^0.21.0",
     "react-icons": "^5.5.0"
   },
   "devDependencies": {
