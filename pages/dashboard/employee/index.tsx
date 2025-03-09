@@ -1,7 +1,7 @@
 import { useState } from "react";
 import Layout from "@/components/layouts/Layout";
 import AnotherTable from "@/components/core/AnotherTable";
-import { Button, Modal, Input } from "antd";
+import { Button, Modal, Input, Select } from "antd";
 import { calculateGajiBruto } from "@/helpers/taxCalc";
 
 interface DataType {
@@ -13,6 +13,8 @@ interface DataType {
   gajiNeto: number;
   monthlyTax: number;
 }
+
+const ptkpOptions = ["TK/0", "K/0", "K/1", "K/2", "K/3"];
 
 export default function List() {
   const [data, setData] = useState<DataType[]>([
@@ -166,12 +168,18 @@ export default function List() {
           onChange={(e) => setNewName(e.target.value)}
           className="mb-3"
         />
-        <Input
-          placeholder="Masukkan PTKP"
-          value={newPtkp}
-          onChange={(e) => setNewPtkp(e.target.value)}
+        <Select
+          placeholder="Pilih PTKP"
+          onChange={(value) => setNewPtkp(value)}
           className="mb-3"
-        />
+          style={{ width: "100%" }}
+        >
+          {ptkpOptions.map((option) => (
+            <Select.Option key={option} value={option}>
+              {option}
+            </Select.Option>
+          ))}
+        </Select>
         <Input
           placeholder="Masukkan Gaji Pokok"
           type="number"
