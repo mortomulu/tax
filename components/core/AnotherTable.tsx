@@ -155,19 +155,44 @@ const AnotherTable: React.FC<AnotherTableProps> = ({ data }) => {
       dataIndex: "ptkp",
       key: "ptkp",
       width: "10%",
+      filters: [
+        {
+          text: "TK/0",
+          value: "TK/0",
+        },
+        {
+          text: "K/0",
+          value: "K/0",
+        },
+        {
+          text: "K/1",
+          value: "K/1",
+        },
+        {
+          text: "K/2",
+          value: "K/2",
+        },
+        {
+          text: "K/3",
+          value: "K/3",
+        },
+      ],
+      onFilter: (value, record) => record.ptkp.indexOf(value as string) === 0,
     },
     {
       title: "Gaji Bersih",
       dataIndex: "gajiNeto",
       key: "gajiNeto",
       width: "15%",
-      render: (price: number) => <span>{formatRupiah(price)}</span>, 
+      sorter: (a, b) => a.gajiNeto - b.gajiNeto,
+      render: (price: number) => <span>{formatRupiah(price)}</span>,
     },
     {
       title: "Gaji Bruto",
       dataIndex: "gajiBruto",
       key: "gajiBruto",
       width: "15%",
+      sorter: (a, b) => a.gajiBruto - b.gajiBruto,
       render: (price: number) => <span>{formatRupiah(price)}</span>,
     },
     {
@@ -175,7 +200,8 @@ const AnotherTable: React.FC<AnotherTableProps> = ({ data }) => {
       dataIndex: "monthlyTax",
       key: "monthlyTax",
       width: "15%",
-      render: (price: number) => <span>{formatRupiah(price)}</span>, 
+      sorter: (a, b) => a.monthlyTax - b.monthlyTax,
+      render: (price: number) => <span>{formatRupiah(price)}</span>,
     },
     {
       title: "Action",
