@@ -6,6 +6,7 @@ import type { FilterDropdownProps } from "antd/es/table/interface";
 import Highlighter from "react-highlight-words";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import { formatRupiah } from "@/utils/currency";
+import { useRouter } from "next/router";
 
 interface DataType {
   key: string;
@@ -33,6 +34,7 @@ const AnotherTable: React.FC<AnotherTableProps> = ({ data }) => {
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
   const searchInput = useRef<InputRef>(null);
+  const router = useRouter();
 
   const handleSearch = (
     selectedKeys: string[],
@@ -207,9 +209,16 @@ const AnotherTable: React.FC<AnotherTableProps> = ({ data }) => {
       title: "Action",
       key: "operation",
       width: "15%",
-      render: () => (
+      render: (_, record) => (
         <Space size="middle">
-          <Dropdown menu={{ items }}>
+          <Dropdown
+            menu={{
+              items: items.map((item) => ({
+                ...item,
+                onClick: () => handleMenuClick(item.key, record),
+              })),
+            }}
+          >
             <a>
               <BsThreeDotsVertical />
             </a>
@@ -218,6 +227,16 @@ const AnotherTable: React.FC<AnotherTableProps> = ({ data }) => {
       ),
     },
   ];
+
+  const handleMenuClick = (key: string, record: any) => {
+    if (key === "1") {
+      router.push(`/dashboard/employee/${record.key}`);
+    } else if (key === "2") {
+      router.push(`/dashboard/employee/${record.key}`);
+    } else if (key === "3") {
+      console.log("Delete:", record.key);
+    }
+  };
 
   return (
     <Table<DataType>

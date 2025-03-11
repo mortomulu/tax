@@ -2,6 +2,7 @@ import React from "react";
 import { Badge, Dropdown, Space, Table, Tabs } from "antd";
 import Layout from "@/components/layouts/Layout";
 import { BsThreeDotsVertical } from "react-icons/bs";
+import { useRouter } from "next/router";
 
 const { TabPane } = Tabs;
 
@@ -54,56 +55,75 @@ const items = [
   { key: "3", label: "Delete" },
 ];
 
-const monthlyColumns = [
-  { title: "Priode Pajak", dataIndex: "priodePajak", key: "priodePajak" },
-  { title: "Tahun Pajak", dataIndex: "tahunPajak", key: "tahunPajak" },
-  { title: "Total Karyawan", dataIndex: "totalKaryawan", key: "totalKaryawan" },
-  {
-    title: "Total Pajak Dibayar",
-    dataIndex: "totalMonthlyTax",
-    key: "totalMonthlyTax",
-    render: (value: number) => `Rp ${value.toLocaleString("id-ID")}`,
-  },
-  {
-    title: "Action",
-    key: "operation",
-    width: "15%",
-    render: () => (
-      <Space size="middle">
-        <Dropdown menu={{ items }}>
-          <a>
-            <BsThreeDotsVertical />
-          </a>
-        </Dropdown>
-      </Space>
-    ),
-  },
-];
-
-const yearlyColumns = [
-  { title: "Tahun Pajak", dataIndex: "tahunPajak", key: "tahunPajak" },
-  {
-    title: "Total Pajak Dibayar",
-    dataIndex: "totalMonthlyTax",
-    key: "totalMonthlyTax",
-    render: (value: number) => `Rp ${value.toLocaleString("id-ID")}`,
-  },
-];
-
-const expandedRowRender = (record: { tahunPajak: string }) => {
-  const filteredMonthlyData = monthlyTaxData.filter(
-    (item) => item.tahunPajak === record.tahunPajak
-  );
-  return (
-    <Table
-      columns={monthlyColumns}
-      dataSource={filteredMonthlyData}
-      pagination={false}
-    />
-  );
-};
-
 const ReportPage: React.FC = () => {
+  const router = useRouter();
+
+  const handleMenuClick = ({ key }: { key: string }, record: any) => {
+    if (key === "1") {
+      router.push(`/dashboard/archive/${record.key}`);
+    } else if (key === "2") {
+      router.push(`/dashboard/employee/${record.key}`);
+    } else if (key === "3") {
+      console.log("Delete:", record.key);
+    }
+  };
+
+  const monthlyColumns = [
+    { title: "Priode Pajak", dataIndex: "priodePajak", key: "priodePajak" },
+    { title: "Tahun Pajak", dataIndex: "tahunPajak", key: "tahunPajak" },
+    { title: "Total Karyawan", dataIndex: "totalKaryawan", key: "totalKaryawan" },
+    {
+      title: "Total Pajak Dibayar",
+      dataIndex: "totalMonthlyTax",
+      key: "totalMonthlyTax",
+      render: (value: number) => `Rp ${value.toLocaleString("id-ID")}`,
+    },
+    {
+      title: "Action",
+      key: "operation",
+      width: "15%",
+      render: (_: any, record: any) => (
+        <Space size="middle">
+          <Dropdown
+            menu={{
+              items: items.map((item) => ({
+                ...item,
+                onClick: (e) => handleMenuClick(e, record),
+              })),
+            }}
+          >
+            <span style={{ cursor: "pointer" }}>
+              <BsThreeDotsVertical />
+            </span>
+          </Dropdown>
+        </Space>
+      ),
+    },
+  ];
+
+  const yearlyColumns = [
+    { title: "Tahun Pajak", dataIndex: "tahunPajak", key: "tahunPajak" },
+    {
+      title: "Total Pajak Dibayar",
+      dataIndex: "totalMonthlyTax",
+      key: "totalMonthlyTax",
+      render: (value: number) => `Rp ${value.toLocaleString("id-ID")}`,
+    },
+  ];
+
+  const expandedRowRender = (record: { tahunPajak: string }) => {
+    const filteredMonthlyData = monthlyTaxData.filter(
+      (item) => item.tahunPajak === record.tahunPajak
+    );
+    return (
+      <Table
+        columns={monthlyColumns}
+        dataSource={filteredMonthlyData}
+        pagination={false}
+      />
+    );
+  };
+
   return (
     <Layout>
       <h2>Laporan Pajak</h2>
