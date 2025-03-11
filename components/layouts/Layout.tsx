@@ -5,7 +5,6 @@ import { HiReceiptTax } from "react-icons/hi";
 const Layout = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter();
 
-  // Fungsi untuk mengecek apakah menu aktif
   const isActive = (path: string) => {
     return router.pathname === path;
   };
