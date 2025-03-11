@@ -69,7 +69,7 @@ export default function MonthlyReportDetail() {
   return (
     <Layout>
       <div className="bg-white p-6 rounded-lg shadow-md">
-        <h1 className="text-2xl font-bold mb-4">Detail Laporan Pajak Bulanan</h1>
+        <h1 className="text-2xl font-bold mb-4">Detail Laporan Pajak Bulan Maret</h1>
 
         <Tabs activeKey={activeTab} onChange={setActiveTab}>
           {/* Tab Ringkasan */}
