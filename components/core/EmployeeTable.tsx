@@ -5,17 +5,13 @@ import { Button, Dropdown, Input, Space, Table } from "antd/lib";
 import type { FilterDropdownProps } from "antd/es/table/interface";
 import Highlighter from "react-highlight-words";
 import { BsThreeDotsVertical } from "react-icons/bs";
-import { formatRupiah } from "@/utils/currency";
 import { useRouter } from "next/router";
 
 interface DataType {
   key: string;
   name: string;
   ptkp: string;
-  gajiPokok: number;
-  gajiBruto: number;
-  gajiNeto: number;
-  monthlyTax: number;
+  jabatan: string;
 }
 
 type DataIndex = keyof DataType;
@@ -30,7 +26,7 @@ interface AnotherTableProps {
   data: DataType[];
 }
 
-const AnotherTable: React.FC<AnotherTableProps> = ({ data }) => {
+const EmployeeTable: React.FC<AnotherTableProps> = ({ data }) => {
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
   const searchInput = useRef<InputRef>(null);
@@ -153,10 +149,41 @@ const AnotherTable: React.FC<AnotherTableProps> = ({ data }) => {
       ...getColumnSearchProps("name"),
     },
     {
+      title: "NIK/NPWP",
+      dataIndex: "nik",
+      key: "nik",
+      width: "20%",
+      //   ...getColumnSearchProps("nik"),
+    },
+    {
       title: "Jabatan",
       dataIndex: "jabatan",
       key: "jabatan",
       width: "20%",
+      filters: [
+        {
+          text: "Karyawan",
+          value: "Karyawan",
+        },
+        {
+          text: "Leader",
+          value: "Leader",
+        },
+        {
+          text: "Manager",
+          value: "Manager",
+        },
+        {
+          text: "CTO",
+          value: "CTO",
+        },
+        {
+          text: "CEO",
+          value: "CEO",
+        },
+      ],
+      onFilter: (value, record) =>
+        record.jabatan.indexOf(value as string) === 0,
     },
     {
       title: "PTKP",
@@ -188,30 +215,6 @@ const AnotherTable: React.FC<AnotherTableProps> = ({ data }) => {
       onFilter: (value, record) => record.ptkp.indexOf(value as string) === 0,
     },
     {
-      title: "Gaji Bersih",
-      dataIndex: "gajiNeto",
-      key: "gajiNeto",
-      width: "15%",
-      sorter: (a, b) => a.gajiNeto - b.gajiNeto,
-      render: (price: number) => <span>{formatRupiah(price)}</span>,
-    },
-    {
-      title: "Gaji Bruto",
-      dataIndex: "gajiBruto",
-      key: "gajiBruto",
-      width: "15%",
-      sorter: (a, b) => a.gajiBruto - b.gajiBruto,
-      render: (price: number) => <span>{formatRupiah(price)}</span>,
-    },
-    {
-      title: "Pajak Bulanan",
-      dataIndex: "monthlyTax",
-      key: "monthlyTax",
-      width: "15%",
-      sorter: (a, b) => a.monthlyTax - b.monthlyTax,
-      render: (price: number) => <span>{formatRupiah(price)}</span>,
-    },
-    {
       title: "Action",
       key: "operation",
       width: "15%",
@@ -236,9 +239,9 @@ const AnotherTable: React.FC<AnotherTableProps> = ({ data }) => {
 
   const handleMenuClick = (key: string, record: any) => {
     if (key === "1") {
-      router.push(`/dashboard/tax/${record.key}`);
+      router.push(`/dashboard/employee/${record.key}`);
     } else if (key === "2") {
-      router.push(`/dashboard/tax/${record.key}`);
+      router.push(`/dashboard/employee/${record.key}`);
     } else if (key === "3") {
       console.log("Delete:", record.key);
     }
@@ -253,4 +256,4 @@ const AnotherTable: React.FC<AnotherTableProps> = ({ data }) => {
   );
 };
 
-export default AnotherTable;
+export default EmployeeTable;
