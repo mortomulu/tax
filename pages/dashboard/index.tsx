@@ -66,7 +66,7 @@ export default function Dashboard() {
                 Archive Laporan Pajak Per Bulan
               </h2>
               <DatePicker
-                picker="day"
+                picker="month"
                 onChange={handleMonthChange}
                 className="w-full md:w-64"
                 placeholder="Pilih Bulan"

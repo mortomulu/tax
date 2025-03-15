@@ -149,8 +149,14 @@ const AnotherTable: React.FC<AnotherTableProps> = ({ data }) => {
       title: "Name",
       dataIndex: "name",
       key: "name",
-      width: "25%",
+      width: "20%",
       ...getColumnSearchProps("name"),
+    },
+    {
+      title: "Jabatan",
+      dataIndex: "jabatan",
+      key: "jabatan",
+      width: "20%",
     },
     {
       title: "PTKP",

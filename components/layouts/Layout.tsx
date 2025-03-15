@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { HiReceiptTax } from "react-icons/hi";
+import { TbTax } from "react-icons/tb";
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter();
@@ -69,6 +70,19 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                   />
                 </svg>
                 Karyawan
+              </Link>
+            </li>
+            <li>
+              <Link
+                href="/dashboard/tax"
+                className={`flex items-center py-2 px-4 rounded-md transition duration-300 ease-in-out transform hover:translate-x-2 ${
+                  isActive("/dashboard/tax")
+                    ? "bg-blue-800 text-yellow-400 border-l-4 border-yellow-400"
+                    : "hover:bg-blue-800 hover:text-yellow-400"
+                }`}
+              >
+                <TbTax className="h-5 w-5 mr-2 text-yellow-400" />
+                Pajak
               </Link>
             </li>
             <li>
