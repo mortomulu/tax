@@ -113,9 +113,9 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
             </li>
             <li>
               <Link
-                href="/dashboard/ptkp"
+                href="/dashboard/additionalData"
                 className={`flex items-center py-2 px-4 rounded-md transition duration-300 ease-in-out transform hover:translate-x-2 ${
-                  isActive("/dashboard/ptkp")
+                  isActive("/dashboard/additionalData")
                     ? "bg-blue-800 text-yellow-400 border-l-4 border-yellow-400"
                     : "hover:bg-blue-800 hover:text-yellow-400"
                 }`}
@@ -134,33 +134,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                     d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"
                   />
                 </svg>
-                PTKP
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="/dashboard/ter"
-                className={`flex items-center py-2 px-4 rounded-md transition duration-300 ease-in-out transform hover:translate-x-2 ${
-                  isActive("/dashboard/ter")
-                    ? "bg-blue-800 text-yellow-400 border-l-4 border-yellow-400"
-                    : "hover:bg-blue-800 hover:text-yellow-400"
-                }`}
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5 mr-2 text-yellow-400"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M13 10V3L4 14h7v7l9-11h-7z"
-                  />
-                </svg>
-                TER
+                Additional Data
               </Link>
             </li>
           </ul>

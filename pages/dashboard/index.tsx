@@ -5,21 +5,16 @@ import LineChart from "@/components/dashboard/Chart";
 import { FaUsers, FaDollarSign } from "react-icons/fa";
 import { TbTax } from "react-icons/tb";
 import { DatePicker } from "antd";
-import type { RangePickerProps } from "antd/es/date-picker";
 import { useState } from "react";
 import { message } from "antd";
-
-const { RangePicker } = DatePicker;
 
 export default function Dashboard() {
   const [selectedMonth, setSelectedMonth] = useState<Date | null>(null);
 
-  // Handle ketika bulan dipilih
   const handleMonthChange = (date: any) => {
     if (date) {
       setSelectedMonth(date);
       message.success(`Selected Month: ${date.format("MMMM YYYY")}`);
-      // Di sini Anda bisa menambahkan logika untuk meng-archive laporan pajak
       console.log("Archive report for:", date.format("MMMM YYYY"));
     } else {
       setSelectedMonth(null);
