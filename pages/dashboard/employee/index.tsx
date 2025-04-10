@@ -1,6 +1,6 @@
 import { useState } from "react";
 import dayjs from "dayjs";
-import { Button, Modal, Input, Select, DatePicker, Checkbox } from "antd";
+import { Button, Modal, Input, Select, DatePicker, Checkbox, message } from "antd";
 import { MdArrowRightAlt } from "react-icons/md";
 import Layout from "@/components/layouts/Layout";
 import EmployeeTable from "@/components/core/EmployeeTable";
@@ -88,7 +88,7 @@ export default function EmployeePage() {
     },
   ]);
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [newName, setNewName] = useState("");
   const [nik, setNik] = useState("");
   const [newPtkp, setNewPtkp] = useState("");
@@ -110,7 +110,7 @@ export default function EmployeePage() {
 
       setNewName("");
       setNewPtkp("");
-      setIsModalOpen(false);
+      setIsAddModalOpen(false);
     }
   };
 
@@ -154,7 +154,7 @@ export default function EmployeePage() {
       <div className="bg-white p-6 rounded-lg shadow-md">
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-2xl font-bold">List Data Karyawan</h1>
-          <Button type="primary" onClick={() => setIsModalOpen(true)}>
+          <Button type="primary" onClick={() => setIsAddModalOpen(true)}>
             Add Data Karyawan
           </Button>
         </div>
@@ -164,7 +164,7 @@ export default function EmployeePage() {
       {/* Modal Add Data */}
       <Modal
         title="Tambah Data Karyawan"
-        open={isModalOpen}
+        open={isAddModalOpen}
         onCancel={() => {
           setNewName("");
           setNik("");
@@ -172,7 +172,7 @@ export default function EmployeePage() {
           setJabatanList([
             { id: 1, jabatan: "", startDate: null, endDate: null, now: false },
           ]);
-          setIsModalOpen(false);
+          setIsAddModalOpen(false);
         }}
         footer={[
           <Button
@@ -190,7 +190,7 @@ export default function EmployeePage() {
                   now: false,
                 },
               ]);
-              setIsModalOpen(false);
+              setIsAddModalOpen(false);
             }}
           >
             Cancel

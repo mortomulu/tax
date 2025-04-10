@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { useRouter } from "next/router"; 
+import { useRouter } from "next/router";
+import { supabase } from "@/utils/supabase";
 import { FaCircle } from "react-icons/fa";
 
 export default function Login() {
@@ -7,11 +8,25 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const router = useRouter();
 
+  async function testSupabaseConnection() {
+    const { data, error } = await supabase
+      .from('testing')
+      .select('*')
+    if (error) {
+      console.error('❌ Error fetching data:', error.message)
+    } else {
+      console.log('✅ Supabase connected! Sample data:', data)
+    }
+  }
+
+  testSupabaseConnection()
+
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
     if (email === "admin@gmail.com" && password === "123") {
-      router.push("/dashboard"); 
+      router.push("/dashboard");
     } else {
       alert("Email atau password salah!");
     }

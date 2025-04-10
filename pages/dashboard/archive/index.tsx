@@ -3,6 +3,10 @@ import { Badge, Dropdown, Space, Table, Tabs } from "antd";
 import Layout from "@/components/layouts/Layout";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import { useRouter } from "next/router";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 const { TabPane } = Tabs;
 
@@ -50,28 +54,64 @@ const yearlyTaxData = [
 ];
 
 const items = [
-  { key: "1", label: "Detail" },
-  { key: "2", label: "Edit" },
-  { key: "3", label: "Delete" },
+  { key: "1", label: "Export PDF" },
+  { key: "2", label: "Export Excel" },
+  { key: "3", label: "Detail" },
+  { key: "4", label: "Edit" },
+  { key: "5", label: "Delete" },
 ];
+
+const exportToExcel = (data: any[], fileName: string) => {
+  const worksheet = XLSX.utils.json_to_sheet(data);
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
+
+  const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
+  const excelFile = new Blob([excelBuffer], { type: "application/octet-stream" });
+
+  saveAs(excelFile, `${fileName}.xlsx`);
+};
+
+const exportToPDF = (data: any[], fileName: string) => {
+  const doc = new jsPDF();
+
+  doc.text("Data Karyawan", 14, 10);
+
+  autoTable(doc, {
+    head: [["Nama", "NIK", "Status Pernikahan"]],
+    body: data.map((item) => [item.name, item.nik, item.maritalStatus]),
+    startY: 20,
+  });
+
+  doc.save(`${fileName}.pdf`);
+};
 
 const ReportPage: React.FC = () => {
   const router = useRouter();
 
   const handleMenuClick = ({ key }: { key: string }, record: any) => {
     if (key === "1") {
-      router.push(`/dashboard/archive/${record.key}`);
+      exportToPDF([record], "Data_Karyawan"); 
     } else if (key === "2") {
-      router.push(`/dashboard/employee/${record.key}`);
+      exportToExcel([record], "Data_Karyawan");
     } else if (key === "3") {
+      router.push(`/dashboard/archive/${record.key}`);
+    } else if (key === "4") {
+      router.push(`/dashboard/employee/${record.key}`);
+    } else if (key === "5") {
       console.log("Delete:", record.key);
     }
   };
+  
 
   const monthlyColumns = [
     { title: "Priode Pajak", dataIndex: "priodePajak", key: "priodePajak" },
     { title: "Tahun Pajak", dataIndex: "tahunPajak", key: "tahunPajak" },
-    { title: "Total Karyawan", dataIndex: "totalKaryawan", key: "totalKaryawan" },
+    {
+      title: "Total Karyawan",
+      dataIndex: "totalKaryawan",
+      key: "totalKaryawan",
+    },
     {
       title: "Total Pajak Dibayar",
       dataIndex: "totalMonthlyTax",
