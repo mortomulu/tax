@@ -9,7 +9,7 @@ import { formatRupiah } from "@/utils/currency";
 import { useRouter } from "next/router";
 
 interface DataType {
-  key: string;
+  id: string;
   typeTer: string;
   startRange: number;
   endRange: number;
@@ -210,7 +210,7 @@ const TerTable: React.FC<TerTable> = ({ data }) => {
     <Table<DataType>
       columns={columns}
       dataSource={data}
-      pagination={{ pageSize: 5 }}
+      pagination={{ pageSize: 10 }}
     />
   );
 };

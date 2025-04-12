@@ -10,6 +10,14 @@ const ptkpValues: Record<string, number> = {
   "K/3": 72000000,
 };
 
+type TER = {
+  id: string;
+  typeTer: number;
+  startRange: number;
+  endRange: number | null;
+  ter: number;
+};
+
 export const calculateTax = (
   yearlyBrutoSalary: number,
   ptkp: string

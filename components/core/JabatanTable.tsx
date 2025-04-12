@@ -9,8 +9,8 @@ import { formatRupiah } from "@/utils/currency";
 import { useRouter } from "next/router";
 
 interface DataType {
-  key: string;
-  jabatan: string;
+  id: string;
+  position: string;
   incentive: number;
 }
 
@@ -142,10 +142,10 @@ const JabatanTable: React.FC<JabatanTable> = ({ data }) => {
   const columns: TableColumnsType<DataType> = [
     {
       title: "Jabatan",
-      dataIndex: "jabatan",
-      key: "jabatan",
+      dataIndex: "position",
+      key: "position",
       width: "20%",
-      ...getColumnSearchProps("jabatan"),
+      ...getColumnSearchProps("position"),
     },
     {
       title: "Incentive",
