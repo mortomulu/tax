@@ -4,6 +4,7 @@ import { HiReceiptTax } from "react-icons/hi";
 import { TbTax } from "react-icons/tb";
 import { supabase } from "@/utils/supabase";
 import { message } from "antd";
+import Cookies from "js-cookie";
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter();
@@ -14,9 +15,13 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
 
   const handleLogout = async () => {
     const { error } = await supabase.auth.signOut();
+
     if (error) {
       message.error("Gagal logout: " + error.message);
     } else {
+      Cookies.remove("sb-access-token", { path: "/" });
+      Cookies.remove("sb-refresh-token", { path: "/" });
+
       message.success("Berhasil logout!");
       router.push("/");
     }

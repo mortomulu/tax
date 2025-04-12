@@ -3,6 +3,7 @@ import { useRouter } from "next/router";
 import { supabase } from "@/utils/supabase";
 import { FaCircle } from "react-icons/fa";
 import { message } from "antd";
+import Cookies from "js-cookie";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -11,17 +12,21 @@ export default function Login() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
+  
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
-
+  
     if (error) {
       message.error("Email atau password salah!");
       console.error("Login error:", error.message);
     } else {
       message.success("Login berhasil!");
+  
+      Cookies.set("sb-access-token", data.session?.access_token || "", { path: "/" });
+      Cookies.set("sb-refresh-token", data.session?.refresh_token || "", { path: "/" });
+    
       router.push("/dashboard");
     }
   };
