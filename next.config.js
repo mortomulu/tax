@@ -5,6 +5,10 @@ const withTM = require('next-transpile-modules')([
   'rc-picker',
   'rc-pagination',
   'dayjs',
+  'rc-tree', 
+  '@babel/runtime',
+  'rc-table',
+  'rc-input',        
 ]);
 
 /** @type {import('next').NextConfig} */

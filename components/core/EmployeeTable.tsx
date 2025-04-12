@@ -69,7 +69,7 @@ const employeeData = {
   ],
 };
 
-const EmployeeTable: React.FC<AnotherTableProps> = ({ data }) => {
+const EmployeeTable: any = ({ data } : any) => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
 
@@ -83,7 +83,7 @@ const EmployeeTable: React.FC<AnotherTableProps> = ({ data }) => {
   ]);
 
   const [visible, setVisible] = useState(false);
-  const [selectedEmployee, setSelectedEmployee] = useState(null);
+  const [selectedEmployee, setSelectedEmployee] : any = useState(null);
 
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
