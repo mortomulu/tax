@@ -2,33 +2,27 @@ import { useState } from "react";
 import { useRouter } from "next/router";
 import { supabase } from "@/utils/supabase";
 import { FaCircle } from "react-icons/fa";
+import { message } from "antd";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const router = useRouter();
 
-  async function testSupabaseConnection() {
-    const { data, error } = await supabase
-      .from('testing')
-      .select('*')
-    if (error) {
-      console.error('❌ Error fetching data:', error.message)
-    } else {
-      console.log('✅ Supabase connected! Sample data:', data)
-    }
-  }
-
-  testSupabaseConnection()
-
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (email === "admin@gmail.com" && password === "123") {
-      router.push("/dashboard");
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) {
+      message.error("Email atau password salah!");
+      console.error("Login error:", error.message);
     } else {
-      alert("Email atau password salah!");
+      message.success("Login berhasil!");
+      router.push("/dashboard");
     }
   };
 
