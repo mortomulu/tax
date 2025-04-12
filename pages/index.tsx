@@ -12,22 +12,44 @@ export default function Login() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-  
-    const { data, error } = await supabase.auth.signInWithPassword({
+
+    const { data: loginData, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
-  
+
     if (error) {
       message.error("Email atau password salah!");
       console.error("Login error:", error.message);
     } else {
+      const { data: profile, error: profileError } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", loginData.user?.id)
+        .single();
+
+      if (profileError) {
+        message.error("Gagal ambil role user!");
+        return;
+      }
+
       message.success("Login berhasil!");
-  
-      Cookies.set("sb-access-token", data.session?.access_token || "", { path: "/" });
-      Cookies.set("sb-refresh-token", data.session?.refresh_token || "", { path: "/" });
-    
-      router.push("/dashboard");
+
+      Cookies.set("sb-access-token", loginData.session?.access_token || "", {
+        path: "/",
+      });
+      Cookies.set("sb-refresh-token", loginData.session?.refresh_token || "", {
+        path: "/",
+      });
+      Cookies.set("role", profile.role, {
+        path: "/",
+      });
+
+      if (profile.role === "superadmin") {
+        router.push("/superadmin");
+      } else {
+        router.push("/dashboard");
+      }
     }
   };
 

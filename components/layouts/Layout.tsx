@@ -21,6 +21,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
     } else {
       Cookies.remove("sb-access-token", { path: "/" });
       Cookies.remove("sb-refresh-token", { path: "/" });
+      Cookies.remove("role", { path: "/" });
 
       message.success("Berhasil logout!");
       router.push("/");

@@ -5,12 +5,11 @@ export async function middleware(req: NextRequest) {
 
   const accessToken = req.cookies.get("sb-access-token")?.value;
   const refreshToken = req.cookies.get("sb-refresh-token")?.value;
+  const role = req.cookies.get("role")?.value;
+  const path = req.nextUrl.pathname;
 
-  if (accessToken) {
-    req.headers.set("Authorization", `Bearer ${accessToken}`);
-  }
-
-  const isProtectedRoute = req.nextUrl.pathname.startsWith("/dashboard");
+  const isProtectedRoute =
+    path.startsWith("/dashboard") || path.startsWith("/superadmin");
 
   if (!accessToken && isProtectedRoute) {
     const redirectUrl = req.nextUrl.clone();
@@ -19,9 +18,17 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(redirectUrl);
   }
 
+  if (role === "admin" && path.startsWith("/superadmin")) {
+    return NextResponse.redirect(new URL("/dashboard", req.url));
+  }
+
+  if (role === "superadmin" && path.startsWith("/dashboard")) {
+    return NextResponse.redirect(new URL("/superadmin", req.url));
+  }
+
   return res;
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*"],
+  matcher: ["/dashboard/:path*", "/superadmin/:path*"], 
 };
