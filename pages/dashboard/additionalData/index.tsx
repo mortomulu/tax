@@ -4,7 +4,7 @@ import PtkpTable from "@/components/core/PtkpTable";
 import TerTable from "@/components/core/TerTable";
 import { supabase } from "@/utils/supabase";
 import { useEffect, useState } from "react";
-import { message } from "antd";
+import { Form, Input, InputNumber, message, Modal } from "antd";
 
 type Position = {
   id: string;
@@ -31,8 +31,51 @@ export default function AdditionalDataPage() {
   const [ptkps, setPtkps] = useState<any[]>([]);
   const [ters, setTers] = useState<any[]>([]);
 
-  console.log("ters", ters)
-  console.log("ptkps", ptkps)
+  // Modal Visibility
+  const [isJabatanModalOpen, setIsJabatanModalOpen] = useState(false);
+  const [isPtkpModalOpen, setIsPtkpModalOpen] = useState(false);
+  const [isTerModalOpen, setIsTerModalOpen] = useState(false);
+
+  // Form Refs
+  const [formJabatan] = Form.useForm();
+  const [formPtkp] = Form.useForm();
+  const [formTer] = Form.useForm();
+
+  const handleAddJabatan = async (values: Position) => {
+    const { data, error } = await supabase.from("positions").insert([values]);
+    if (error) {
+      message.error("Gagal menambahkan jabatan");
+    } else {
+      message.success("Berhasil menambahkan jabatan");
+      fetchPositions();
+      formJabatan.resetFields();
+      setIsJabatanModalOpen(false);
+    }
+  };
+
+  const handleAddPtkp = async (values: PTKP) => {
+    const { data, error } = await supabase.from("ptkp").insert([values]);
+    if (error) {
+      message.error("Gagal menambahkan PTKP");
+    } else {
+      message.success("Berhasil menambahkan PTKP");
+      fetchPtkps();
+      formPtkp.resetFields();
+      setIsPtkpModalOpen(false);
+    }
+  };
+
+  const handleAddTer = async (values: TER) => {
+    const { data, error } = await supabase.from("ter").insert([values]);
+    if (error) {
+      message.error("Gagal menambahkan TER");
+    } else {
+      message.success("Berhasil menambahkan TER");
+      fetchTers();
+      formTer.resetFields();
+      setIsTerModalOpen(false);
+    }
+  };
 
   const fetchPositions = async () => {
     const { data, error } = await supabase
@@ -84,23 +127,122 @@ export default function AdditionalDataPage() {
       <div className="flex flex-col gap-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="bg-white p-6 rounded-lg border-l-4 border-yellow-400 shadow-md grid-rows-2 flex flex-col">
-            <h1 className="text-xl font-semibold text-gray-800 mb-4">
-              Data Jabatan
-            </h1>
-            <JabatanTable data={positions} />
+            <div className="flex flex-row justify-between mb-4">
+              <h1 className="text-xl font-semibold text-gray-800 mb-4">
+                Data Jabatan
+              </h1>
+              <button
+                onClick={() => setIsJabatanModalOpen(true)}
+                className="bg-blue-600 text-white py-1 px-3 rounded font-semibold"
+              >
+                Tambah Jabatan
+              </button>
+            </div>
+            <JabatanTable data={positions} fetchPositions={fetchPositions} />
           </div>
           <div className="bg-white p-6 rounded-lg shadow-md grid-rows-2 flex flex-col">
-            <h1 className="text-xl font-semibold text-gray-800 mb-4">
-              Data PTKP
-            </h1>
-            <PtkpTable data={ptkps} />
+            <div className="flex flex-row justify-between mb-4">
+              <h1 className="text-xl font-semibold text-gray-800 mb-4">
+                Data PTKP
+              </h1>
+              <button
+                onClick={() => setIsPtkpModalOpen(true)}
+                className="bg-blue-600 text-white py-1 px-3 rounded font-semibold"
+              >
+                Tambah PTKP
+              </button>
+            </div>
+            <PtkpTable data={ptkps} fetchPtkps={fetchPtkps}/>
           </div>
         </div>
         <div className="bg-white p-6 rounded-lg border-l-4 border-yellow-400 shadow-md grid-rows-2 flex flex-col">
-          <h1 className="text-xl font-semibold text-gray-800 mb-4">Data TER</h1>
-          <TerTable data={ters} />
+          <div className="flex flex-row justify-between mb-4">
+            <h1 className="text-xl font-semibold text-gray-800 mb-4">
+              Data TER
+            </h1>
+            <button
+              onClick={() => setIsTerModalOpen(true)}
+              className="bg-blue-600 text-white py-1 px-3 rounded font-semibold"
+            >
+              Tambah TER
+            </button>
+          </div>
+          <TerTable data={ters} fetchTers={fetchTers} />
         </div>
       </div>
+      <Modal
+        title="Tambah Jabatan"
+        open={isJabatanModalOpen}
+        onCancel={() => setIsJabatanModalOpen(false)}
+        onOk={() => formJabatan.submit()}
+      >
+        <Form form={formJabatan} layout="vertical" onFinish={handleAddJabatan}>
+          <Form.Item
+            name="position"
+            label="Nama Jabatan"
+            rules={[{ required: true }]}
+          >
+            <Input />
+          </Form.Item>
+          <Form.Item
+            name="incentive"
+            label="Incentive"
+            rules={[{ required: true }]}
+          >
+            <InputNumber min={0} className="w-full" />
+          </Form.Item>
+        </Form>
+      </Modal>
+
+      <Modal
+        title="Tambah PTKP"
+        open={isPtkpModalOpen}
+        onCancel={() => setIsPtkpModalOpen(false)}
+        onOk={() => formPtkp.submit()}
+      >
+        <Form form={formPtkp} layout="vertical" onFinish={handleAddPtkp}>
+          <Form.Item name="ptkp" label="Nama PTKP" rules={[{ required: true }]}>
+            <Input />
+          </Form.Item>
+          <Form.Item name="amount" label="Jumlah" rules={[{ required: true }]}>
+            <InputNumber min={0} className="w-full" />
+          </Form.Item>
+        </Form>
+      </Modal>
+
+      <Modal
+        title="Tambah TER"
+        open={isTerModalOpen}
+        onCancel={() => setIsTerModalOpen(false)}
+        onOk={() => formTer.submit()}
+      >
+        <Form form={formTer} layout="vertical" onFinish={handleAddTer}>
+          <Form.Item
+            name="typeTer"
+            label="Tipe TER"
+            rules={[{ required: true }]}
+          >
+            <Input />
+          </Form.Item>
+          <Form.Item
+            name="startRange"
+            label="Start Range"
+            rules={[{ required: true }]}
+          >
+            <InputNumber min={0} className="w-full" />
+          </Form.Item>
+          <Form.Item
+            name="endRange"
+            label="End Range"
+            rules={[{ required: true }]}
+          >
+            <InputNumber min={0} className="w-full" />
+          </Form.Item>
+          <Form.Item name="ter" label="TER (%)" rules={[{ required: true }]}>
+            <InputNumber min={0} max={100} className="w-full" />
+          </Form.Item>
+        </Form>
+      </Modal>
     </Layout>
   );
 }

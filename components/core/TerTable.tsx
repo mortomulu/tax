@@ -1,12 +1,13 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { SearchOutlined } from "@ant-design/icons/lib";
 import type { InputRef, TableColumnsType, TableColumnType } from "antd/lib";
-import { Button, Dropdown, Input, Space, Table } from "antd/lib";
+import { Button, Dropdown, Form, Input, InputNumber, message, Modal, Space, Table } from "antd/lib";
 import type { FilterDropdownProps } from "antd/es/table/interface";
 import Highlighter from "react-highlight-words";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import { formatRupiah } from "@/utils/currency";
 import { useRouter } from "next/router";
+import { supabase } from "@/utils/supabase";
 
 interface DataType {
   id: string;
@@ -26,12 +27,30 @@ const items = [
 
 interface TerTable {
   data: DataType[];
+  fetchTers: () => void;
 }
 
-const TerTable: React.FC<TerTable> = ({ data }) => {
+const TerTable: React.FC<TerTable> = ({ data, fetchTers }) => {
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
   const searchInput = useRef<InputRef>(null);
+
+  const [activeRecord, setActiveRecord] = useState<any>(null);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [editForm] = Form.useForm();
+
+  useEffect(() => {
+    if (activeRecord) {
+      editForm.setFieldsValue({
+        typeTer: activeRecord.typeTer,
+        startRange: activeRecord.startRange,
+        endRange: activeRecord.endRange,
+        ter: activeRecord.ter,
+      });
+    }
+  }, [activeRecord, editForm, isEditModalOpen]);
 
   const handleSearch = (
     selectedKeys: string[],
@@ -197,21 +216,137 @@ const TerTable: React.FC<TerTable> = ({ data }) => {
   ];
 
   const handleMenuClick = (key: string, record: any) => {
+    setActiveRecord(record);
+
     if (key === "1") {
-      //   router.push(`/dashboard/tax/${record.key}`);
+      setIsDetailModalOpen(true);
     } else if (key === "2") {
-      //   router.push(`/dashboard/tax/${record.key}`);
+      setIsEditModalOpen(true);
     } else if (key === "3") {
-      //   console.log("Delete:", record.key);
+      setIsDeleteModalOpen(true);
+    }
+  };
+
+  const handleEdit = async (values: any) => {
+    const { error } = await supabase
+      .from("ter")
+      .update(values)
+      .eq("id", activeRecord.id);
+
+    if (error) {
+      message.error("Gagal edit data");
+      console.log(error);
+    } else {
+      message.success("Data berhasil diupdate");
+      editForm.resetFields();
+      setActiveRecord(null);
+      fetchTers();
+      setIsEditModalOpen(false);
+    }
+  };
+
+  const handleDeleteData = async () => {
+    const { data, error } = await supabase
+      .from("ter")
+      .delete()
+      .eq("id", activeRecord.id);
+
+    if (error) {
+      message.error("Gagal menghapus data");
+    } else {
+      message.success("Data berhasil dihapus");
+      fetchTers();
+      setIsDeleteModalOpen(false);
     }
   };
 
   return (
-    <Table<DataType>
-      columns={columns}
-      dataSource={data}
-      pagination={{ pageSize: 10 }}
-    />
+    <>
+      <Table<DataType>
+        columns={columns}
+        dataSource={data}
+        pagination={{ pageSize: 10 }}
+      />
+      <Modal
+        title="Detail Data"
+        open={isDetailModalOpen}
+        onCancel={() => setIsDetailModalOpen(false)}
+        footer={null}
+      >
+        <p>
+          <strong>ID:</strong> {activeRecord?.id}
+        </p>
+        <p>
+          <strong>Nama:</strong>{" "}
+          {activeRecord?.position ||
+            activeRecord?.ptkp ||
+            activeRecord?.typeTer}
+        </p>
+        <p>
+          <strong>Incentive/Amount/Range:</strong>
+          {activeRecord?.incentive ||
+            activeRecord?.amount ||
+            `${activeRecord?.startRange} - ${activeRecord?.endRange}`}
+        </p>
+      </Modal>
+      <Modal
+        title="Edit Data Jabatan"
+        open={isEditModalOpen}
+        onCancel={() => {
+          setIsEditModalOpen(false);
+          editForm.resetFields();
+        }}
+        onOk={() => editForm.submit()}
+      >
+        <Form form={editForm} layout="vertical" onFinish={handleEdit}>
+          <Form.Item
+            name="typeTer"
+            label="Jenis TER"
+            rules={[{ required: true }]}
+          >
+            <Input />
+          </Form.Item>
+          <Form.Item
+            name="startRange"
+            label="Start Range"
+            rules={[{ required: true }]}
+          >
+            <InputNumber className="w-full" />
+          </Form.Item>
+          <Form.Item
+            name="endRange"
+            label="End Range"
+            rules={[{ required: true }]}
+          >
+            <InputNumber className="w-full" />
+          </Form.Item>
+          <Form.Item
+            name="ter"
+            label="TER"
+            rules={[{ required: true }]}
+          >
+            <InputNumber className="w-full" />
+          </Form.Item>
+        </Form>
+      </Modal>
+      <Modal
+        title="Hapus Data"
+        open={isDeleteModalOpen}
+        onCancel={() => setIsDeleteModalOpen(false)}
+        onOk={handleDeleteData}
+      >
+        <p>Apakah Anda yakin ingin menghapus data ini?</p>
+        <p>
+          <strong>ID:</strong> {activeRecord?.id}
+        </p>
+        <p>
+          <strong>Nama:</strong>{" "}
+          {activeRecord?.position ||
+            activeRecord?.ptkp ||
+            activeRecord?.typeTer}
+        </p>
+      </Modal>
+    </>
   );
 };
 
