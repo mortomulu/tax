@@ -1,7 +1,17 @@
 import React, { useEffect, useRef, useState } from "react";
 import { SearchOutlined } from "@ant-design/icons/lib";
 import type { InputRef, TableColumnsType, TableColumnType } from "antd/lib";
-import { Button, Dropdown, Form, Input, InputNumber, message, Modal, Space, Table } from "antd/lib";
+import {
+  Button,
+  Dropdown,
+  Form,
+  Input,
+  InputNumber,
+  message,
+  Modal,
+  Space,
+  Table,
+} from "antd/lib";
 import type { FilterDropdownProps } from "antd/es/table/interface";
 import Highlighter from "react-highlight-words";
 import { BsThreeDotsVertical } from "react-icons/bs";
@@ -41,6 +51,12 @@ const TerTable: React.FC<TerTable> = ({ data, fetchTers }) => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [editForm] = Form.useForm();
 
+  const [filteredData, setFilteredData] = useState<DataType[]>(data);
+
+  useEffect(() => {
+    setFilteredData(data);
+  }, [data]);
+
   useEffect(() => {
     if (activeRecord) {
       editForm.setFieldsValue({
@@ -60,6 +76,18 @@ const TerTable: React.FC<TerTable> = ({ data, fetchTers }) => {
     confirm();
     setSearchText(selectedKeys[0]);
     setSearchedColumn(dataIndex);
+  };
+
+  const handleGlobalSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.toLowerCase();
+    setSearchText(value);
+
+    const filtered = data.filter(
+      (item) => item.typeTer.toLowerCase().includes(value)
+      // ||
+      // item.incentive.toString().includes(value)
+    );
+    setFilteredData(filtered);
   };
 
   const handleReset = (clearFilters: () => void) => {
@@ -261,10 +289,16 @@ const TerTable: React.FC<TerTable> = ({ data, fetchTers }) => {
   };
 
   return (
-    <>
+    <div className="-mt-4">
+      <Input
+        placeholder="Cari berdasarkan Jenis TER"
+        value={searchText}
+        onChange={handleGlobalSearch}
+        style={{ marginBottom: 16, width: 300 }}
+      />
       <Table<DataType>
         columns={columns}
-        dataSource={data}
+        dataSource={filteredData}
         pagination={{ pageSize: 10 }}
       />
       <Modal
@@ -272,22 +306,47 @@ const TerTable: React.FC<TerTable> = ({ data, fetchTers }) => {
         open={isDetailModalOpen}
         onCancel={() => setIsDetailModalOpen(false)}
         footer={null}
+        width={600}
       >
-        <p>
-          <strong>ID:</strong> {activeRecord?.id}
-        </p>
-        <p>
-          <strong>Nama:</strong>{" "}
-          {activeRecord?.position ||
-            activeRecord?.ptkp ||
-            activeRecord?.typeTer}
-        </p>
-        <p>
-          <strong>Incentive/Amount/Range:</strong>
-          {activeRecord?.incentive ||
-            activeRecord?.amount ||
-            `${activeRecord?.startRange} - ${activeRecord?.endRange}`}
-        </p>
+        <div className="space-y-4">
+          <div className="grid grid-cols-3 gap-4 mt-6">
+            <div className="col-span-1">
+              <p className="font-semibold text-gray-600">Jenis TER</p>
+            </div>
+            <div className="col-span-2">
+              <p className="text-gray-800">
+                {activeRecord?.position ||
+                  activeRecord?.ptkp ||
+                  activeRecord?.typeTer ||
+                  "-"}
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-3 gap-4">
+            <div className="col-span-1">
+              <p className="font-semibold text-gray-600">Penghasilan Bruto</p>
+            </div>
+            <div className="col-span-2">
+              <p className="text-gray-800">
+                {activeRecord?.incentive ||
+                  activeRecord?.amount ||
+                  (activeRecord?.startRange && activeRecord?.endRange
+                    ? `${activeRecord.startRange} - ${activeRecord.endRange}`
+                    : "-")}
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-3 gap-4 mt-6">
+            <div className="col-span-1">
+              <p className="font-semibold text-gray-600">TER</p>
+            </div>
+            <div className="col-span-2">
+              <p className="text-gray-800">{activeRecord?.ter || "-"}%</p>
+            </div>
+          </div>
+        </div>
       </Modal>
       <Modal
         title="Edit Data Jabatan"
@@ -320,11 +379,7 @@ const TerTable: React.FC<TerTable> = ({ data, fetchTers }) => {
           >
             <InputNumber className="w-full" />
           </Form.Item>
-          <Form.Item
-            name="ter"
-            label="TER"
-            rules={[{ required: true }]}
-          >
+          <Form.Item name="ter" label="TER" rules={[{ required: true }]}>
             <InputNumber className="w-full" />
           </Form.Item>
         </Form>
@@ -346,7 +401,7 @@ const TerTable: React.FC<TerTable> = ({ data, fetchTers }) => {
             activeRecord?.typeTer}
         </p>
       </Modal>
-    </>
+    </div>
   );
 };
 

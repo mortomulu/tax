@@ -49,6 +49,12 @@ const PtkpTable: React.FC<PtkpTable> = ({ data, fetchPtkps }) => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [editForm] = Form.useForm();
 
+  const [filteredData, setFilteredData] = useState<DataType[]>(data);
+
+  useEffect(() => {
+    setFilteredData(data);
+  }, [data]);
+
   useEffect(() => {
     if (activeRecord) {
       editForm.setFieldsValue({
@@ -66,6 +72,18 @@ const PtkpTable: React.FC<PtkpTable> = ({ data, fetchPtkps }) => {
     confirm();
     setSearchText(selectedKeys[0]);
     setSearchedColumn(dataIndex);
+  };
+
+  const handleGlobalSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.toLowerCase();
+    setSearchText(value);
+
+    const filtered = data.filter(
+      (item) => item.ptkp.toLowerCase().includes(value)
+      // ||
+      // item.amount.toString().includes(value)
+    );
+    setFilteredData(filtered);
   };
 
   const handleReset = (clearFilters: () => void) => {
@@ -250,10 +268,17 @@ const PtkpTable: React.FC<PtkpTable> = ({ data, fetchPtkps }) => {
   };
 
   return (
-    <>
+    <div className="-mt-4">
+      <Input
+        placeholder="Cari berdasarkan PTKP atau Amount"
+        value={searchText}
+        onChange={handleGlobalSearch}
+        style={{ marginBottom: 16, width: 300 }}
+      />
+
       <Table<DataType>
         columns={columns}
-        dataSource={data}
+        dataSource={filteredData}
         pagination={{ pageSize: 5 }}
       />
       <Modal
@@ -261,22 +286,44 @@ const PtkpTable: React.FC<PtkpTable> = ({ data, fetchPtkps }) => {
         open={isDetailModalOpen}
         onCancel={() => setIsDetailModalOpen(false)}
         footer={null}
+        width={600}
       >
-        <p>
-          <strong>ID:</strong> {activeRecord?.id}
-        </p>
-        <p>
-          <strong>Nama:</strong>{" "}
-          {activeRecord?.position ||
-            activeRecord?.ptkp ||
-            activeRecord?.typeTer}
-        </p>
-        <p>
-          <strong>Incentive/Amount/Range:</strong>
-          {activeRecord?.incentive ||
-            activeRecord?.amount ||
-            `${activeRecord?.startRange} - ${activeRecord?.endRange}`}
-        </p>
+        <div className="space-y-4">
+          <div className="grid grid-cols-3 gap-4 mt-6">
+            <div className="col-span-1">
+              <p className="font-semibold text-gray-600">PTKP</p>
+            </div>
+            <div className="col-span-2">
+              <p className="text-gray-800">
+                {activeRecord?.position ||
+                  activeRecord?.ptkp ||
+                  activeRecord?.typeTer ||
+                  "-"}
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-3 gap-4">
+            <div className="col-span-1">
+              <p className="font-semibold text-gray-600">
+                {activeRecord?.incentive
+                  ? "Incentive"
+                  : activeRecord?.amount
+                  ? "Amount"
+                  : "Range"}
+              </p>
+            </div>
+            <div className="col-span-2">
+              <p className="text-gray-800">
+                {activeRecord?.incentive ||
+                  activeRecord?.amount ||
+                  (activeRecord?.startRange && activeRecord?.endRange
+                    ? `${activeRecord.startRange} - ${activeRecord.endRange}`
+                    : "-")}
+              </p>
+            </div>
+          </div>
+        </div>
       </Modal>
       <Modal
         title="Edit Data PTKP"
@@ -313,7 +360,7 @@ const PtkpTable: React.FC<PtkpTable> = ({ data, fetchPtkps }) => {
             activeRecord?.typeTer}
         </p>
       </Modal>
-    </>
+    </div>
   );
 };
 

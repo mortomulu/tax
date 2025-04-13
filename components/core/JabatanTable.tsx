@@ -52,6 +52,12 @@ const JabatanTable: React.FC<JabatanTableProps> = ({
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [editForm] = Form.useForm();
 
+  const [filteredData, setFilteredData] = useState<DataType[]>(data);
+
+  useEffect(() => {
+    setFilteredData(data);
+  }, [data]);
+
   useEffect(() => {
     if (activeRecord) {
       editForm.setFieldsValue({
@@ -69,6 +75,18 @@ const JabatanTable: React.FC<JabatanTableProps> = ({
     confirm();
     setSearchText(selectedKeys[0]);
     setSearchedColumn(dataIndex);
+  };
+
+  const handleGlobalSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.toLowerCase();
+    setSearchText(value);
+
+    const filtered = data.filter(
+      (item) =>
+        item.position.toLowerCase().includes(value) ||
+        item.incentive.toString().includes(value)
+    );
+    setFilteredData(filtered);
   };
 
   const handleReset = (clearFilters: () => void) => {
@@ -228,7 +246,7 @@ const JabatanTable: React.FC<JabatanTableProps> = ({
 
     if (error) {
       message.error("Gagal edit data");
-      console.log(error)
+      console.log(error);
     } else {
       message.success("Data berhasil diupdate");
       editForm.resetFields();
@@ -254,10 +272,16 @@ const JabatanTable: React.FC<JabatanTableProps> = ({
   };
 
   return (
-    <>
+    <div className="-mt-4">
+      <Input
+        placeholder="Cari berdasarkan Jabatan"
+        value={searchText}
+        onChange={handleGlobalSearch}
+        style={{ marginBottom: 16, width: 300 }}
+      />
       <Table<DataType>
         columns={columns}
-        dataSource={data}
+        dataSource={filteredData}
         pagination={{ pageSize: 5 }}
       />
       <Modal
@@ -265,22 +289,29 @@ const JabatanTable: React.FC<JabatanTableProps> = ({
         open={isDetailModalOpen}
         onCancel={() => setIsDetailModalOpen(false)}
         footer={null}
+        width={600}
       >
-        <p>
-          <strong>ID:</strong> {activeRecord?.id}
-        </p>
-        <p>
-          <strong>Nama:</strong>{" "}
-          {activeRecord?.position ||
-            activeRecord?.ptkp ||
-            activeRecord?.typeTer}
-        </p>
-        <p>
-          <strong>Incentive/Amount/Range:</strong>
-          {activeRecord?.incentive ||
-            activeRecord?.amount ||
-            `${activeRecord?.startRange} - ${activeRecord?.endRange}`}
-        </p>
+        <div className="space-y-4">
+          <div className="grid grid-cols-3 gap-4 mt-6">
+            <div className="col-span-1">
+              <p className="font-semibold text-gray-600">Jabatan</p>
+            </div>
+            <div className="col-span-2">
+              <p className="text-gray-800">{activeRecord?.position || "-"}</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-3 gap-4">
+            <div className="col-span-1">
+              <p className="font-semibold text-gray-600">Incentive</p>
+            </div>
+            <div className="col-span-2">
+              <p className="text-gray-800">
+                {formatRupiah(activeRecord?.incentive)}
+              </p>
+            </div>
+          </div>
+        </div>
       </Modal>
       <Modal
         title="Edit Data Jabatan"
@@ -325,7 +356,7 @@ const JabatanTable: React.FC<JabatanTableProps> = ({
             activeRecord?.typeTer}
         </p>
       </Modal>
-    </>
+    </div>
   );
 };
 

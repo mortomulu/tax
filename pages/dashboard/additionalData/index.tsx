@@ -147,12 +147,12 @@ export default function AdditionalDataPage() {
               </h1>
               <button
                 onClick={() => setIsPtkpModalOpen(true)}
-                className="bg-blue-600 text-white py-1 px-3 rounded font-semibold"
+                className="bg-blue-600 text-white px-4 rounded font-semibold"
               >
                 Tambah PTKP
               </button>
             </div>
-            <PtkpTable data={ptkps} fetchPtkps={fetchPtkps}/>
+            <PtkpTable data={ptkps} fetchPtkps={fetchPtkps} />
           </div>
         </div>
         <div className="bg-white p-6 rounded-lg border-l-4 border-yellow-400 shadow-md grid-rows-2 flex flex-col">
