@@ -4,7 +4,7 @@ import PtkpTable from "@/components/core/PtkpTable";
 import TerTable from "@/components/core/TerTable";
 import { supabase } from "@/utils/supabase";
 import { useEffect, useState } from "react";
-import { Form, Input, InputNumber, message, Modal } from "antd";
+import { Form, Input, InputNumber, message, Modal, Button } from "antd";
 
 type Position = {
   id: string;
@@ -131,12 +131,12 @@ export default function AdditionalDataPage() {
               <h1 className="text-xl font-semibold text-gray-800 mb-4">
                 Data Jabatan
               </h1>
-              <button
+              <Button
                 onClick={() => setIsJabatanModalOpen(true)}
-                className="bg-blue-600 text-white py-1 px-3 rounded font-semibold"
+                type="primary"
               >
                 Tambah Jabatan
-              </button>
+              </Button>
             </div>
             <JabatanTable data={positions} fetchPositions={fetchPositions} />
           </div>
@@ -145,12 +145,9 @@ export default function AdditionalDataPage() {
               <h1 className="text-xl font-semibold text-gray-800 mb-4">
                 Data PTKP
               </h1>
-              <button
-                onClick={() => setIsPtkpModalOpen(true)}
-                className="bg-blue-600 text-white px-4 rounded font-semibold"
-              >
+              <Button onClick={() => setIsPtkpModalOpen(true)} type="primary">
                 Tambah PTKP
-              </button>
+              </Button>
             </div>
             <PtkpTable data={ptkps} fetchPtkps={fetchPtkps} />
           </div>
@@ -160,12 +157,9 @@ export default function AdditionalDataPage() {
             <h1 className="text-xl font-semibold text-gray-800 mb-4">
               Data TER
             </h1>
-            <button
-              onClick={() => setIsTerModalOpen(true)}
-              className="bg-blue-600 text-white py-1 px-3 rounded font-semibold"
-            >
+            <Button onClick={() => setIsTerModalOpen(true)} type="primary">
               Tambah TER
-            </button>
+            </Button>
           </div>
           <TerTable data={ters} fetchTers={fetchTers} />
         </div>

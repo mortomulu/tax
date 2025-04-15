@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { SearchOutlined } from "@ant-design/icons/lib";
 import type { InputRef, TableColumnsType, TableColumnType } from "antd/lib";
 import {
@@ -20,6 +20,8 @@ import Highlighter from "react-highlight-words";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import { useRouter } from "next/router";
 import dayjs from "dayjs";
+import { supabase } from "@/utils/supabase";
+import { MdArrowRightAlt } from "react-icons/md";
 
 interface DataType {
   key: string;
@@ -49,46 +51,50 @@ interface AnotherTableProps {
   data: DataType[];
 }
 
-const ptkpOptions = ["PTKP 1", "PTKP 2", "PTKP 3"];
-const jabatanOptions = ["Karyawan", "Leader", "Manager", "CEO", "CTO"];
-
-const dummyHistoryPosition = [
-  { id: 1, position: "Software Engineer", department: "IT", startYear: 2018, endYear: 2020 },
-  { id: 2, position: "Senior Engineer", department: "IT", startYear: 2020, endYear: 2023 },
-  { id: 3, position: "Tech Lead", department: "IT", startYear: 2023, endYear: "Sekarang" },
-]
-
-const employeeData = {
-  name: "Budi Santoso",
-  nik: "1234567890",
-  maritalStatus: "Menikah",
-  history: [
-    { id: 1, position: "Software Engineer", incentive: "0", startYear: 2018, endYear: 2020 },
-    { id: 2, position: "Senior Engineer", incentive: "2000000", startYear: 2020, endYear: 2023 },
-    { id: 3, position: "Tech Lead", incentive: "3000000", startYear: 2023, endYear: "Sekarang" },
-  ],
-};
-
-const EmployeeTable: any = ({ data } : any) => {
+const EmployeeTable: any = ({
+  data,
+  ptkpOptions,
+  positionOptions,
+  fetchEmployees,
+}: any) => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
+  const [historiesPosition, setHistoriesPosition] = useState<any>();
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [newName, setNewName] = useState("");
   const [nik, setNik] = useState("");
   const [newPtkp, setNewPtkp] = useState<string | null>(null);
-  const [jabatanList, setJabatanList] = useState<Jabatan[]>([
-    { id: 1, jabatan: "", startDate: null, endDate: null, now: false },
-  ]);
 
   const [visible, setVisible] = useState(false);
-  const [selectedEmployee, setSelectedEmployee] : any = useState(null);
+  const [selectedEmployee, setSelectedEmployee]: any = useState(null);
 
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
   const searchInput = useRef<InputRef>(null);
   const router = useRouter();
+
+  useEffect(() => {
+    if (selectedEmployee?.historiesPosition) {
+      const formattedHistories = selectedEmployee.historiesPosition
+        .map((item: any, index: number) => ({
+          key: index,
+          id: item.id,
+          startDate: item.startdate,
+          endDate: item.enddate,
+          idPosition: item.positions?.id,
+          position: item.positions?.position || "-",
+          incentive: item.positions?.incentive || 0,
+        }))
+        .sort(
+          (a: any, b: any) =>
+            new Date(b.startYear).getTime() - new Date(a.startYear).getTime()
+        );
+
+      setHistoriesPosition(formattedHistories);
+    }
+  }, [selectedEmployee]);
 
   const handleSearch = (
     selectedKeys: string[],
@@ -213,34 +219,10 @@ const EmployeeTable: any = ({ data } : any) => {
       width: "20%",
     },
     {
-      title: "Jabatan",
-      dataIndex: "jabatan",
-      key: "jabatan",
+      title: "Jabatan Sekarang",
+      dataIndex: "positionNow",
+      key: "positionNow",
       width: "20%",
-      filters: [
-        {
-          text: "Karyawan",
-          value: "Karyawan",
-        },
-        {
-          text: "Leader",
-          value: "Leader",
-        },
-        {
-          text: "Manager",
-          value: "Manager",
-        },
-        {
-          text: "CTO",
-          value: "CTO",
-        },
-        {
-          text: "CEO",
-          value: "CEO",
-        },
-      ],
-      onFilter: (value, record) =>
-        record.jabatanList.indexOf(value as any) === 0,
     },
     {
       title: "PTKP",
@@ -303,13 +285,11 @@ const EmployeeTable: any = ({ data } : any) => {
 
   const handleMenuClick = (key: string, record: any) => {
     if (key === "1") {
-      // router.push(`/dashboard/employee/${record.key}`);
       openDetailModal(record);
     } else if (key === "2") {
-      // router.push(`/dashboard/employee/${record.key}`);
       openModal(record, key);
     } else if (key === "3") {
-      showDeleteModal(record.key);
+      showDeleteModal(record.id);
     }
   };
 
@@ -318,12 +298,24 @@ const EmployeeTable: any = ({ data } : any) => {
     setIsDeleteModalOpen(true);
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (selectedKey !== null) {
-      message.success("Data berhasil dihapus");
+      const { error } = await supabase
+        .from("employees")
+        .delete()
+        .eq("id", Number(selectedKey));
+
+      if (error) {
+        message.error("Gagal menghapus data");
+        console.error(error);
+      } else {
+        message.success("Data berhasil dihapus");
+        fetchEmployees?.();
+      }
+
+      setIsDeleteModalOpen(false);
+      setSelectedKey(null);
     }
-    setIsDeleteModalOpen(false);
-    setSelectedKey(null);
   };
 
   const handleCancelDelete = () => {
@@ -331,82 +323,115 @@ const EmployeeTable: any = ({ data } : any) => {
     setSelectedKey(null);
   };
 
-  const resetForm = () => {
-    setNewName("");
-    setNik("");
-    setNewPtkp(null);
-    setJabatanList([
-      { id: 1, jabatan: "", startDate: null, endDate: null, now: false },
-    ]);
-  };
-
   const openModal = (record?: DataType, index?: any) => {
     if (record) {
-      // Jika edit, isi modal dengan data yang dipilih
       setNewName(record.name);
       setNik(record.nik);
       setNewPtkp(record.ptkp);
-      setJabatanList(record.jabatanList);
-      // setIsEditing(true);
       setEditingIndex(index ?? null);
     } else {
-      // Jika tambah, kosongkan modal
       setNewName("");
       setNik("");
       setNewPtkp(null);
-      setJabatanList([
-        { id: 1, jabatan: "", startDate: null, endDate: null, now: false },
-      ]);
-      // setIsEditing(false);
       setEditingIndex(null);
     }
+    setSelectedEmployee(record);
     setIsEditModalOpen(true);
   };
 
-  const handleSave = () => {
-    setIsEditModalOpen(false);
-    resetForm();
+  const handleSave = async () => {
+    try {
+      if (!selectedEmployee) return;
+
+      const { error: employeeError } = await supabase
+        .from("employees")
+        .update({
+          name: selectedEmployee.name,
+          nik: selectedEmployee.nik,
+          idptkp: selectedEmployee.ptkp_id,
+        })
+        .eq("id", selectedEmployee.id);
+
+      if (employeeError) {
+        message.error("Gagal mengupdate data karyawan");
+        console.error("Employee Update Error:", employeeError);
+        return;
+      }
+
+      for (const item of historiesPosition) {
+        console.log("item", item);
+        const { error: historyError } = await supabase
+          .from("histories_positions")
+          .update({
+            idposition: item.idPosition,
+            startdate: item.startDate,
+            enddate: item.now ? null : item.endDate,
+          })
+          .eq("id", item.id);
+
+        if (historyError) {
+          message.error("Gagal mengupdate riwayat jabatan");
+          console.error("Histories Update Error:", historyError);
+          return;
+        }
+      }
+
+      fetchEmployees();
+      message.success("Data berhasil diperbarui");
+      setIsEditModalOpen(false);
+    } catch (error) {
+      console.error("Unexpected Error:", error);
+      message.error("Terjadi kesalahan saat menyimpan data");
+    }
   };
 
-  const handleJabatanChange = (
-    index: number,
-    field: keyof Jabatan,
-    value: any
-  ) => {
-    const newJabatanList = [...jabatanList];
-    newJabatanList[index] = { ...newJabatanList[index], [field]: value };
+  const handleJabatanChange = (index: number, field: keyof any, value: any) => {
+    const updatedHistories = [...historiesPosition];
+
+    const formattedValue =
+      field === "startDate" || field === "endDate"
+        ? value
+          ? dayjs(value).format("YYYY-MM-DD")
+          : null
+        : value;
+
+    updatedHistories[index] = {
+      ...updatedHistories[index],
+      [field]: formattedValue,
+    };
 
     if (field === "now" && value === true) {
-      newJabatanList[index].endDate = null;
+      updatedHistories[index].endDate = null;
     }
 
-    setJabatanList(newJabatanList);
+    setHistoriesPosition(updatedHistories);
   };
 
   const handleAddJabatan = () => {
-    setJabatanList((prev) => [
+    setHistoriesPosition((prev: any) => [
       ...(prev || []),
       {
+        key: Date.now(),
         id: Date.now(),
-        jabatan: "",
+        position: "",
         startDate: null,
         endDate: null,
+        incentive: 0,
         now: false,
       },
     ]);
   };
 
-  // Hapus Jabatan
   const handleRemoveJabatan = (index: number) => {
-    setJabatanList(jabatanList.filter((_, i) => i !== index));
+    setHistoriesPosition(
+      historiesPosition.filter((_: any, i: any) => i !== index)
+    );
   };
 
   const openDetailModal = (record: any) => {
     setSelectedEmployee(record);
     setVisible(true);
   };
-
-  console.log("visible", visible);
 
   return (
     <>
@@ -462,29 +487,29 @@ const EmployeeTable: any = ({ data } : any) => {
           className="mb-3"
           style={{ width: "100%" }}
         >
-          {ptkpOptions.map((option) => (
-            <Select.Option key={option} value={option}>
-              {option}
+          {ptkpOptions?.map((option: any) => (
+            <Select.Option key={option.id} value={option.id}>
+              {option.ptkp}
             </Select.Option>
           ))}
         </Select>
 
         <h3>Jabatan</h3>
-        {jabatanList?.map((jabatan, index) => (
+        {historiesPosition?.map((jabatan: any, index: any) => (
           <>
             <div key={jabatan.id} className="mb-4 border p-3 rounded">
               <Select
                 placeholder="Pilih Jabatan"
-                value={jabatan.jabatan || undefined}
-                onChange={(value) =>
-                  handleJabatanChange(index, "jabatan", value)
-                }
+                value={jabatan.position || undefined}
+                onChange={() => {
+                  handleJabatanChange(index, "position", jabatan.id);
+                }}
                 className="mb-2"
                 style={{ width: "100%" }}
               >
-                {jabatanOptions.map((option) => (
-                  <Select.Option key={option} value={option}>
-                    {option}
+                {positionOptions.map((option: any) => (
+                  <Select.Option key={option.id} value={option.id}>
+                    {option.position}
                   </Select.Option>
                 ))}
               </Select>
@@ -494,17 +519,29 @@ const EmployeeTable: any = ({ data } : any) => {
                   handleJabatanChange(index, "now", e.target.checked)
                 }
                 checked={jabatan.now}
+                className="w-full mb-3"
               >
                 Jabatan Sekarang
               </Checkbox>
 
-              <DatePicker
-                onChange={(date) =>
-                  handleJabatanChange(index, "startDate", date)
-                }
-                value={jabatan.startDate ? dayjs(jabatan.startDate) : null}
-              />
-              {jabatanList.length > 1 && (
+              <div className="flex items-center gap-4">
+                <DatePicker
+                  onChange={(date) =>
+                    handleJabatanChange(index, "startDate", date)
+                  }
+                  value={jabatan.startDate ? dayjs(jabatan.startDate) : null}
+                />
+                <MdArrowRightAlt className="text-xl" />
+                <DatePicker
+                  placeholder="Akhir Jabatan"
+                  onChange={(date) =>
+                    handleJabatanChange(index, "endDate", date)
+                  }
+                  value={jabatan.endDate ? dayjs(jabatan.endDate) : null}
+                  disabled={jabatan.now}
+                />
+              </div>
+              {historiesPosition?.length > 1 && (
                 <Button
                   danger
                   onClick={() => handleRemoveJabatan(index)}
@@ -522,7 +559,7 @@ const EmployeeTable: any = ({ data } : any) => {
         </Button>
       </Modal>
 
-      {/* modal detail data karyawan */}
+      {/* modal detail data karyawan by table */}
       <Modal
         title="Detail Karyawan"
         open={visible}
@@ -532,58 +569,28 @@ const EmployeeTable: any = ({ data } : any) => {
             Tutup
           </Button>,
         ]}
+        width={800}
       >
-        {selectedEmployee && (
-            <>
-              <Descriptions bordered column={1}>
-                <Descriptions.Item label="Nama">
-                  {selectedEmployee.name}
-                </Descriptions.Item>
-                <Descriptions.Item label="NIK">
-                  {selectedEmployee.nik}
-                </Descriptions.Item>
-                <Descriptions.Item label="Status Pernikahan">
-                  {selectedEmployee.ptkp}
-                </Descriptions.Item>
-              </Descriptions>
+        <Descriptions bordered column={1}>
+          <Descriptions.Item label="Nama">
+            {selectedEmployee?.name}
+          </Descriptions.Item>
+          <Descriptions.Item label="NIK">
+            {selectedEmployee?.nik}
+          </Descriptions.Item>
+          <Descriptions.Item label="Status Pernikahan">
+            {selectedEmployee?.ptkp}
+          </Descriptions.Item>
+        </Descriptions>
 
-              <h3 style={{ marginTop: "20px" }} className="mb-4">History Jabatan</h3>
-              <Timeline>
-                {dummyHistoryPosition?.map((item) => (
-                  <Timeline.Item key={item.id}>
-                    <strong>{item.position}</strong> - {item.department} <br />
-                    {item.startYear} - {item.endYear}
-                  </Timeline.Item>
-                ))}
-              </Timeline>
-            </>
-          )}
+        <h3 className="mt-8 mb-4 font-semibold">History Jabatan</h3>
+        <Table
+          columns={columnsHistoryPositions}
+          dataSource={historiesPosition}
+          rowKey="id"
+          pagination={false}
+        />
       </Modal>
-
-      {/* modal detail data karyawan by table */}
-      <Modal 
-      title="Detail Karyawan" 
-      open={visible} 
-      onCancel={() => setVisible(false)} 
-      footer={[
-        <Button key="close" onClick={()=> setVisible(false)}>Tutup</Button>
-      ]}
-      width={800}
-    >
-      <Descriptions bordered column={1}>
-        <Descriptions.Item label="Nama">{employeeData?.name}</Descriptions.Item>
-        <Descriptions.Item label="NIK">{employeeData?.nik}</Descriptions.Item>
-        <Descriptions.Item label="Status Pernikahan">{employeeData?.maritalStatus}</Descriptions.Item>
-      </Descriptions>
-
-      <h3 style={{ marginTop: "20px" }}>History Jabatan</h3>
-      <Table 
-        columns={columnsHistoryPositions} 
-        dataSource={employeeData?.history} 
-        rowKey="id" 
-        pagination={false} 
-      />
-    </Modal>
     </>
   );
 };

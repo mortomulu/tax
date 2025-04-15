@@ -1,16 +1,36 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import dayjs from "dayjs";
-import { Button, Modal, Input, Select, DatePicker, Checkbox, message } from "antd";
+import {
+  Button,
+  Modal,
+  Input,
+  Select,
+  DatePicker,
+  Checkbox,
+  message,
+} from "antd";
 import { MdArrowRightAlt } from "react-icons/md";
 import Layout from "@/components/layouts/Layout";
 import EmployeeTable from "@/components/core/EmployeeTable";
+import { supabase } from "@/utils/supabase";
 
 interface DataType {
-  key: string;
+  id: number;
   name: string;
-  jabatan: any;
-  ptkp: string;
+  nik: string;
+  ptkp: any;
+  positionNow: any;
+  histories_positions: {
+    id: number;
+    startdate: string;
+    enddate: string | null;
+    positions: {
+      position: string;
+    }[];
+  }[];
 }
+
+type EmployeesResponse = DataType[] | null;
 
 type JabatanType = {
   id: number;
@@ -20,96 +40,140 @@ type JabatanType = {
   now: boolean;
 };
 
-const ptkpOptions = ["TK/0", "K/0", "K/1", "K/2", "K/3"];
-
-const jabatanOptions = ["Karyawan", "Leader", "Manager", "CTO", "CEO"];
-
 export default function EmployeePage() {
-  const [data, setData] = useState<DataType[]>([
-    {
-      key: "1",
-      name: "Sumarmo",
-      jabatan: "Karyawan",
-      ptkp: "K/2",
-    },
-    {
-      key: "2",
-      name: "Edi Wahyono",
-      jabatan: "Karyawan",
-      ptkp: "K/2",
-    },
-    {
-      key: "3",
-      name: "Dimas Maulana Walidayni",
-      jabatan: "Karyawan",
-      ptkp: "TK/0",
-    },
-    {
-      key: "4",
-      name: "Priyo Adi Prayogo",
-      jabatan: "Karyawan",
-      ptkp: "TK/0",
-    },
-    {
-      key: "5",
-      name: "Andika Adnan Husaini",
-      jabatan: "Karyawan",
-      ptkp: "TK/0",
-    },
-    {
-      key: "6",
-      name: "Puji Suryanto",
-      jabatan: "Karyawan",
-      ptkp: "TK/0",
-    },
-    {
-      key: "7",
-      name: "Abdullah Wafi ",
-      jabatan: "Karyawan",
-      ptkp: "K/2",
-    },
-    {
-      key: "8",
-      name: "Sri Pujo Adi",
-      jabatan: "Karyawan",
-      ptkp: "TK/0",
-    },
-    {
-      key: "9",
-      name: "Khairus saleh,SP",
-      jabatan: "Karyawan",
-      ptkp: "K/0",
-    },
-    {
-      key: "10",
-      name: "Dandi kurnia Putra",
-      jabatan: "Karyawan",
-      ptkp: "TK/0",
-    },
-  ]);
+  const [data, setData] = useState<any>([]);
+  const [ptkpOptions, setPtkpOptions] = useState<any>();
+  const [positionOptions, setPositionOptions] = useState<any>();
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [newName, setNewName] = useState("");
+  const [name, setName] = useState("");
   const [nik, setNik] = useState("");
-  const [newPtkp, setNewPtkp] = useState("");
+  const [ptkp, setPtkp] = useState("");
   const [jabatanList, setJabatanList] = useState<JabatanType[]>([
     { id: 1, jabatan: "", startDate: null, endDate: null, now: false },
   ]);
 
-  const handleAdd = () => {
-    if (newName && newPtkp) {
-      setData([
-        ...data,
-        {
-          key: (data.length + 1).toString(),
-          name: newName,
-          jabatan: jabatanList,
-          ptkp: newPtkp,
-        },
-      ]);
+  const fetchPtkpOptions = async () => {
+    const { data, error } = await supabase.from("ptkp").select(`id, ptkp`);
 
-      setNewName("");
-      setNewPtkp("");
+    if (error) {
+      message.error("Gagal mengambil data PTKP");
+      console.error("Gagal mengambil data PTKP:", error);
+      return;
+    }
+
+    setPtkpOptions(data);
+  };
+
+  const fetchPositionOptions = async () => {
+    const { data, error } = await supabase
+      .from("positions")
+      .select(`id, position`);
+
+    if (error) {
+      message.error("Gagal mengambil data Jabatan");
+      console.error("Gagal mengambil data Jabatan:", error);
+      return;
+    }
+
+    setPositionOptions(data);
+  };
+
+  const fetchEmployees = async () => {
+    const { data, error } = await supabase.from("employees").select(`
+      id,
+      name,
+      nik,
+      ptkp (
+        id,
+        ptkp
+      ),
+      histories_positions (
+        id,
+        startdate,
+        enddate,
+        positions (
+          id,
+          position,
+          incentive
+        )
+      )
+    `);
+
+    if (error) {
+      message.error("Gagal mengambil data");
+      console.error("Gagal mengambil data", error);
+      return;
+    }
+
+    const formatted = data.map((item: any) => ({
+      id: item.id,
+      name: item.name,
+      nik: item.nik,
+      ptkp: item.ptkp?.ptkp || "-",
+      positionNow: item?.histories_positions?.[0]?.positions?.position || null,
+      historiesPosition: item.histories_positions || [],
+    }));
+
+    setData(formatted);
+  };
+
+  useEffect(() => {
+    fetchEmployees();
+    fetchPositionOptions();
+    fetchPtkpOptions();
+  }, []);
+
+  const handleAdd = async () => {
+    if (name == "" && nik == "" && ptkp == "") {
+      message.error("Isi data terlebih dahulu");
+      return
+    }
+
+    if (jabatanList[0].jabatan == "" && jabatanList[0].startDate == null) {
+      message.error("Isi jabatan terlebih dahulu");
+      return;
+    }
+
+    if (name && ptkp && nik) {
+      const { data: insertEmployee, error: errorEmployee } = await supabase
+        .from("employees")
+        .insert([
+          {
+            name,
+            nik,
+            idptkp: ptkp,
+          },
+        ])
+        .select();
+
+      if (errorEmployee) {
+        message.error("Gagal menambahkan data karyawan");
+        console.error(errorEmployee);
+        return;
+      }
+
+      await supabase.from("histories_positions").insert(
+        jabatanList.map((jabatan) => ({
+          idemployee: insertEmployee[0].id,
+          idposition: jabatan.jabatan,
+          startdate: jabatan.startDate
+            ? new Date(jabatan.startDate).toISOString()
+            : null,
+          enddate: jabatan.endDate
+            ? new Date(jabatan.endDate).toISOString()
+            : null,
+        }))
+      );
+
+      message.success("Data berhasil ditambahkan");
+
+      fetchEmployees?.();
+
+      setName("");
+      setNik("");
+      setPtkp("");
+      setJabatanList([]);
       setIsAddModalOpen(false);
     }
   };
@@ -158,7 +222,12 @@ export default function EmployeePage() {
             Add Data Karyawan
           </Button>
         </div>
-        <EmployeeTable data={data} />
+        <EmployeeTable
+          data={data}
+          ptkpOptions={ptkpOptions}
+          positionOptions={positionOptions}
+          fetchEmployees={fetchEmployees}
+        />
       </div>
 
       {/* Modal Add Data */}
@@ -166,9 +235,10 @@ export default function EmployeePage() {
         title="Tambah Data Karyawan"
         open={isAddModalOpen}
         onCancel={() => {
-          setNewName("");
+          setName("");
           setNik("");
-          setNewPtkp("");
+          setName("");
+          setPtkp("");
           setJabatanList([
             { id: 1, jabatan: "", startDate: null, endDate: null, now: false },
           ]);
@@ -178,9 +248,10 @@ export default function EmployeePage() {
           <Button
             key="cancel"
             onClick={() => {
-              setNewName("");
+              setName("");
               setNik("");
-              setNewPtkp("");
+              setName("");
+              setPtkp("");
               setJabatanList([
                 {
                   id: 1,
@@ -195,15 +266,15 @@ export default function EmployeePage() {
           >
             Cancel
           </Button>,
-          <Button key="add" type="primary">
+          <Button key="add" type="primary" onClick={handleAdd}>
             Add
           </Button>,
         ]}
       >
         <Input
           placeholder="Masukkan Nama Karyawan"
-          value={newName}
-          onChange={(e) => setNewName(e.target.value)}
+          value={name}
+          onChange={(e) => setName(e.target.value)}
           className="mb-3"
         />
         <Input
@@ -214,14 +285,14 @@ export default function EmployeePage() {
         />
         <Select
           placeholder="Pilih PTKP"
-          value={newPtkp || undefined}
-          onChange={setNewPtkp}
+          value={ptkp || undefined}
+          onChange={setPtkp}
           className="mb-3"
           style={{ width: "100%" }}
         >
-          {ptkpOptions.map((option) => (
-            <Select.Option key={option} value={option}>
-              {option}
+          {ptkpOptions?.map((option: any) => (
+            <Select.Option key={option.id} value={option.id}>
+              {option.ptkp}
             </Select.Option>
           ))}
         </Select>
@@ -236,9 +307,9 @@ export default function EmployeePage() {
               className="mb-2"
               style={{ width: "100%" }}
             >
-              {jabatanOptions.map((option) => (
-                <Select.Option key={option} value={option}>
-                  {option}
+              {positionOptions?.map((option: any) => (
+                <Select.Option key={option.id} value={option.id}>
+                  {option.position}
                 </Select.Option>
               ))}
             </Select>
