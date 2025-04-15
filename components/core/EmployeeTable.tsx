@@ -75,6 +75,12 @@ const EmployeeTable: any = ({
   const searchInput = useRef<InputRef>(null);
   const router = useRouter();
 
+  const [filteredData, setFilteredData] = useState<DataType[]>(data);
+
+  useEffect(() => {
+    setFilteredData(data);
+  }, [data]);
+
   useEffect(() => {
     if (selectedEmployee?.historiesPosition) {
       const formattedHistories = selectedEmployee.historiesPosition
@@ -104,6 +110,16 @@ const EmployeeTable: any = ({
     confirm();
     setSearchText(selectedKeys[0]);
     setSearchedColumn(dataIndex);
+  };
+
+  const handleGlobalSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.toLowerCase();
+    setSearchText(value);
+
+    const filtered = data.filter((item: any) =>
+      item.name.toLowerCase().includes(value)
+    );
+    setFilteredData(filtered);
   };
 
   const handleReset = (clearFilters: () => void) => {
@@ -434,10 +450,16 @@ const EmployeeTable: any = ({
   };
 
   return (
-    <>
+    <div className="mt-4">
+      <Input
+        placeholder="Cari berdasarkan Nama"
+        value={searchText}
+        onChange={handleGlobalSearch}
+        style={{ marginBottom: 16, width: 300 }}
+      />
       <Table<DataType>
         columns={columns}
-        dataSource={data}
+        dataSource={filteredData}
         pagination={{ pageSize: 5 }}
       />
 
@@ -591,7 +613,7 @@ const EmployeeTable: any = ({
           pagination={false}
         />
       </Modal>
-    </>
+    </div>
   );
 };
 
