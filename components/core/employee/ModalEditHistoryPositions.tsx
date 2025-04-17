@@ -24,42 +24,6 @@ interface DataType {
   incentive?: number;
 }
 
-// const EditableCell = ({
-//   editing,
-//   dataIndex,
-//   title,
-//   inputType,
-//   record,
-//   index,
-//   children,
-//   ...restProps
-// }: any) => {
-//   let inputNode;
-//   if (dataIndex === "now") {
-//     inputNode = <Checkbox />;
-//   } else if (dataIndex === "startDate" || dataIndex === "endDate") {
-//     inputNode = <DatePicker />;
-//   } else {
-//     inputNode = <Input />;
-//   }
-
-//   return (
-//     <td {...restProps}>
-//       {editing ? (
-//         <Form.Item
-//           name={dataIndex}
-//           style={{ margin: 0 }}
-//           valuePropName={dataIndex === "now" ? "checked" : "value"}
-//         >
-//           {inputNode}
-//         </Form.Item>
-//       ) : (
-//         children
-//       )}
-//     </td>
-//   );
-// };
-
 const getEditableCell = (positionOptions: any[], form: any) => {
   const EditableCell: React.FC<any> = ({
     editing,
@@ -285,6 +249,7 @@ const EditHistoryModal = ({
             message.success("Data berhasil ditambahkan.");
           }
         }
+        fetchEmployees();
       }
     } catch (errInfo) {
       console.log("Validate Failed:", errInfo);
@@ -306,6 +271,7 @@ const EditHistoryModal = ({
 
       setData((prevData) => prevData.filter((item) => item.key !== key));
       fetchHistoryPositions();
+      fetchEmployees();
       message.success("Jabatan berhasil dihapus.");
     } catch (err) {
       console.error("Unexpected error:", err);
@@ -411,9 +377,6 @@ const EditHistoryModal = ({
         </Button>,
         <Button key="cancel" onClick={onClose}>
           Batal
-        </Button>,
-        <Button key="submit" type="primary" onClick={() => onSave(data)}>
-          Simpan Semua
         </Button>,
       ]}
     >
