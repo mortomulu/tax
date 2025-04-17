@@ -10,6 +10,7 @@ import {
   Input,
   message,
   Modal,
+  Popconfirm,
   Select,
   Space,
   Table,
@@ -22,6 +23,7 @@ import { useRouter } from "next/router";
 import dayjs from "dayjs";
 import { supabase } from "@/utils/supabase";
 import { MdArrowRightAlt } from "react-icons/md";
+import ModalEditHistoryPositions from "./ModalEditHistoryPositions";
 
 interface DataType {
   key: string;
@@ -43,8 +45,9 @@ type DataIndex = keyof DataType;
 
 const items = [
   { key: "1", label: "Detail" },
-  { key: "2", label: "Edit" },
-  { key: "3", label: "Delete" },
+  { key: "2", label: "Edit Profil" },
+  { key: "3", label: "Edit Riwayat Jabatan" },
+  { key: "4", label: "Delete" },
 ];
 
 interface AnotherTableProps {
@@ -62,6 +65,8 @@ const EmployeeTable: any = ({
   const [historiesPosition, setHistoriesPosition] = useState<any>();
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isEditHistoryPositionModalOpen, setIsEditHistoryPositionModalOpen] =
+    useState(false);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [newName, setNewName] = useState("");
   const [nik, setNik] = useState("");
@@ -303,8 +308,10 @@ const EmployeeTable: any = ({
     if (key === "1") {
       openDetailModal(record);
     } else if (key === "2") {
-      openModal(record, key);
+      openModalEditProfil(record, key);
     } else if (key === "3") {
+      openModalEditHistoryPositions(record, key);
+    } else if (key === "4") {
       showDeleteModal(record.id);
     }
   };
@@ -339,7 +346,7 @@ const EmployeeTable: any = ({
     setSelectedKey(null);
   };
 
-  const openModal = (record?: DataType, index?: any) => {
+  const openModalEditProfil = (record?: DataType, index?: any) => {
     if (record) {
       setNewName(record.name);
       setNik(record.nik);
@@ -375,7 +382,6 @@ const EmployeeTable: any = ({
       }
 
       for (const item of historiesPosition) {
-        console.log("item", item);
         const { error: historyError } = await supabase
           .from("histories_positions")
           .update({
@@ -399,6 +405,11 @@ const EmployeeTable: any = ({
       console.error("Unexpected Error:", error);
       message.error("Terjadi kesalahan saat menyimpan data");
     }
+  };
+
+  const openModalEditHistoryPositions = (record?: DataType, index?: any) => {
+    setSelectedEmployee(record);
+    setIsEditHistoryPositionModalOpen(true);
   };
 
   const handleJabatanChange = (index: number, field: keyof any, value: any) => {
@@ -580,6 +591,20 @@ const EmployeeTable: any = ({
           + Tambah Jabatan
         </Button>
       </Modal>
+
+      {/* modal edit history positions */}
+      <ModalEditHistoryPositions
+        isOpen={isEditHistoryPositionModalOpen}
+        onClose={() => setIsEditHistoryPositionModalOpen(false)}
+        initialData={historiesPosition}
+        selectedEmployee={selectedEmployee}
+        onSave={(updatedData) => {
+          setHistoriesPosition(updatedData);
+          setIsEditHistoryPositionModalOpen(false);
+        }}
+        fetchEmployees={fetchEmployees}
+        positionOptions={positionOptions}
+      />
 
       {/* modal detail data karyawan by table */}
       <Modal

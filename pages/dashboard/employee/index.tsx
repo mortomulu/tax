@@ -11,7 +11,7 @@ import {
 } from "antd";
 import { MdArrowRightAlt } from "react-icons/md";
 import Layout from "@/components/layouts/Layout";
-import EmployeeTable from "@/components/core/EmployeeTable";
+import EmployeeTable from "@/components/core/employee/EmployeeTable";
 import { supabase } from "@/utils/supabase";
 
 interface DataType {
