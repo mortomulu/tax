@@ -304,8 +304,8 @@ const EditHistoryModal = ({
         return;
       }
 
-      fetchEmployees();
       setData((prevData) => prevData.filter((item) => item.key !== key));
+      fetchHistoryPositions();
       message.success("Jabatan berhasil dihapus.");
     } catch (err) {
       console.error("Unexpected error:", err);
