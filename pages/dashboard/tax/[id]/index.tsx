@@ -7,15 +7,6 @@ import { supabase } from "@/utils/supabase";
 
 const { TabPane } = Tabs;
 
-const employeeData = {
-  id: "K001",
-  name: "Ahmad Fajri",
-  position: "Software Engineer",
-  nik: "1234567890123456",
-  npwp: "09.123.456.7-891.000",
-  ptkpStatus: "K/0",
-};
-
 const taxHistoryData = [
   {
     key: "1",
@@ -43,11 +34,6 @@ const taxHistoryData = [
   },
 ];
 
-const items = [
-  { key: "1", label: "Edit" },
-  { key: "2", label: "Hapus" },
-];
-
 const taxColumns = [
   { title: "Periode", dataIndex: "period", key: "period" },
   {
@@ -67,34 +53,8 @@ const taxColumns = [
     key: "status",
     render: () => <Badge status="success" text="Dibayar" />,
   },
-  //   {
-  //     title: "Aksi",
-  //     key: "operation",
-  //     width: "10%",
-  //     render: () => (
-  //       <Space size="middle">
-  //         <Dropdown menu={{ items }}>
-  //           <a>
-  //             <BsThreeDotsVertical />
-  //           </a>
-  //         </Dropdown>
-  //       </Space>
-  //     ),
-  //   },
 ];
 
-// const expandedRowRender = (record: any) => {
-//   return (
-//     <Table
-//       columns={[
-//         { title: "Potongan Pajak (Rp)", dataIndex: "deductions", key: "deductions", render: (value: number) => value.toLocaleString("id-ID") },
-//         { title: "Tunjangan (Rp)", dataIndex: "allowances", key: "allowances", render: (value: number) => value.toLocaleString("id-ID") },
-//       ]}
-//       dataSource={[record]}
-//       pagination={false}
-//     />
-//   );
-// };
 
 const EmployeeDetailPage: React.FC = () => {
   const { query } = useRouter();
@@ -162,7 +122,7 @@ const EmployeeDetailPage: React.FC = () => {
             </svg>
             <p className="text-gray-700">
               <span className="font-semibold text-gray-800">Nama:</span>{" "}
-              {employee?.name || "-"}
+              {employee?.name}
             </p>
           </div>
 
@@ -183,7 +143,7 @@ const EmployeeDetailPage: React.FC = () => {
             </svg>
             <p className="text-gray-700">
               <span className="font-semibold text-gray-800">Jabatan:</span>{" "}
-              {employee?.positions?.position || "-"}
+              {employee?.positions?.position}
             </p>
           </div>
 
@@ -204,7 +164,7 @@ const EmployeeDetailPage: React.FC = () => {
             </svg>
             <p className="text-gray-700">
               <span className="font-semibold text-gray-800">NIK/NPWP:</span>{" "}
-              {employee?.nik || "-"}
+              {employee?.nik}
             </p>
           </div>
 
@@ -225,7 +185,7 @@ const EmployeeDetailPage: React.FC = () => {
             </svg>
             <p className="text-gray-700">
               <span className="font-semibold text-gray-800">Status PTKP:</span>{" "}
-              {employee?.ptkp?.ptkp || "-"}
+              {employee?.ptkp?.ptkp}
             </p>
           </div>
         </div>
