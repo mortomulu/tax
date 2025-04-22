@@ -273,7 +273,7 @@ const AnotherTable: React.FC<AnotherTableProps> = ({
   const handleMenuClick = (key: string, record: any) => {
     setSelectedRecord(record);
     if (key === "1") {
-      router.push(`/dashboard/tax/${record.key}`);
+      router.push(`/dashboard/tax/${record.id}`);
     } else if (key === "2") {
       setIsEditModalVisible(true);
     } else if (key === "3") {
