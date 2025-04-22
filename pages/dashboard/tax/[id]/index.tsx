@@ -1,51 +1,23 @@
 import React, { useEffect, useState } from "react";
-import { Card, Table, Tabs, Badge, Space, Dropdown, message } from "antd";
+import { Card, Table, Tabs, Badge, message } from "antd";
 import Layout from "@/components/layouts/Layout";
-import { BsThreeDotsVertical } from "react-icons/bs";
 import { useRouter } from "next/router";
 import { supabase } from "@/utils/supabase";
 
 const { TabPane } = Tabs;
 
-const taxHistoryData = [
-  {
-    key: "1",
-    period: "Januari 2024",
-    salary: 10000000,
-    tax: 500000,
-    deductions: 250000,
-    allowances: 500000,
-  },
-  {
-    key: "2",
-    period: "Februari 2024",
-    salary: 10000000,
-    tax: 500000,
-    deductions: 250000,
-    allowances: 500000,
-  },
-  {
-    key: "3",
-    period: "Maret 2024",
-    salary: 10000000,
-    tax: 500000,
-    deductions: 250000,
-    allowances: 500000,
-  },
-];
-
 const taxColumns = [
-  { title: "Periode", dataIndex: "period", key: "period" },
+  { title: "Periode", dataIndex: "periode", key: "periode" },
   {
     title: "Gaji (Rp)",
-    dataIndex: "salary",
-    key: "salary",
+    dataIndex: "thp",
+    key: "thp",
     render: (value: number) => value.toLocaleString("id-ID"),
   },
   {
     title: "Pajak (Rp)",
-    dataIndex: "tax",
-    key: "tax",
+    dataIndex: "tax_total",
+    key: "tax_total",
     render: (value: number) => value.toLocaleString("id-ID"),
   },
   {
@@ -55,12 +27,27 @@ const taxColumns = [
   },
 ];
 
+const monthNames = [
+  "Januari",
+  "Februari",
+  "Maret",
+  "April",
+  "Mei",
+  "Juni",
+  "Juli",
+  "Agustus",
+  "September",
+  "Oktober",
+  "November",
+  "Desember",
+];
 
 const EmployeeDetailPage: React.FC = () => {
   const { query } = useRouter();
   const { id } = query;
 
   const [employee, setEmployee] = useState<any>();
+  const [taxArchieve, setTaxArchieve] = useState<any>();
 
   const fetchEmployee = async () => {
     if (!id) return;
@@ -85,13 +72,48 @@ const EmployeeDetailPage: React.FC = () => {
       return null;
     }
 
-    console.log("data", data);
     setEmployee(data);
     return data;
   };
 
+  const fetchTaxArchieve = async () => {
+    if (!id) return;
+
+    const { data, error } = await supabase
+      .from("monthly_tax_archive")
+      .select(
+        `
+        year,
+        month,
+        thp,
+        tax_total
+      `
+      )
+      .eq("idemployee", id);
+
+    if (error) {
+      message.error("Gagal mengambil archive tax karyawan");
+      console.error("Gagal mengambil archive tax karyawan:", error.message);
+      return null;
+    }
+
+    const formatted = data.map((item) => {
+      const monthIndex = parseInt(item.month, 10) - 1;
+      const monthName = monthNames[monthIndex] || item.month;
+
+      return {
+        periode: `${monthName} ${item.year}`,
+        thp: item.thp,
+        tax_total: item.tax_total,
+      };
+    });
+
+    setTaxArchieve(formatted);
+  };
+
   useEffect(() => {
     fetchEmployee();
+    fetchTaxArchieve();
   }, []);
 
   return (
@@ -195,7 +217,7 @@ const EmployeeDetailPage: React.FC = () => {
       <Tabs defaultActiveKey="1">
         <TabPane tab="Riwayat Pajak" key="1">
           <Table
-            dataSource={taxHistoryData}
+            dataSource={taxArchieve}
             columns={taxColumns}
             pagination={{ pageSize: 5 }}
           />
