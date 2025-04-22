@@ -1,4 +1,29 @@
-export const calculateGajiBruto = (gajiNeto: number): number => {
+export const calculateNettoSalary = (
+  thp: number,
+  positionAllowance: number,
+  incentive: number,
+  overtimeAllowance: number,
+  jkk: number,
+  jkm: number,
+  bpjs: number,
+  bonus: number,
+  thr: number
+): number => {
+  const additions =
+    (positionAllowance || 0) +
+    (incentive || 0) +
+    (overtimeAllowance || 0) +
+    (bonus || 0) +
+    (thr || 0);
+
+  const deductions = (jkk || 0) + (jkm || 0) + (bpjs || 0);
+
+  const nettoSalary = (thp || 0) + additions - deductions;
+
+  return nettoSalary;
+};
+
+export const calculateBrutoSalary = (gajiNeto: number): number => {
   return gajiNeto / 0.95;
 };
 

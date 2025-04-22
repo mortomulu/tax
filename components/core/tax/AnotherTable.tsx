@@ -9,12 +9,13 @@ import { formatRupiah } from "@/utils/currency";
 import { useRouter } from "next/router";
 
 interface DataType {
-  key: string;
+  id: string;
   name: string;
+  position: string;
   ptkp: string;
-  gajiPokok: number;
-  gajiBruto: number;
-  gajiNeto: number;
+  thp: number;
+  nettoSalary: number;
+  brutoSalary: number;
   monthlyTax: number;
 }
 
@@ -154,8 +155,8 @@ const AnotherTable: React.FC<AnotherTableProps> = ({ data }) => {
     },
     {
       title: "Jabatan",
-      dataIndex: "jabatan",
-      key: "jabatan",
+      dataIndex: "position",
+      key: "position",
       width: "20%",
     },
     {
@@ -189,18 +190,18 @@ const AnotherTable: React.FC<AnotherTableProps> = ({ data }) => {
     },
     {
       title: "Gaji Bersih",
-      dataIndex: "gajiNeto",
-      key: "gajiNeto",
+      dataIndex: "nettoSalary",
+      key: "nettoSalary",
       width: "15%",
-      sorter: (a, b) => a.gajiNeto - b.gajiNeto,
+      sorter: (a, b) => a.nettoSalary - b.nettoSalary,
       render: (price: number) => <span>{formatRupiah(price)}</span>,
     },
     {
       title: "Gaji Bruto",
-      dataIndex: "gajiBruto",
-      key: "gajiBruto",
+      dataIndex: "brutoSalary",
+      key: "brutoSalary",
       width: "15%",
-      sorter: (a, b) => a.gajiBruto - b.gajiBruto,
+      sorter: (a, b) => a.brutoSalary - b.brutoSalary,
       render: (price: number) => <span>{formatRupiah(price)}</span>,
     },
     {

@@ -1,172 +1,204 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Layout from "@/components/layouts/Layout";
-import AnotherTable from "@/components/core/AnotherTable";
-import { Button, Modal, Input, Select } from "antd";
-import { calculateGajiBruto, calculateTax } from "@/helpers/taxCalc";
+import AnotherTable from "@/components/core/tax/AnotherTable";
+import { Button, Modal, Input, Select, message } from "antd";
+import {
+  calculateNettoSalary,
+  calculateBrutoSalary,
+  calculateTax,
+} from "@/helpers/taxCalc";
+import { supabase } from "@/utils/supabase";
 
 interface DataType {
-  key: string;
+  id: string;
   name: string;
-  jabatan: string;
+  position: string;
   ptkp: string;
-  gajiPokok: number;
-  gajiBruto: number;
-  gajiNeto: number;
+  thp: number;
+  nettoSalary: number;
+  brutoSalary: number;
   monthlyTax: number;
 }
 
-const karyawanOptions = [
-  "Sumarmo",
-  "Edi Wahyono",
-  "Dimas Maulana Walidayni",
-  "Priyo Adi Prayogo",
-  "Andika Adnan Husaini",
-];
-
 export default function List() {
-  const [data, setData] = useState<DataType[]>([
-    {
-      key: "1",
-      name: "Sumarmo",
-      jabatan: "Karyawan",
-      ptkp: "K/2",
-      gajiPokok: 4100000,
-      gajiBruto: 4100000,
-      gajiNeto: 4100000,
-      monthlyTax: 0,
-    },
-    {
-      key: "2",
-      name: "Edi Wahyono",
-      jabatan: "Karyawan",
-      ptkp: "K/2",
-      gajiPokok: 3600000,
-      gajiBruto: 3600000,
-      gajiNeto: 3600000,
-      monthlyTax: 0,
-    },
-    {
-      key: "3",
-      name: "Dimas Maulana Walidayni",
-      jabatan: "Karyawan",
-      ptkp: "TK/0",
-      gajiPokok: 1700000,
-      gajiBruto: 1700000,
-      gajiNeto: 1700000,
-      monthlyTax: 0,
-    },
-    {
-      key: "4",
-      name: "Priyo Adi Prayogo",
-      jabatan: "Karyawan",
-      ptkp: "TK/0",
-      gajiPokok: 1560000,
-      gajiBruto: 1560000,
-      gajiNeto: 1560000,
-      monthlyTax: 0,
-    },
-    {
-      key: "5",
-      name: "Andika Adnan Husaini",
-      jabatan: "Karyawan",
-      ptkp: "TK/0",
-      gajiPokok: 1600000,
-      gajiBruto: 1600000,
-      gajiNeto: 1600000,
-      monthlyTax: 0,
-    },
-    {
-      key: "6",
-      name: "Puji Suryanto",
-      jabatan: "Karyawan",
-      ptkp: "TK/0",
-      gajiPokok: 1447000,
-      gajiBruto: 1447000,
-      gajiNeto: 1447000,
-      monthlyTax: 0,
-    },
-    {
-      key: "7",
-      name: "Abdullah Wafi ",
-      jabatan: "Karyawan",
-      ptkp: "K/2",
-      gajiPokok: 1447000,
-      gajiBruto: 1447000,
-      gajiNeto: 1447000,
-      monthlyTax: 0,
-    },
-    {
-      key: "8",
-      name: "Sri Pujo Adi",
-      jabatan: "Karyawan",
-      ptkp: "TK/0",
-      gajiPokok: 1447000,
-      gajiBruto: 1447000,
-      gajiNeto: 1447000,
-      monthlyTax: 0,
-    },
-    {
-      key: "9",
-      name: "Khairus saleh,SP",
-      jabatan: "Karyawan",
-      ptkp: "K/0",
-      gajiPokok: 1447000,
-      gajiBruto: 1447000,
-      gajiNeto: 1447000,
-      monthlyTax: 0,
-    },
-    {
-      key: "10",
-      name: "Dandi kurnia Putra",
-      jabatan: "Karyawan",
-      ptkp: "TK/0",
-      gajiPokok: 1447000,
-      gajiBruto: 1447000,
-      gajiNeto: 1447000,
-      monthlyTax: 0,
-    },
-  ]);
+  const [data, setData] = useState<DataType[]>([]);
+
+  const [employeeOptions, setEmployeeOptions] = useState<any>();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const [idName, setIdName] = useState<any>();
   const [newName, setNewName] = useState("");
-  const [jabatan, setJabatan] = useState("");
-  const [newPtkp, setNewPtkp] = useState("");
-  const [newGajiPokok, setNewGajiPokok] = useState("");
-  const [positionAllowance, setPositionAllowance] = useState("");
-  const [incentive, setIncentive] = useState("");
-  const [overtimeAllowance, setOvertimeAllowance] = useState("");
-  const [jkk, setJkk] = useState("");
-  const [jkm, setJkm] = useState("");
-  const [bpjs, setBpjs] = useState("");
-  const [bonus, setBonus] = useState("");
+  const [idPosition, setIdPosition] = useState("");
+  const [newGajiPokok, setNewGajiPokok] = useState<any>();
+  const [positionAllowance, setPositionAllowance] = useState<any>("");
+  const [incentive, setIncentive] = useState<any>();
+  const [overtimeAllowance, setOvertimeAllowance] = useState<any>("");
+  const [jkk, setJkk] = useState<any>("");
+  const [jkm, setJkm] = useState<any>("");
+  const [bpjs, setBpjs] = useState<any>("");
+  const [bonus, setBonus] = useState<any>("");
+  const [thr, setThr] = useState<any>("");
   const [etc, setEtc] = useState("");
-  const [thr, setThr] = useState("");
 
-  const handleAdd = () => {
-    if (newName && newPtkp && newGajiPokok) {
-      const brutoSalary = calculateGajiBruto(parseFloat(newGajiPokok));
-      const yearlyBrutoSalary = brutoSalary * 12;
+  const [ptkp, setPtkp] = useState<any>();
 
-      const monthlyTax = calculateTax(yearlyBrutoSalary, newPtkp);
+  const fetchEmployees = async () => {
+    const { data, error } = await supabase.from("employees").select(`
+      id,
+      name,
+      nik,
+      ptkp (
+        id,
+        ptkp
+      ),
+      positions (
+          id,
+          position,
+          incentive
+        )
+      )
+    `);
 
-      setData([
-        ...data,
-        {
-          key: (data.length + 1).toString(),
-          name: newName,
-          jabatan: jabatan,
-          ptkp: newPtkp,
-          gajiPokok: parseFloat(newGajiPokok),
-          gajiBruto: brutoSalary,
-          gajiNeto: parseFloat(newGajiPokok),
-          monthlyTax: monthlyTax,
-        },
-      ]);
+    if (error) {
+      message.error("Gagal mengambil opsi pegawai");
+      console.error("Gagal mengambil employee options", error);
+      return;
+    }
 
-      setNewName("");
-      setNewPtkp("");
-      setNewGajiPokok("");
+    const formatted = data.map((item: any) => ({
+      id: item.id,
+      name: item.name,
+      nik: item.nik,
+      ptkp: item.ptkp?.ptkp || "-",
+      idPosition: item?.positions?.id,
+      positionNow: item?.positions?.position || null,
+      positionAllowance: item?.positions?.incentive,
+    }));
+
+    setEmployeeOptions(formatted);
+  };
+
+  const fetchAllTaxData = async () => {
+    const { data, error } = await supabase.from("tax").select(`
+    *,
+    positions: idposition (
+      id,
+      position
+    ),
+    employees: idemployee (
+      id,
+      name,
+      nik,
+      ptkp (
+        id,
+        ptkp
+      )
+    )
+  `);
+
+    if (error) {
+      console.error("Error fetching tax data:", error);
+      return [];
+    }
+
+    const formatted = data.map((item: any) => ({
+      id: item?.id,
+      name: item?.employees?.name,
+      position: item?.positions?.position,
+      ptkp: item?.employees?.ptkp?.ptkp,
+      thp: item?.thp,
+      nettoSalary: item?.nettosalary,
+      brutoSalary: item?.brutosalary,
+      monthlyTax: item?.monthlytax,
+    }));
+
+    setData(formatted);
+  };
+
+  useEffect(() => {
+    fetchEmployees();
+    fetchAllTaxData();
+  }, []);
+
+  useEffect(() => {
+    const selectedEmployee = employeeOptions?.find(
+      (emp: any) => emp.id === idName
+    );
+
+    if (selectedEmployee) {
+      setPositionAllowance(selectedEmployee.positionAllowance || 0);
+      setIdPosition(selectedEmployee.idPosition);
+      setPtkp(selectedEmployee.ptkp);
+    } else {
+      setPositionAllowance(0);
+    }
+  }, [idName]);
+
+  const resetForm = () => {
+    setNewName("");
+    setIdName("");
+    setNewGajiPokok("");
+    setPositionAllowance("");
+    setIncentive("");
+    setOvertimeAllowance("");
+    setJkk("");
+    setJkm("");
+    setBpjs("");
+    setBonus("");
+    setThr("");
+    setBonus("");
+  };
+
+  const handleAddTaxData = async () => {
+    if (!idName || !newGajiPokok) {
+      message.error("Nama dan Gaji Pokok wajib diisi.");
+      return;
+    }
+
+    const nettoSalary = calculateNettoSalary(
+      Number(newGajiPokok),
+      Number(positionAllowance),
+      Number(incentive),
+      Number(overtimeAllowance),
+      Number(jkk),
+      Number(jkm),
+      Number(bpjs),
+      Number(bonus),
+      Number(thr)
+    );
+
+    const brutoSalary = Math.round(calculateBrutoSalary(nettoSalary));
+
+    const monthlyTax = Math.round(calculateTax(brutoSalary * 12, ptkp));
+
+    const { error } = await supabase.from("tax").insert([
+      {
+        idemployee: idName,
+        idposition: idPosition,
+        thp: newGajiPokok,
+        incentive: incentive || positionAllowance || 0,
+        overtime_allowance: overtimeAllowance || 0,
+        jkk: jkk || 0,
+        jkm: jkm || 0,
+        bpjs: bpjs || 0,
+        bonus: bonus || 0,
+        thr: thr || 0,
+        nettosalary: nettoSalary || 0,
+        brutosalary: brutoSalary,
+        monthlytax: monthlyTax,
+      },
+    ]);
+
+    if (error) {
+      console.error("Gagal menambahkan data:", error.message);
+      message.error("Gagal menambahkan data pajak.");
+    } else {
+      fetchEmployees();
+      fetchAllTaxData();
+      message.success("Data berhasil ditambahkan!");
       setIsModalOpen(false);
+      resetForm();
     }
   };
 
@@ -200,7 +232,7 @@ export default function List() {
           >
             Cancel
           </Button>,
-          <Button key="add" type="primary" onClick={handleAdd}>
+          <Button key="add" type="primary" onClick={handleAddTaxData}>
             Add
           </Button>,
         ]}
@@ -208,13 +240,13 @@ export default function List() {
         <Select
           placeholder="Pilih Karyawan"
           value={newName || undefined}
-          onChange={(value) => setNewName(value)}
+          onChange={(value) => setIdName(value)}
           className="mb-3"
           style={{ width: "100%" }}
         >
-          {karyawanOptions.map((option) => (
-            <Select.Option key={option} value={option}>
-              {option}
+          {employeeOptions?.map((option: any) => (
+            <Select.Option key={option.id} value={option.id}>
+              {option.name}
             </Select.Option>
           ))}
         </Select>
@@ -229,9 +261,10 @@ export default function List() {
         <Input
           placeholder="Masukkan Position Allowance"
           type="number"
-          value={positionAllowance}
+          value={idName ? positionAllowance : ""}
           onChange={(e) => setPositionAllowance(e.target.value)}
           className="mb-3"
+          disabled
         />
         <Input
           placeholder="Masukkan Incentive"
