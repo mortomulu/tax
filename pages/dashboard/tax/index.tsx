@@ -211,7 +211,7 @@ export default function List() {
             Add Data
           </Button>
         </div>
-        <AnotherTable data={data} />
+        <AnotherTable data={data} fetchAllTaxData={fetchAllTaxData}/>
       </div>
 
       {/* Modal Add Data */}

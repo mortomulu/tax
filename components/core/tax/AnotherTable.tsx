@@ -1,12 +1,21 @@
 import React, { useRef, useState } from "react";
 import { SearchOutlined } from "@ant-design/icons/lib";
 import type { InputRef, TableColumnsType, TableColumnType } from "antd/lib";
-import { Button, Dropdown, Input, Space, Table } from "antd/lib";
+import {
+  Button,
+  Dropdown,
+  Input,
+  message,
+  Modal,
+  Space,
+  Table,
+} from "antd/lib";
 import type { FilterDropdownProps } from "antd/es/table/interface";
 import Highlighter from "react-highlight-words";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import { formatRupiah } from "@/utils/currency";
 import { useRouter } from "next/router";
+import { supabase } from "@/utils/supabase";
 
 interface DataType {
   id: string;
@@ -29,13 +38,22 @@ const items = [
 
 interface AnotherTableProps {
   data: DataType[];
+  fetchAllTaxData: () => void;
 }
 
-const AnotherTable: React.FC<AnotherTableProps> = ({ data }) => {
+const AnotherTable: React.FC<AnotherTableProps> = ({
+  data,
+  fetchAllTaxData,
+}) => {
+  const router = useRouter();
+
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
   const searchInput = useRef<InputRef>(null);
-  const router = useRouter();
+
+  const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
+  const [isEditModalVisible, setIsEditModalVisible] = useState(false);
+  const [selectedRecord, setSelectedRecord] = useState<any>(null);
 
   const handleSearch = (
     selectedKeys: string[],
@@ -236,21 +254,73 @@ const AnotherTable: React.FC<AnotherTableProps> = ({ data }) => {
   ];
 
   const handleMenuClick = (key: string, record: any) => {
+    setSelectedRecord(record);
     if (key === "1") {
       router.push(`/dashboard/tax/${record.key}`);
     } else if (key === "2") {
-      router.push(`/dashboard/tax/${record.key}`);
+      setIsEditModalVisible(true);
     } else if (key === "3") {
-      console.log("Delete:", record.key);
+      setIsDeleteModalVisible(true);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    const { error } = await supabase.from("tax").delete().eq("id", id);
+
+    if (error) {
+      console.error("Error deleting data:", error);
+      message.error("Gagal menghapus data");
+    } else {
+      message.success("Data berhasil dihapus");
+      fetchAllTaxData();
     }
   };
 
   return (
-    <Table<DataType>
-      columns={columns}
-      dataSource={data}
-      pagination={{ pageSize: 5 }}
-    />
+    <>
+      <Table<DataType>
+        rowKey="id"
+        columns={columns}
+        dataSource={data}
+        pagination={{ pageSize: 5 }}
+      />
+
+      {/* modal edit */}
+      <Modal
+        title="Edit Data"
+        open={isEditModalVisible}
+        onOk={() => {
+          setIsEditModalVisible(false);
+        }}
+        onCancel={() => setIsEditModalVisible(false)}
+        okText="Simpan"
+      >
+        <Input
+          value={selectedRecord?.name}
+          onChange={(e) =>
+            setSelectedRecord({ ...selectedRecord, name: e.target.value })
+          }
+          placeholder="Nama Karyawan"
+        />
+      </Modal>
+
+      {/* modal delete */}
+      <Modal
+        title="Hapus Data"
+        open={isDeleteModalVisible}
+        onOk={() => {
+          handleDelete(selectedRecord?.id);
+          setIsDeleteModalVisible(false);
+        }}
+        onCancel={() => setIsDeleteModalVisible(false)}
+        okText="Hapus"
+        okButtonProps={{ danger: true }}
+      >
+        <p>
+          Yakin ingin menghapus data <strong>{selectedRecord?.name}</strong>?
+        </p>
+      </Modal>
+    </>
   );
 };
 
