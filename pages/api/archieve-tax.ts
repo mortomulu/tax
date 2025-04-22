@@ -9,7 +9,7 @@ export default async function handler(
   const year = today.getFullYear();
   const month = today.getMonth() + 1;
 
-  if (today.getDate() !== 20) {
+  if (today.getDate() !== 23) {
     return res
       .status(400)
       .json({ message: "Hari ini bukan tanggal 20, tidak ada arsip." });
