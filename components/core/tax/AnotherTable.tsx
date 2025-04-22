@@ -7,6 +7,7 @@ import {
   Input,
   message,
   Modal,
+  Select,
   Space,
   Table,
 } from "antd/lib";
@@ -16,13 +17,27 @@ import { BsThreeDotsVertical } from "react-icons/bs";
 import { formatRupiah } from "@/utils/currency";
 import { useRouter } from "next/router";
 import { supabase } from "@/utils/supabase";
+import {
+  calculateBrutoSalary,
+  calculateNettoSalary,
+  calculateTax,
+} from "@/helpers/taxCalc";
 
 interface DataType {
   id: string;
+  idName: string;
   name: string;
   position: string;
+  positionAllowance: number;
   ptkp: string;
   thp: number;
+  incentive: number;
+  overtimeAllowance: number;
+  jkk: number;
+  jkm: number;
+  bpjs: number;
+  bonus: number;
+  thr: number;
   nettoSalary: number;
   brutoSalary: number;
   monthlyTax: number;
@@ -39,11 +54,13 @@ const items = [
 interface AnotherTableProps {
   data: DataType[];
   fetchAllTaxData: () => void;
+  employeeOptions: any;
 }
 
 const AnotherTable: React.FC<AnotherTableProps> = ({
   data,
   fetchAllTaxData,
+  employeeOptions,
 }) => {
   const router = useRouter();
 
@@ -276,6 +293,55 @@ const AnotherTable: React.FC<AnotherTableProps> = ({
     }
   };
 
+  const handleEditTax = async () => {
+    const nettoSalary = calculateNettoSalary(
+      Number(selectedRecord?.newGajiPokok),
+      Number(selectedRecord?.positionAllowance),
+      Number(selectedRecord?.incentive),
+      Number(selectedRecord?.overtimeAllowance),
+      Number(selectedRecord?.jkk),
+      Number(selectedRecord?.jkm),
+      Number(selectedRecord?.bpjs),
+      Number(selectedRecord?.bonus),
+      Number(selectedRecord?.thr)
+    );
+
+    const brutoSalary = Math.round(calculateBrutoSalary(nettoSalary));
+
+    const monthlyTax = Math.round(
+      calculateTax(brutoSalary * 12, selectedRecord.ptkp)
+    );
+
+    const { data, error } = await supabase
+      .from("tax")
+      .update({
+        idemployee: selectedRecord?.idName,
+        thp: Number(selectedRecord?.thp),
+        incentive: Number(selectedRecord?.incentive),
+        overtime_allowance: Number(selectedRecord?.overtimeAllowance),
+        jkk: Number(selectedRecord?.jkk),
+        jkm: Number(selectedRecord?.jkm),
+        bpjs: Number(selectedRecord?.bpjs),
+        bonus: Number(selectedRecord?.bonus),
+        thr: Number(selectedRecord?.thr),
+        nettosalary: Number(nettoSalary),
+        brutosalary: Number(brutoSalary),
+        monthlytax: Number(monthlyTax),
+      })
+      .eq("id", selectedRecord?.id);
+
+    if (error) {
+      message.error("Gagal update data pajak");
+      console.error("Gagal update data pajak:", error.message);
+      return false;
+    } else {
+      fetchAllTaxData();
+      setSelectedRecord(null);
+      message.success("Berhasil update data pajak");
+      return true;
+    }
+  };
+
   return (
     <>
       <Table<DataType>
@@ -291,16 +357,107 @@ const AnotherTable: React.FC<AnotherTableProps> = ({
         open={isEditModalVisible}
         onOk={() => {
           setIsEditModalVisible(false);
+          handleEditTax();
         }}
-        onCancel={() => setIsEditModalVisible(false)}
+        onCancel={() => {
+          setSelectedRecord(null);
+          setIsEditModalVisible(false);
+        }}
         okText="Simpan"
       >
-        <Input
-          value={selectedRecord?.name}
-          onChange={(e) =>
-            setSelectedRecord({ ...selectedRecord, name: e.target.value })
+        <Select
+          placeholder="Pilih Karyawan"
+          value={selectedRecord?.idName || undefined}
+          onChange={(value) =>
+            setSelectedRecord({ ...selectedRecord, idName: value })
           }
-          placeholder="Nama Karyawan"
+          className="mb-3"
+          style={{ width: "100%" }}
+        >
+          {employeeOptions?.map((option: any) => (
+            <Select.Option key={option.id} value={option.id}>
+              {option.name}
+            </Select.Option>
+          ))}
+        </Select>
+        <Input
+          value={selectedRecord?.thp}
+          onChange={(e) =>
+            setSelectedRecord({ ...selectedRecord, thp: e.target.value })
+          }
+          placeholder="Masukkan THP"
+          className="mb-3"
+        />
+        <Input
+          value={selectedRecord?.positionAllowance}
+          onChange={(e) =>
+            setSelectedRecord({
+              ...selectedRecord,
+              positionAllowance: e.target.value,
+            })
+          }
+          placeholder="Masukkan Position Allowance"
+          className="mb-3"
+          disabled
+        />
+        <Input
+          value={selectedRecord?.incentive}
+          onChange={(e) =>
+            setSelectedRecord({ ...selectedRecord, incentive: e.target.value })
+          }
+          placeholder="Masukkan Incentive"
+          className="mb-3"
+        />
+        <Input
+          value={selectedRecord?.overtimeAllowance}
+          onChange={(e) =>
+            setSelectedRecord({
+              ...selectedRecord,
+              overtimeAllowance: e.target.value,
+            })
+          }
+          placeholder="Masukkan Overtime Allowance"
+          className="mb-3"
+        />
+        <Input
+          value={selectedRecord?.jkk}
+          onChange={(e) =>
+            setSelectedRecord({ ...selectedRecord, jkk: e.target.value })
+          }
+          placeholder="Masukkan Employement Injury Security/JKK"
+          className="mb-3"
+        />
+        <Input
+          value={selectedRecord?.jkm}
+          onChange={(e) =>
+            setSelectedRecord({ ...selectedRecord, jkm: e.target.value })
+          }
+          placeholder="Masukkan Death Security/JKM"
+          className="mb-3"
+        />
+        <Input
+          value={selectedRecord?.bpjs}
+          onChange={(e) =>
+            setSelectedRecord({ ...selectedRecord, bpjs: e.target.value })
+          }
+          placeholder="Masukkan BPJS Health/Jaminan Kesehatan"
+          className="mb-3"
+        />
+        <Input
+          value={selectedRecord?.bonus}
+          onChange={(e) =>
+            setSelectedRecord({ ...selectedRecord, bonus: e.target.value })
+          }
+          placeholder="Masukkan Bonus"
+          className="mb-3"
+        />
+        <Input
+          value={selectedRecord?.thr}
+          onChange={(e) =>
+            setSelectedRecord({ ...selectedRecord, thr: e.target.value })
+          }
+          placeholder="Masukkan Religius Holiday Allowance/THR"
+          className="mb-3"
         />
       </Modal>
 

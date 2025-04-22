@@ -11,10 +11,19 @@ import { supabase } from "@/utils/supabase";
 
 interface DataType {
   id: string;
+  idName: string;
   name: string;
   position: string;
+  positionAllowance: number;
   ptkp: string;
   thp: number;
+  incentive: number;
+  overtimeAllowance: number;
+  jkk: number;
+  jkm: number;
+  bpjs: number;
+  bonus: number;
+  thr: number;
   nettoSalary: number;
   brutoSalary: number;
   monthlyTax: number;
@@ -84,7 +93,8 @@ export default function List() {
     *,
     positions: idposition (
       id,
-      position
+      position, 
+      incentive
     ),
     employees: idemployee (
       id,
@@ -104,10 +114,19 @@ export default function List() {
 
     const formatted = data.map((item: any) => ({
       id: item?.id,
+      idName: item?.employees?.id,
       name: item?.employees?.name,
       position: item?.positions?.position,
+      positionAllowance: item?.positions?.incentive,
       ptkp: item?.employees?.ptkp?.ptkp,
       thp: item?.thp,
+      incentive: item?.incentive,
+      overtimeAllowance: item?.overtime_allowance,
+      jkk: item?.jkk,
+      jkm: item?.jkm,
+      bpjs: item?.bpjs,
+      bonus: item?.bonus,
+      thr: item?.thr,
       nettoSalary: item?.nettosalary,
       brutoSalary: item?.brutosalary,
       monthlyTax: item?.monthlytax,
@@ -211,7 +230,7 @@ export default function List() {
             Add Data
           </Button>
         </div>
-        <AnotherTable data={data} fetchAllTaxData={fetchAllTaxData}/>
+        <AnotherTable data={data} fetchAllTaxData={fetchAllTaxData} employeeOptions={employeeOptions}/>
       </div>
 
       {/* Modal Add Data */}
