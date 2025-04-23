@@ -101,6 +101,8 @@ const exportToPDF = (data: any[], fileName: string) => {
 const ReportPage: React.FC = () => {
   const router = useRouter();
 
+  const [expandedRowKeys, setExpandedRowKeys] = useState<React.Key[]>([]);
+
   const [summaryMonthlyTaxes, setSummaryMonthlyTaxes] = useState<SummaryType[]>(
     []
   );
@@ -223,13 +225,13 @@ const ReportPage: React.FC = () => {
   ];
 
   const expandedRowRender = (record: { tahunPajak: string }) => {
-    const filteredMonthlyData = monthlyTaxData.filter(
-      (item) => item.tahunPajak === record.tahunPajak
+    const filteredMonthlyData = summaryMonthlyTaxes.filter(
+      (item) => item.year === record.tahunPajak
     );
     return (
       <Table
         columns={monthlyColumns}
-        dataSource={summaryMonthlyTaxes}
+        dataSource={filteredMonthlyData}
         pagination={false}
       />
     );
@@ -254,7 +256,15 @@ const ReportPage: React.FC = () => {
           <Table
             dataSource={summaryYearlyTaxes}
             columns={yearlyColumns}
-            expandable={{ expandedRowRender }}
+            expandable={{
+              expandedRowRender,
+              expandedRowKeys,
+              onExpand: (expanded, record) => {
+                setExpandedRowKeys(expanded ? [record.tahunPajak] : []);
+              },
+              rowExpandable: () => true,
+            }}
+            rowKey="tahunPajak"
             pagination={{ pageSize: 5 }}
           />
         </TabPane>
