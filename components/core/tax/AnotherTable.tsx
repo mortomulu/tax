@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { SearchOutlined } from "@ant-design/icons/lib";
 import type { InputRef, TableColumnsType, TableColumnType } from "antd/lib";
 import {
@@ -72,6 +72,12 @@ const AnotherTable: React.FC<AnotherTableProps> = ({
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState<any>(null);
 
+  const [filteredData, setFilteredData] = useState<any>();
+
+  useEffect(() => {
+    setFilteredData(data);
+  }, [data]);
+
   const handleSearch = (
     selectedKeys: string[],
     confirm: FilterDropdownProps["confirm"],
@@ -80,6 +86,16 @@ const AnotherTable: React.FC<AnotherTableProps> = ({
     confirm();
     setSearchText(selectedKeys[0]);
     setSearchedColumn(dataIndex);
+  };
+
+  const handleGlobalSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.toLowerCase();
+    setSearchText(value);
+
+    const filtered = data.filter((item: any) =>
+      item.name.toLowerCase().includes(value)
+    );
+    setFilteredData(filtered);
   };
 
   const handleReset = (clearFilters: () => void) => {
@@ -343,11 +359,17 @@ const AnotherTable: React.FC<AnotherTableProps> = ({
   };
 
   return (
-    <>
+    <div className="mt-4">
+      <Input
+        placeholder="Cari berdasarkan Nama"
+        value={searchText}
+        onChange={handleGlobalSearch}
+        style={{ marginBottom: 16, width: 300 }}
+      />
       <Table<DataType>
         rowKey="id"
         columns={columns}
-        dataSource={data}
+        dataSource={filteredData}
         pagination={{ pageSize: 5 }}
       />
 
@@ -477,7 +499,7 @@ const AnotherTable: React.FC<AnotherTableProps> = ({
           Yakin ingin menghapus data <strong>{selectedRecord?.name}</strong>?
         </p>
       </Modal>
-    </>
+    </div>
   );
 };
 
