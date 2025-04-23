@@ -1,5 +1,5 @@
-import React from "react";
-import { Badge, Dropdown, Space, Table, Tabs } from "antd";
+import React, { useEffect, useState } from "react";
+import { Badge, Dropdown, message, Space, Table, Tabs } from "antd";
 import Layout from "@/components/layouts/Layout";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import { useRouter } from "next/router";
@@ -7,6 +7,16 @@ import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import { supabase } from "@/utils/supabase";
+
+interface SummaryType {
+  id: string;
+  year: string;
+  month: string;
+  total_tax: number;
+  total_thp: number;
+  created_at: string;
+}
 
 const { TabPane } = Tabs;
 
@@ -67,7 +77,9 @@ const exportToExcel = (data: any[], fileName: string) => {
   XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
 
   const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
-  const excelFile = new Blob([excelBuffer], { type: "application/octet-stream" });
+  const excelFile = new Blob([excelBuffer], {
+    type: "application/octet-stream",
+  });
 
   saveAs(excelFile, `${fileName}.xlsx`);
 };
@@ -89,9 +101,42 @@ const exportToPDF = (data: any[], fileName: string) => {
 const ReportPage: React.FC = () => {
   const router = useRouter();
 
+  const [summaryMonthlyTaxes, setSummaryMonthlyTaxes] = useState<SummaryType[]>([]);
+
+  const fetchSummary = async () => {
+    const { data, error } = await supabase
+      .from("summary_monthly_tax")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      message.error("Gagal mengambil data ringkasan pajak bulanan");
+      console.error(error);
+    } else {
+      const formattedData = data.map((item) => {
+        const monthName = new Date(
+          2000,
+          parseInt(item.month) - 1
+        ).toLocaleString("id-ID", {
+          month: "long",
+        });
+        return {
+          ...item,
+          periode: `${monthName} ${item.year}`,
+        };
+      });
+
+      setSummaryMonthlyTaxes(formattedData);
+    }
+  };
+
+  useEffect(() => {
+    fetchSummary();
+  }, []);
+
   const handleMenuClick = ({ key }: { key: string }, record: any) => {
     if (key === "1") {
-      exportToPDF([record], "Data_Karyawan"); 
+      exportToPDF([record], "Data_Karyawan");
     } else if (key === "2") {
       exportToExcel([record], "Data_Karyawan");
     } else if (key === "3") {
@@ -102,20 +147,19 @@ const ReportPage: React.FC = () => {
       console.log("Delete:", record.key);
     }
   };
-  
 
   const monthlyColumns = [
-    { title: "Priode Pajak", dataIndex: "priodePajak", key: "priodePajak" },
-    { title: "Tahun Pajak", dataIndex: "tahunPajak", key: "tahunPajak" },
+    { title: "Priode Pajak", dataIndex: "periode", key: "periode" },
+    { title: "Tahun Pajak", dataIndex: "year", key: "year" },
     {
       title: "Total Karyawan",
-      dataIndex: "totalKaryawan",
-      key: "totalKaryawan",
+      dataIndex: "total_employees",
+      key: "total_employees",
     },
     {
       title: "Total Pajak Dibayar",
-      dataIndex: "totalMonthlyTax",
-      key: "totalMonthlyTax",
+      dataIndex: "total_monthly_tax",
+      key: "total_monthly_tax",
       render: (value: number) => `Rp ${value.toLocaleString("id-ID")}`,
     },
     {
@@ -172,7 +216,7 @@ const ReportPage: React.FC = () => {
         {/* Pajak Bulanan */}
         <TabPane tab="Pajak Bulanan" key="1">
           <Table
-            dataSource={monthlyTaxData}
+            dataSource={summaryMonthlyTaxes}
             columns={monthlyColumns}
             pagination={{ pageSize: 5 }}
           />
