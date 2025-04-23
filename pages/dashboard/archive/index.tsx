@@ -101,7 +101,32 @@ const exportToPDF = (data: any[], fileName: string) => {
 const ReportPage: React.FC = () => {
   const router = useRouter();
 
-  const [summaryMonthlyTaxes, setSummaryMonthlyTaxes] = useState<SummaryType[]>([]);
+  const [summaryMonthlyTaxes, setSummaryMonthlyTaxes] = useState<SummaryType[]>(
+    []
+  );
+  const [summaryYearlyTaxes, setSummaryYearlyTaxes] = useState<any>();
+
+  const processYearlySummary = (monthlyData: any[]) => {
+    const yearlyMap: Record<string, number> = {};
+
+    monthlyData.forEach((item) => {
+      const year = item.year;
+      const tax = item.total_monthly_tax || 0;
+
+      if (yearlyMap[year]) {
+        yearlyMap[year] += tax;
+      } else {
+        yearlyMap[year] = tax;
+      }
+    });
+
+    const yearlySummary = Object.entries(yearlyMap).map(([year, total]) => ({
+      tahunPajak: year,
+      totalMonthlyTax: total,
+    }));
+
+    setSummaryYearlyTaxes(yearlySummary);
+  };
 
   const fetchSummary = async () => {
     const { data, error } = await supabase
@@ -123,10 +148,12 @@ const ReportPage: React.FC = () => {
         return {
           ...item,
           periode: `${monthName} ${item.year}`,
+          tahunPajak: item.year,
         };
       });
 
       setSummaryMonthlyTaxes(formattedData);
+      processYearlySummary(formattedData);
     }
   };
 
@@ -202,7 +229,7 @@ const ReportPage: React.FC = () => {
     return (
       <Table
         columns={monthlyColumns}
-        dataSource={filteredMonthlyData}
+        dataSource={summaryMonthlyTaxes}
         pagination={false}
       />
     );
@@ -225,7 +252,7 @@ const ReportPage: React.FC = () => {
         {/* Pajak Tahunan */}
         <TabPane tab="Pajak Tahunan" key="2">
           <Table
-            dataSource={yearlyTaxData}
+            dataSource={summaryYearlyTaxes}
             columns={yearlyColumns}
             expandable={{ expandedRowRender }}
             pagination={{ pageSize: 5 }}
