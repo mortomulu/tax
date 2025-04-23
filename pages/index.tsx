@@ -10,48 +10,75 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const router = useRouter();
 
+  // const handleSubmit = async (e: React.FormEvent) => {
+  //   e.preventDefault();
+
+  //   const { data: loginData, error } = await supabase.auth.signInWithPassword({
+  //     email,
+  //     password,
+  //   });
+
+  //   if (error) {
+  //     message.error("Email atau password salah!");
+  //     console.error("Login error:", error.message);
+  //   } else {
+  //     const { data: profile, error: profileError } = await supabase
+  //       .from("profiles")
+  //       .select("role")
+  //       .eq("id", loginData.user?.id)
+  //       .single();
+
+  //     if (profileError) {
+  //       message.error("Gagal ambil role user!");
+  //       return;
+  //     }
+
+  //     message.success("Login berhasil!");
+
+  //     Cookies.set("sb-access-token", loginData.session?.access_token || "", {
+  //       path: "/",
+  //     });
+  //     Cookies.set("sb-refresh-token", loginData.session?.refresh_token || "", {
+  //       path: "/",
+  //     });
+  //     Cookies.set("role", profile.role, {
+  //       path: "/",
+  //     });
+
+  //     if (profile.role === "superadmin") {
+  //       router.push("/superadmin");
+  //     } else {
+  //       router.push("/dashboard");
+  //     }
+  //   }
+  // };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    const { data: loginData, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
+  
+    const res = await fetch("/api/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email, password }),
     });
-
-    if (error) {
-      message.error("Email atau password salah!");
-      console.error("Login error:", error.message);
+  
+    if (!res.ok) {
+      message.error("Login gagal!");
+      return;
+    }
+  
+    const { role } = await res.json();
+    message.success("Login berhasil!");
+  
+    if (role === "superadmin") {
+      router.push("/superadmin");
     } else {
-      const { data: profile, error: profileError } = await supabase
-        .from("profiles")
-        .select("role")
-        .eq("id", loginData.user?.id)
-        .single();
-
-      if (profileError) {
-        message.error("Gagal ambil role user!");
-        return;
-      }
-
-      message.success("Login berhasil!");
-
-      Cookies.set("sb-access-token", loginData.session?.access_token || "", {
-        path: "/",
-      });
-      Cookies.set("sb-refresh-token", loginData.session?.refresh_token || "", {
-        path: "/",
-      });
-      Cookies.set("role", profile.role, {
-        path: "/",
-      });
-
-      if (profile.role === "superadmin") {
-        router.push("/superadmin");
-      } else {
-        router.push("/dashboard");
-      }
+      router.push("/dashboard");
     }
   };
+  
 
   return (
     <div className="flex flex-col gap-6 items-center justify-center min-h-screen bg-gray-100">

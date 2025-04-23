@@ -14,6 +14,8 @@
     "@supabase/supabase-js": "^2.39.5",
     "antd": "^5.24.3",
     "apexcharts": "^4.5.0",
+    "axios": "^1.8.4",
+    "cookie": "^1.0.2",
     "file-saver": "^2.0.5",
     "js-cookie": "^3.0.5",
     "jspdf": "^3.0.0",

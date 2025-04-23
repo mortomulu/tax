@@ -23,6 +23,7 @@ import {
 } from "@ant-design/icons";
 import { useRouter } from "next/router";
 import Cookies from "js-cookie";
+import axios from "axios";
 
 type User = {
   id: string;
@@ -156,18 +157,28 @@ export default function UserList() {
     },
   ];
 
+  // const handleLogout = async () => {
+  //   const { error } = await supabase.auth.signOut();
+
+  //   if (error) {
+  //     message.error("Gagal logout: " + error.message);
+  //   } else {
+  //     Cookies.remove("sb-access-token", { path: "/" });
+  //     Cookies.remove("sb-refresh-token", { path: "/" });
+  //     Cookies.remove("role", { path: "/" });
+
+  //     message.success("Berhasil logout!");
+  //     router.push("/");
+  //   }
+  // };
+
   const handleLogout = async () => {
-    const { error } = await supabase.auth.signOut();
-
-    if (error) {
-      message.error("Gagal logout: " + error.message);
-    } else {
-      Cookies.remove("sb-access-token", { path: "/" });
-      Cookies.remove("sb-refresh-token", { path: "/" });
-      Cookies.remove("role", { path: "/" });
-
-      message.success("Berhasil logout!");
-      router.push("/");
+    try {
+      await axios.post("/api/logout"); // panggil API logout
+      router.push("/"); // redirect ke halaman login/landing
+    } catch (err) {
+      message.error("Gagal logout")
+      console.error("Logout error:", err);
     }
   };
 
