@@ -20,55 +20,10 @@ interface SummaryType {
 
 const { TabPane } = Tabs;
 
-const monthlyTaxData = [
-  {
-    key: "1",
-    priodePajak: "Januari 2024",
-    tahunPajak: "2024",
-    totalKaryawan: 20,
-    totalMonthlyTax: 5000000,
-  },
-  {
-    key: "2",
-    priodePajak: "Februari 2024",
-    tahunPajak: "2024",
-    totalKaryawan: 20,
-    totalMonthlyTax: 5000000,
-  },
-  {
-    key: "3",
-    priodePajak: "Maret 2024",
-    tahunPajak: "2024",
-    totalKaryawan: 20,
-    totalMonthlyTax: 5000000,
-  },
-  {
-    key: "4",
-    priodePajak: "Januari 2025",
-    tahunPajak: "2025",
-    totalKaryawan: 20,
-    totalMonthlyTax: 5000000,
-  },
-  {
-    key: "5",
-    priodePajak: "Februari 2025",
-    tahunPajak: "2025",
-    totalKaryawan: 20,
-    totalMonthlyTax: 5000000,
-  },
-];
-
-const yearlyTaxData = [
-  { key: "2024", tahunPajak: "2024", totalMonthlyTax: 60000000 },
-  { key: "2025", tahunPajak: "2025", totalMonthlyTax: 60000000 },
-];
-
 const items = [
   { key: "1", label: "Export PDF" },
   { key: "2", label: "Export Excel" },
   { key: "3", label: "Detail" },
-  { key: "4", label: "Edit" },
-  { key: "5", label: "Delete" },
 ];
 
 const exportToExcel = (data: any[], fileName: string) => {
@@ -170,10 +125,6 @@ const ReportPage: React.FC = () => {
       exportToExcel([record], "Data_Karyawan");
     } else if (key === "3") {
       router.push(`/dashboard/archive/${record.key}`);
-    } else if (key === "4") {
-      router.push(`/dashboard/employee/${record.key}`);
-    } else if (key === "5") {
-      console.log("Delete:", record.key);
     }
   };
 
