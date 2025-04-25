@@ -23,8 +23,14 @@ const taxColumns = [
   },
   {
     title: "Status",
-    key: "status",
-    render: () => <Badge status="success" text="Dibayar" />,
+    key: "proofPaymentUrl",
+    dataIndex: "proofPaymentUrl",
+    render: (proofPaymentUrl: string) =>
+      proofPaymentUrl ? (
+        <Badge status="success" text="Dibayar" />
+      ) : (
+        <Badge status="default" text="Belum Dibayar" />
+      ),
   },
 ];
 
