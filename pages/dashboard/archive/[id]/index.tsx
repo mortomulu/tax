@@ -1,6 +1,9 @@
-import { useState } from "react";
-import { Card, Table, Tabs } from "antd";
+import { useEffect, useState } from "react";
+import { Card, message, Table, Tabs } from "antd";
 import Layout from "@/components/layouts/Layout";
+import { useRouter } from "next/router";
+import { supabase } from "@/utils/supabase";
+import { formatRupiah } from "@/utils/currency";
 
 interface EmployeeData {
   key: string;
@@ -10,42 +13,66 @@ interface EmployeeData {
   monthlyTax: number;
 }
 
-const employees: EmployeeData[] = [
-  {
-    key: "1",
-    name: "Sumarmo",
-    ptkp: "K/2",
-    gajiBruto: 4100000,
-    monthlyTax: 200000,
-  },
-  {
-    key: "2",
-    name: "Edi Wahyono",
-    ptkp: "K/2",
-    gajiBruto: 3600000,
-    monthlyTax: 150000,
-  },
-  {
-    key: "3",
-    name: "Dimas Maulana",
-    ptkp: "TK/0",
-    gajiBruto: 1700000,
-    monthlyTax: 50000,
-  },
-];
-
-const getTotalMonthlyTax = (data: EmployeeData[]) => {
-  return data.reduce((total, item) => total + item.monthlyTax, 0);
-};
-
 export default function MonthlyReportDetail() {
+  const router = useRouter();
+  const { id } = router.query;
+
+  const [taxSummary, setTaxSummary] = useState<any>();
+  const [employeesTax, setEmployeesTax] = useState<any>();
+
+  const fetchTaxSummary = async () => {
+    const { data, error } = await supabase
+      .from("summary_monthly_tax")
+      .select("*")
+      .eq("id", id)
+      .single();
+
+    if (error) {
+      message.error("Gagal mengambil data ringkasan pajak");
+      console.error("fetchTaxSummary error:", error);
+      return;
+    }
+
+    setTaxSummary(data);
+  };
+
+  const fetchEmployeesTax = async () => {
+    const { data, error } = await supabase
+      .from("monthly_tax_archive")
+      .select(
+        `
+        *,
+        employees (
+          name,
+          nik
+        )
+      `
+      )
+      .eq("id_summary", id);
+
+    if (error) {
+      message.error("Gagal mengambil data pajak karyawan");
+      console.error("fetchEmployeesTax error:", error);
+      return;
+    }
+
+    setEmployeesTax(data);
+  };
+
+  useEffect(() => {
+    if (id) {
+      fetchTaxSummary();
+      fetchEmployeesTax();
+    }
+  }, [id]);
+
   const [activeTab, setActiveTab] = useState("summary");
 
   const columns = [
     {
       title: "Nama Karyawan",
-      dataIndex: "name",
-      key: "name",
+      dataIndex: "employee_name",
+      key: "employee_name",
     },
     {
       title: "PTKP",
@@ -54,22 +81,24 @@ export default function MonthlyReportDetail() {
     },
     {
       title: "Gaji Bruto",
-      dataIndex: "gajiBruto",
-      key: "gajiBruto",
-      render: (text: number) => `Rp ${text.toLocaleString()}`,
+      dataIndex: "bruto_salary",
+      key: "bruto_salary",
+      render: (text: number) => `Rp ${text?.toLocaleString()}`,
     },
     {
       title: "Pajak Bulanan",
-      dataIndex: "monthlyTax",
-      key: "monthlyTax",
-      render: (text: number) => `Rp ${text.toLocaleString()}`,
+      dataIndex: "tax_total",
+      key: "tax_total",
+      render: (text: number) => `Rp ${text?.toLocaleString()}`,
     },
   ];
 
   return (
     <Layout>
       <div className="bg-white p-6 rounded-lg shadow-md">
-        <h1 className="text-2xl font-bold mb-4">Detail Laporan Pajak Bulan Maret</h1>
+        <h1 className="text-2xl font-bold mb-4">
+          Detail Laporan Pajak Bulan Maret
+        </h1>
 
         <Tabs activeKey={activeTab} onChange={setActiveTab}>
           {/* Tab Ringkasan */}
@@ -78,7 +107,7 @@ export default function MonthlyReportDetail() {
               <p className="text-lg font-semibold">
                 Total Pajak yang Harus Dibayarkan:{" "}
                 <span className="text-red-500">
-                  Rp {getTotalMonthlyTax(employees).toLocaleString()}
+                  {formatRupiah(taxSummary?.total_monthly_tax)}
                 </span>
               </p>
             </Card>
@@ -86,7 +115,11 @@ export default function MonthlyReportDetail() {
 
           {/* Tab List Karyawan */}
           <Tabs.TabPane tab="List Karyawan" key="employees">
-            <Table columns={columns} dataSource={employees} pagination={{ pageSize: 5 }} />
+            <Table
+              columns={columns}
+              dataSource={employeesTax}
+              pagination={{ pageSize: 5 }}
+            />
           </Tabs.TabPane>
         </Tabs>
       </div>

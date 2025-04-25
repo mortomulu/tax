@@ -23,7 +23,11 @@ import type {
 import { supabase } from "@/utils/supabase";
 import { formatRupiah } from "@/utils/currency";
 import { BsThreeDotsVertical } from "react-icons/bs";
-import { calculateBrutoSalary, calculateNettoSalary, calculateTax } from "@/helpers/taxCalc";
+import {
+  calculateBrutoSalary,
+  calculateNettoSalary,
+  calculateTax,
+} from "@/helpers/taxCalc";
 
 type TransferItem = GetProp<TransferProps, "dataSource">[number];
 type TableRowSelection<T extends object> = TableProps<T>["rowSelection"];
@@ -296,6 +300,9 @@ const App: React.FC<any> = ({ month, year }) => {
       return item;
     });
 
+    // logic to summarize tax and insert that to db
+    // logic to insert that monthly employees taxes on db
+
     setArchieveData(updatedData);
     setIsModalEditOpen(false);
     message.success("Berhasil mengubah data");
@@ -389,7 +396,10 @@ const App: React.FC<any> = ({ month, year }) => {
       <Modal
         open={isModalEditOpen}
         title="Edit Data Pajak"
-        onCancel={() => setIsModalEditOpen(false)}
+        onCancel={() => {
+          setSelectedRecord(null);
+          setIsModalEditOpen(false);
+        }}
         footer={null}
       >
         {selectedRecord && (

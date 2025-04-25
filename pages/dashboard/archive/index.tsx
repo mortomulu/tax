@@ -125,7 +125,7 @@ const ReportPage: React.FC = () => {
     } else if (key === "2") {
       exportToExcel([record], "Data_Karyawan");
     } else if (key === "3") {
-      router.push(`/dashboard/archive/${record.key}`);
+      router.push(`/dashboard/archive/${record.id}`);
     }
   };
 
