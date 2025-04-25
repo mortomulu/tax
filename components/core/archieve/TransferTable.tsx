@@ -1,5 +1,19 @@
 import React, { useEffect, useState } from "react";
-import { Button, Flex, message, Switch, Table, Tag, Transfer } from "antd";
+import {
+  Button,
+  Descriptions,
+  Dropdown,
+  Flex,
+  Form,
+  Input,
+  InputNumber,
+  message,
+  Modal,
+  Space,
+  Table,
+  Tag,
+  Transfer,
+} from "antd";
 import type {
   GetProp,
   TableColumnsType,
@@ -8,6 +22,8 @@ import type {
 } from "antd";
 import { supabase } from "@/utils/supabase";
 import { formatRupiah } from "@/utils/currency";
+import { BsThreeDotsVertical } from "react-icons/bs";
+import { calculateBrutoSalary, calculateNettoSalary, calculateTax } from "@/helpers/taxCalc";
 
 type TransferItem = GetProp<TransferProps, "dataSource">[number];
 type TableRowSelection<T extends object> = TableProps<T>["rowSelection"];
@@ -24,6 +40,11 @@ interface TableTransferProps extends TransferProps<TransferItem> {
   leftColumns: TableColumnsType<DataType>;
   rightColumns: TableColumnsType<DataType>;
 }
+
+const actionItems = [
+  { key: "1", label: "Detail" },
+  { key: "2", label: "Edit" },
+];
 
 // Customize Table Transfer
 const TableTransfer: React.FC<TableTransferProps> = (props) => {
@@ -74,36 +95,6 @@ const TableTransfer: React.FC<TableTransferProps> = (props) => {
   );
 };
 
-const mockTags = ["cat", "dog", "bird"];
-
-const mockData = Array.from({ length: 20 }).map<DataType>((_, i) => ({
-  key: i.toString(),
-  title: `content${i + 1}`,
-  description: `description of content${i + 1}`,
-  tag: mockTags[i % 3],
-}));
-
-const columns: TableColumnsType<DataType> = [
-  {
-    dataIndex: "employee_name",
-    title: "Name",
-  },
-  {
-    dataIndex: "ptkp",
-    title: "PTKP",
-    render: (tag: string) => (
-      <Tag style={{ marginInlineEnd: 0 }} color="cyan">
-        {tag.toUpperCase()}
-      </Tag>
-    ),
-  },
-  {
-    dataIndex: "tax_total",
-    title: "Tax",
-    render: (price: number) => <span>{formatRupiah(price)}</span>,
-  },
-];
-
 const filterOption = (input: string, item: DataType) =>
   item.title?.includes(input) || item.tag?.includes(input);
 
@@ -115,12 +106,68 @@ const App: React.FC<any> = ({ month, year }) => {
 
   const [archieveData, setArchieveData] = useState<any>();
 
+  const [selectedRecord, setSelectedRecord] = useState<any>();
+  const [isModalDetailOpen, setIsModalDetailOpen] = useState<boolean>(false);
+  const [isModalEditOpen, setIsModalEditOpen] = useState<boolean>(false);
+
   const [targetKeys, setTargetKeys] = useState<TransferProps["targetKeys"]>([]);
   const [disabled, setDisabled] = useState(false);
 
   const onChange: TableTransferProps["onChange"] = (nextTargetKeys) => {
     setTargetKeys(nextTargetKeys);
   };
+
+  const handleMenuClick = ({ key }: { key: string }, record: any) => {
+    if (key === "1") {
+      setSelectedRecord(record);
+      setIsModalDetailOpen(true);
+    } else if (key === "2") {
+      setSelectedRecord(record);
+      setIsModalEditOpen(true);
+    }
+  };
+
+  const columns: TableColumnsType<DataType> = [
+    {
+      dataIndex: "employee_name",
+      title: "Name",
+    },
+    {
+      dataIndex: "ptkp",
+      title: "PTKP",
+      render: (tag: string) => (
+        <Tag style={{ marginInlineEnd: 0 }} color="cyan">
+          {tag.toUpperCase()}
+        </Tag>
+      ),
+    },
+    {
+      dataIndex: "tax_total",
+      title: "Tax",
+      render: (price: number) => <span>{formatRupiah(price)}</span>,
+    },
+    {
+      title: "Action",
+      key: "operation",
+      width: "15%",
+      render: (_: any, record: any) => (
+        <Space size="middle" onClick={(e) => e.stopPropagation()}>
+          <Dropdown
+            menu={{
+              items: actionItems.map((item) => ({
+                ...item,
+                onClick: (e) => handleMenuClick(e, record),
+              })),
+            }}
+          >
+            <span style={{ cursor: "pointer" }}>
+              <BsThreeDotsVertical />
+            </span>
+          </Dropdown>
+        </Space>
+      ),
+    },
+  ];
 
   const fetchData = async () => {
     const { data: employeess, error: fetchEmployeesError } = await supabase
@@ -205,27 +252,189 @@ const App: React.FC<any> = ({ month, year }) => {
     setTotalTHP(tempTotalTHP);
   }, [month, year, employees, taxes]);
 
+  const handleEditSubmit = (values: any) => {
+    const updatedData = archieveData.map((item: any) => {
+      if (item.key === selectedRecord.key) {
+        const {
+          position_allowance,
+          incentive,
+          overtime_allowance,
+          jkk,
+          jkm,
+          bpjs,
+          bonus,
+          thr,
+        } = values;
+
+        const gajiPokok = item.thp ?? 0;
+        const ptkp = item.ptkp;
+
+        const nettoSalary = calculateNettoSalary(
+          Number(gajiPokok),
+          Number(position_allowance),
+          Number(incentive),
+          Number(overtime_allowance),
+          Number(jkk),
+          Number(jkm),
+          Number(bpjs),
+          Number(bonus),
+          Number(thr)
+        );
+
+        const brutoSalary = Math.round(calculateBrutoSalary(nettoSalary));
+        const monthlyTax = Math.round(calculateTax(brutoSalary * 12, ptkp));
+
+        return {
+          ...item,
+          ...values,
+          netto_salary: nettoSalary,
+          bruto_salary: brutoSalary,
+          tax_total: monthlyTax,
+        };
+      }
+
+      return item;
+    });
+
+    setArchieveData(updatedData);
+    setIsModalEditOpen(false);
+    message.success("Berhasil mengubah data");
+  };
+
   return (
-    <Flex align="start" gap="middle" vertical>
-      <TableTransfer
-        dataSource={archieveData}
-        targetKeys={targetKeys}
-        disabled={disabled}
-        showSearch
-        showSelectAll={false}
-        onChange={onChange}
-        filterOption={filterOption}
-        leftColumns={columns}
-        rightColumns={columns}
-      />
-      <Button
-        type="primary"
-        className="ml-auto"
-        disabled={month === null || year === null}
+    <>
+      <Flex align="start" gap="middle" vertical>
+        <TableTransfer
+          dataSource={archieveData}
+          targetKeys={targetKeys}
+          disabled={disabled}
+          showSearch
+          showSelectAll={false}
+          onChange={onChange}
+          filterOption={filterOption}
+          leftColumns={columns}
+          rightColumns={columns}
+        />
+        <Button
+          type="primary"
+          className="ml-auto"
+          disabled={month === null || year === null}
+        >
+          Simpan archieve
+        </Button>
+      </Flex>
+
+      {/* modal detail */}
+      <Modal
+        open={isModalDetailOpen}
+        title="Detail Pajak Karyawan"
+        onCancel={() => {
+          setSelectedRecord(null);
+          setIsModalDetailOpen(false);
+        }}
+        footer={null}
       >
-        Simpan archieve
-      </Button>
-    </Flex>
+        {selectedRecord && (
+          <Descriptions column={1} bordered size="small">
+            <Descriptions.Item label="Nama">
+              {selectedRecord.employee_name}
+            </Descriptions.Item>
+            <Descriptions.Item label="PTKP">
+              {selectedRecord.ptkp}
+            </Descriptions.Item>
+            <Descriptions.Item label="Jabatan">
+              {selectedRecord.position}
+            </Descriptions.Item>
+            <Descriptions.Item label="Tunjangan Jabatan">
+              {formatRupiah(selectedRecord.position_allowance)}
+            </Descriptions.Item>
+            <Descriptions.Item label="Insentif">
+              {formatRupiah(selectedRecord.incentive)}
+            </Descriptions.Item>
+            <Descriptions.Item label="THP">
+              {formatRupiah(selectedRecord.thp)}
+            </Descriptions.Item>
+            <Descriptions.Item label="Lembur">
+              {formatRupiah(selectedRecord.overtime_allowance)}
+            </Descriptions.Item>
+            <Descriptions.Item label="JKK">
+              {formatRupiah(selectedRecord.jkk)}
+            </Descriptions.Item>
+            <Descriptions.Item label="JKM">
+              {formatRupiah(selectedRecord.jkm)}
+            </Descriptions.Item>
+            <Descriptions.Item label="BPJS">
+              {formatRupiah(selectedRecord.bpjs)}
+            </Descriptions.Item>
+            <Descriptions.Item label="Bonus">
+              {formatRupiah(selectedRecord.bonus)}
+            </Descriptions.Item>
+            <Descriptions.Item label="THR">
+              {formatRupiah(selectedRecord.thr)}
+            </Descriptions.Item>
+            <Descriptions.Item label="Netto">
+              {formatRupiah(selectedRecord.netto_salary)}
+            </Descriptions.Item>
+            <Descriptions.Item label="Bruto">
+              {formatRupiah(selectedRecord.bruto_salary)}
+            </Descriptions.Item>
+            <Descriptions.Item label="Total Pajak">
+              {formatRupiah(selectedRecord.tax_total)}
+            </Descriptions.Item>
+          </Descriptions>
+        )}
+      </Modal>
+
+      {/* modal edit */}
+      <Modal
+        open={isModalEditOpen}
+        title="Edit Data Pajak"
+        onCancel={() => setIsModalEditOpen(false)}
+        footer={null}
+      >
+        {selectedRecord && (
+          <Form
+            layout="vertical"
+            initialValues={selectedRecord}
+            onFinish={handleEditSubmit}
+          >
+            <Form.Item name="employee_name" label="Nama">
+              <Input disabled />
+            </Form.Item>
+
+            {/* <Form.Item name="position_allowance" label="Tunjangan Jabatan">
+              <InputNumber style={{ width: "100%" }} />
+            </Form.Item> */}
+
+            <Form.Item name="incentive" label="Insentif">
+              <InputNumber style={{ width: "100%" }} />
+            </Form.Item>
+
+            <Form.Item name="bonus" label="Bonus">
+              <InputNumber style={{ width: "100%" }} />
+            </Form.Item>
+
+            <Form.Item name="thr" label="THR">
+              <InputNumber style={{ width: "100%" }} />
+            </Form.Item>
+
+            {/* <Form.Item name="tax_total" label="Pajak">
+              <InputNumber style={{ width: "100%" }} />
+            </Form.Item> */}
+
+            <Form.Item name="thp" label="THP">
+              <InputNumber style={{ width: "100%" }} />
+            </Form.Item>
+
+            <Form.Item>
+              <Button htmlType="submit" type="primary" block>
+                Simpan Perubahan
+              </Button>
+            </Form.Item>
+          </Form>
+        )}
+      </Modal>
+    </>
   );
 };
 
