@@ -2,13 +2,45 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { HiReceiptTax } from "react-icons/hi";
 import { TbTax } from "react-icons/tb";
-import { supabase } from "@/utils/supabase";
 import { message } from "antd";
-import Cookies from "js-cookie";
 import axios from "axios";
+import { Breadcrumb } from "antd";
+import { HomeOutlined } from "@ant-design/icons";
+
+function toTitleCase(str: string) {
+  return str
+    .replace(/([A-Z])/g, " $1")
+    .replace(/[-_]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .replace(/\b\w/g, (c) => c.toUpperCase());
+}
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter();
+  const pathname = router.asPath; 
+
+  const generateBreadcrumb = () => {
+    const segments = pathname.split("/").filter((segment) => segment);
+    const breadcrumbItems = [
+      {
+        title: (
+          <Link href="/">
+            <HomeOutlined />
+          </Link>
+        ),
+      },
+      ...segments.map((segment, index) => {
+        const url = "/" + segments.slice(0, index + 1).join("/");
+        return {
+          title: (
+            <Link href={url}>{decodeURIComponent(toTitleCase(segment))}</Link>
+          ),
+        };
+      }),
+    ];
+    return breadcrumbItems;
+  };
 
   const isActive = (path: string) => {
     return router.pathname === path;
@@ -31,10 +63,10 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
 
   const handleLogout = async () => {
     try {
-      await axios.post("/api/logout"); // panggil API logout
-      router.push("/"); // redirect ke halaman login/landing
+      await axios.post("/api/logout"); 
+      router.push("/"); 
     } catch (err) {
-      message.error("Gagal logout")
+      message.error("Gagal logout");
       console.error("Logout error:", err);
     }
   };
@@ -201,7 +233,8 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 p-6 overflow-auto bg-blue-50">
+      <main className="flex-1 p-6 overflow-auto bg-blue-50 min-h-screen">
+        <Breadcrumb items={generateBreadcrumb()} className="mb-4" />
         <div className="bg-white p-6 rounded-lg shadow-md border-l-4 border-yellow-400">
           {children}
         </div>

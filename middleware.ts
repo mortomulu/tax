@@ -11,6 +11,14 @@ export async function middleware(req: NextRequest) {
   const isProtectedRoute =
     path.startsWith("/dashboard") || path.startsWith("/superadmin");
 
+  if (accessToken && path === "/") {
+    if (role === "admin") {
+      return NextResponse.redirect(new URL("/dashboard", req.url));
+    } else if (role === "superadmin") {
+      return NextResponse.redirect(new URL("/superadmin", req.url));
+    }
+  }
+
   if (!accessToken && isProtectedRoute) {
     const redirectUrl = req.nextUrl.clone();
     redirectUrl.pathname = "/";
@@ -30,5 +38,5 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/superadmin/:path*"],
+  matcher: ["/", "/dashboard/:path*", "/superadmin/:path*"],
 };
