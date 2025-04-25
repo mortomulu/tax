@@ -2,7 +2,7 @@ import React from "react";
 import dynamic from "next/dynamic";
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
 
-const LineChart = () => {
+const LineChart = ({ chartTax, chartTaxMonth }: any) => {
   const options = {
     chart: {
       id: "basic-line",
@@ -11,15 +11,15 @@ const LineChart = () => {
       },
     },
     xaxis: {
-      categories: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul"],
+      categories: chartTaxMonth,
     },
     colors: ["#F59E0B"],
   };
 
   const series = [
     {
-      name: "Sales",
-      data: [30, 40, 45, 50, 49, 60, 70],
+      name: "Tax",
+      data: chartTax,
     },
   ];
 
