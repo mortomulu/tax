@@ -1,6 +1,7 @@
 import { supabase } from "@/utils/supabase";
 import { serialize } from "cookie";
 import type { NextApiRequest, NextApiResponse } from "next";
+import { NextResponse } from 'next/server';
 
 export default async function handler(
   req: NextApiRequest,
