@@ -300,8 +300,8 @@ const EmployeeTable: any = ({
   const columnsHistoryPositions = [
     { title: "Jabatan", dataIndex: "position", key: "position" },
     { title: "Incentive", dataIndex: "incentive", key: "incentive" },
-    { title: "Tahun Mulai", dataIndex: "startYear", key: "startYear" },
-    { title: "Tahun Selesai", dataIndex: "endYear", key: "endYear" },
+    { title: "Tahun Mulai", dataIndex: "startDate", key: "startDate" },
+    { title: "Tahun Selesai", dataIndex: "endDate", key: "endDate" },
   ];
 
   const handleMenuClick = (key: string, record: any) => {
@@ -527,7 +527,7 @@ const EmployeeTable: any = ({
           ))}
         </Select>
 
-        <h3>Jabatan</h3>
+        {/* <h3>Jabatan</h3>
         {historiesPosition?.map((jabatan: any, index: any) => (
           <>
             <div key={jabatan.id} className="mb-4 border p-3 rounded">
@@ -589,7 +589,7 @@ const EmployeeTable: any = ({
 
         <Button type="dashed" onClick={handleAddJabatan} className="w-full">
           + Tambah Jabatan
-        </Button>
+        </Button> */}
       </Modal>
 
       {/* modal edit history positions */}
