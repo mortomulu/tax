@@ -114,7 +114,7 @@ const EmployeeDetailPage: React.FC = () => {
   useEffect(() => {
     fetchEmployee();
     fetchTaxArchieve();
-  }, []);
+  }, [id]);
 
   return (
     <Layout>
