@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { Badge, Dropdown, message, Space, Table, Tabs } from "antd";
+import { Badge, Button, Dropdown, message, Space, Table, Tabs } from "antd";
 import Layout from "@/components/layouts/Layout";
 import { BsThreeDotsVertical } from "react-icons/bs";
+import { FaPlus } from "react-icons/fa6";
 import { useRouter } from "next/router";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
@@ -190,7 +191,19 @@ const ReportPage: React.FC = () => {
 
   return (
     <Layout>
-      <h2>Laporan Pajak</h2>
+      <div className="flex justify-between items-center">
+        <h2>Laporan Pajak</h2>
+        <Button
+          type="primary"
+          className="font-semibold flex items-center"
+          onClick={() => {
+            router.push("/dashboard/archive/add");
+          }}
+        >
+          <FaPlus />
+          Tambah Arsip Pajak Manual
+        </Button>
+      </div>
 
       <Tabs defaultActiveKey="1">
         {/* Pajak Bulanan */}
