@@ -154,6 +154,14 @@ export default function List() {
     }
   }, [idName]);
 
+  useEffect(() => {
+    const gaji = parseFloat(newGajiPokok) || 0;
+
+    setJkk((gaji * 0.89) / 100);
+    setJkm((gaji * 0.3) / 100);
+    setBpjs((gaji * 4) / 100);
+  }, [newGajiPokok]);
+
   const resetForm = () => {
     setNewName("");
     setIdName("");
@@ -167,6 +175,7 @@ export default function List() {
     setBonus("");
     setThr("");
     setBonus("");
+    setIsModalOpen(false);
   };
 
   const handleAddTaxData = async () => {
@@ -216,7 +225,6 @@ export default function List() {
       fetchEmployees();
       fetchAllTaxData();
       message.success("Data berhasil ditambahkan!");
-      setIsModalOpen(false);
       resetForm();
     }
   };
@@ -230,7 +238,11 @@ export default function List() {
             Add Data
           </Button>
         </div>
-        <AnotherTable data={data} fetchAllTaxData={fetchAllTaxData} employeeOptions={employeeOptions}/>
+        <AnotherTable
+          data={data}
+          fetchAllTaxData={fetchAllTaxData}
+          employeeOptions={employeeOptions}
+        />
       </div>
 
       {/* Modal Add Data */}
@@ -238,15 +250,13 @@ export default function List() {
         title="Tambah Data Pajak Karyawan"
         open={isModalOpen}
         onCancel={() => {
-          setNewName("");
-          setIsModalOpen(false);
+          resetForm();
         }}
         footer={[
           <Button
             key="cancel"
             onClick={() => {
-              setIsModalOpen(false);
-              setNewName("");
+              resetForm();
             }}
           >
             Cancel
@@ -258,7 +268,7 @@ export default function List() {
       >
         <Select
           placeholder="Pilih Karyawan"
-          value={newName || undefined}
+          value={idName || undefined}
           onChange={(value) => setIdName(value)}
           className="mb-3"
           style={{ width: "100%" }}
@@ -305,6 +315,7 @@ export default function List() {
           value={jkk}
           onChange={(e) => setJkk(e.target.value)}
           className="mb-3"
+          disabled
         />
         <Input
           placeholder="Masukkan Death Security/JKM"
@@ -312,6 +323,7 @@ export default function List() {
           value={jkm}
           onChange={(e) => setJkm(e.target.value)}
           className="mb-3"
+          disabled
         />
         <Input
           placeholder="Masukkan BPJS Health/Jaminan Kesehatan"
@@ -319,6 +331,7 @@ export default function List() {
           value={bpjs}
           onChange={(e) => setBpjs(e.target.value)}
           className="mb-3"
+          disabled
         />
         <Input
           placeholder="Masukkan Bonus"
@@ -334,13 +347,13 @@ export default function List() {
           onChange={(e) => setThr(e.target.value)}
           className="mb-3"
         />
-        <Input
+        {/* <Input
           placeholder="Masukkan Etc."
           type="number"
           value={etc}
           onChange={(e) => setEtc(e.target.value)}
           className="mb-3"
-        />
+        /> */}
       </Modal>
     </Layout>
   );
