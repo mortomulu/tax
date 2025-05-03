@@ -263,7 +263,9 @@ const JabatanTable: React.FC<JabatanTableProps> = ({
       .eq("id", activeRecord.id);
 
     if (error) {
-      message.error("Gagal menghapus data");
+      message.error(
+        "Posisi masih digunakan oleh karyawan dan tidak dapat dihapus. Silakan ubah datanya jika diperlukan."
+      );
     } else {
       message.success("Data berhasil dihapus");
       fetchPositions();
