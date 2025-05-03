@@ -13,6 +13,7 @@ import { MdArrowRightAlt } from "react-icons/md";
 import Layout from "@/components/layouts/Layout";
 import EmployeeTable from "@/components/core/employee/EmployeeTable";
 import { supabase } from "@/utils/supabase";
+import TextArea from "antd/lib/input/TextArea";
 
 interface DataType {
   id: number;
@@ -52,6 +53,7 @@ export default function EmployeePage() {
   const [jabatanList, setJabatanList] = useState<JabatanType[]>([
     { id: 1, jabatan: "", startDate: null, endDate: null, now: false },
   ]);
+  const [address, setAddress] = useState<any>();
 
   const fetchPtkpOptions = async () => {
     const { data, error } = await supabase.from("ptkp").select(`id, ptkp`);
@@ -84,6 +86,7 @@ export default function EmployeePage() {
       id,
       name,
       nik,
+      address,
       ptkp (
         id,
         ptkp
@@ -110,6 +113,7 @@ export default function EmployeePage() {
       id: item.id,
       name: item.name,
       nik: item.nik,
+      address: item.address,
       ptkp: item.ptkp?.ptkp || "-",
       positionNow: item?.histories_positions?.[0]?.positions?.position || null,
       historiesPosition: item.histories_positions || [],
@@ -144,8 +148,6 @@ export default function EmployeePage() {
 
     const idPositionTerbaru = latestJabatan?.jabatan || 0;
 
-    console.log("idPositionTerbaru", idPositionTerbaru)
-
     if (name && ptkp && nik) {
       const { data: insertEmployee, error: errorEmployee } = await supabase
         .from("employees")
@@ -155,6 +157,7 @@ export default function EmployeePage() {
             nik,
             idptkp: ptkp,
             idposition: idPositionTerbaru,
+            address,
           },
         ])
         .select();
@@ -185,6 +188,7 @@ export default function EmployeePage() {
       setName("");
       setNik("");
       setPtkp("");
+      setAddress("");
       setJabatanList([]);
       setIsAddModalOpen(false);
     }
@@ -254,6 +258,7 @@ export default function EmployeePage() {
           setJabatanList([
             { id: 1, jabatan: "", startDate: null, endDate: null, now: false },
           ]);
+          setAddress("");
           setIsAddModalOpen(false);
         }}
         footer={[
@@ -273,6 +278,7 @@ export default function EmployeePage() {
                   now: false,
                 },
               ]);
+              setAddress("");
               setIsAddModalOpen(false);
             }}
           >
@@ -294,6 +300,13 @@ export default function EmployeePage() {
           value={nik}
           onChange={(e) => setNik(e.target.value)}
           className="mb-3"
+        />
+        <TextArea
+          placeholder="Masukkan Alamat"
+          value={address}
+          onChange={(e) => setAddress(e.target.value)}
+          className="mb-3"
+          autoSize={{ minRows: 2}}
         />
         <Select
           placeholder="Pilih PTKP"

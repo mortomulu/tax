@@ -625,8 +625,11 @@ const EmployeeTable: any = ({
           <Descriptions.Item label="NIK">
             {selectedEmployee?.nik}
           </Descriptions.Item>
-          <Descriptions.Item label="Status Pernikahan">
+          <Descriptions.Item label="PTKP">
             {selectedEmployee?.ptkp}
+          </Descriptions.Item>
+          <Descriptions.Item label="Alamat">
+            {selectedEmployee?.address}
           </Descriptions.Item>
         </Descriptions>
 
