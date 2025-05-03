@@ -127,13 +127,24 @@ export default function EmployeePage() {
   const handleAdd = async () => {
     if (name == "" && nik == "" && ptkp == "") {
       message.error("Isi data terlebih dahulu");
-      return
+      return;
     }
 
     if (jabatanList[0].jabatan == "" && jabatanList[0].startDate == null) {
       message.error("Isi jabatan terlebih dahulu");
       return;
     }
+
+    const latestJabatan = jabatanList
+      .filter((j) => j.startDate !== null)
+      .sort(
+        (a: any, b: any) =>
+          new Date(b.startDate).getTime() - new Date(a.startDate).getTime()
+      )[0];
+
+    const idPositionTerbaru = latestJabatan?.jabatan || 0;
+
+    console.log("idPositionTerbaru", idPositionTerbaru)
 
     if (name && ptkp && nik) {
       const { data: insertEmployee, error: errorEmployee } = await supabase
@@ -143,6 +154,7 @@ export default function EmployeePage() {
             name,
             nik,
             idptkp: ptkp,
+            idposition: idPositionTerbaru,
           },
         ])
         .select();
