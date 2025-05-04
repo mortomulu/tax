@@ -7,11 +7,7 @@
       {
         "path": "/api/set-dec-tax",
         "schedule": "0 0 1 12 *"
-      },
-      {
-        "path": "/api/reset-dec-tax",
-        "schedule": "10 0 1 1 *"
-      }      
+      }  
     ]
   }
   
