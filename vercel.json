@@ -2,8 +2,7 @@
     "crons": [
       {
         "path": "/api/archieve-tax",
-        "schedule": "0 0 1 * *",
-        "method": "POST" 
+        "schedule": "0 0 1 * *"
       }
     ]
   }
