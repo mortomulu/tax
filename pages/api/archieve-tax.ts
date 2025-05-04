@@ -9,10 +9,10 @@ export default async function handler(
   const year = today.getFullYear();
   const month = today.getMonth() + 1;
 
-  if (today.getDate() !== 23) {
+  if (today.getDate() !== 1) {
     return res
       .status(400)
-      .json({ message: "Hari ini bukan tanggal 23, tidak ada arsip." });
+      .json({ message: "Hari ini bukan tanggal 1, tidak ada arsip." });
   }
 
   const { data: employees, error: fetchEmployeesError } = await supabase
