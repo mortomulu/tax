@@ -50,7 +50,14 @@ export default async function handler(
       const employeeTax = taxes.find((t) => t.idemployee === emp.id);
       if (!employeeTax) return null;
 
-      const taxValue = employeeTax?.monthlytax || 0;
+      let taxValue = 0;
+
+      if (month == 1) {
+        taxValue = employeeTax?.dectax || 0;
+      } else {
+        taxValue = employeeTax?.monthlytax || 0;
+      }
+
       const thpValue = employeeTax?.thp || 0;
 
       totalTax += taxValue;
