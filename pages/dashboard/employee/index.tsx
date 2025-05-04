@@ -48,7 +48,10 @@ export default function EmployeePage() {
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [name, setName] = useState("");
+  const [idType, setIdType] = useState<any>();
+  const [idValue, setIdValue] = useState<any>();
   const [nik, setNik] = useState("");
+  const [npwp, setNpwp] = useState("");
   const [ptkp, setPtkp] = useState("");
   const [jabatanList, setJabatanList] = useState<JabatanType[]>([
     { id: 1, jabatan: "", startDate: null, endDate: null, now: false },
@@ -85,7 +88,9 @@ export default function EmployeePage() {
     const { data, error } = await supabase.from("employees").select(`
       id,
       name,
+      idtype,
       nik,
+      npwp,
       address,
       ptkp (
         id,
@@ -112,8 +117,11 @@ export default function EmployeePage() {
     const formatted = data.map((item: any) => ({
       id: item.id,
       name: item.name,
+      idType: item.idtype,
       nik: item.nik,
+      npwp: item.npwp,
       address: item.address,
+      idPtkp: item.ptkp?.id,
       ptkp: item.ptkp?.ptkp || "-",
       positionNow: item?.histories_positions?.[0]?.positions?.position || null,
       historiesPosition: item.histories_positions || [],
@@ -129,7 +137,7 @@ export default function EmployeePage() {
   }, []);
 
   const handleAdd = async () => {
-    if (name == "" && nik == "" && ptkp == "") {
+    if (name == "" && idValue == "") {
       message.error("Isi data terlebih dahulu");
       return;
     }
@@ -148,16 +156,17 @@ export default function EmployeePage() {
 
     const idPositionTerbaru = latestJabatan?.jabatan || 0;
 
-    if (name && ptkp && nik) {
+    if (name && ptkp && idValue) {
       const { data: insertEmployee, error: errorEmployee } = await supabase
         .from("employees")
         .insert([
           {
             name,
-            nik,
             idptkp: ptkp,
             idposition: idPositionTerbaru,
             address,
+            idtype: idType,
+            ...(idType === "NIK" ? { nik: idValue } : { npwp: idValue }),
           },
         ])
         .select();
@@ -189,6 +198,8 @@ export default function EmployeePage() {
       setNik("");
       setPtkp("");
       setAddress("");
+      setIdType("");
+      setIdValue("");
       setJabatanList([]);
       setIsAddModalOpen(false);
     }
@@ -259,6 +270,8 @@ export default function EmployeePage() {
             { id: 1, jabatan: "", startDate: null, endDate: null, now: false },
           ]);
           setAddress("");
+          setIdType("");
+          setIdValue("");
           setIsAddModalOpen(false);
         }}
         footer={[
@@ -279,6 +292,8 @@ export default function EmployeePage() {
                 },
               ]);
               setAddress("");
+              setIdType("");
+              setIdValue("");
               setIsAddModalOpen(false);
             }}
           >
@@ -295,18 +310,40 @@ export default function EmployeePage() {
           onChange={(e) => setName(e.target.value)}
           className="mb-3"
         />
+        <Select
+          value={idType || undefined}
+          className="mb-3"
+          style={{ width: "100%" }}
+          onChange={(val) => setIdType(val)}
+          placeholder="Pilih NIK/NPWP"
+        >
+          <Select.Option value="NIK">NIK</Select.Option>
+          <Select.Option value="NPWP">NPWP</Select.Option>
+        </Select>
         <Input
-          placeholder="Masukkan NIK/NPWP"
+          placeholder={`Masukkan ${idType?.toUpperCase()}`}
+          value={idValue}
+          onChange={(e) => setIdValue(e.target.value)}
+          className="mb-3"
+        />
+        {/* <Input
+          placeholder="Masukkan NIK"
           value={nik}
           onChange={(e) => setNik(e.target.value)}
           className="mb-3"
         />
+        <Input
+          placeholder="Masukkan NPWP"
+          value={npwp}
+          onChange={(e) => setNpwp(e.target.value)}
+          className="mb-3"
+        /> */}
         <TextArea
           placeholder="Masukkan Alamat"
           value={address}
           onChange={(e) => setAddress(e.target.value)}
           className="mb-3"
-          autoSize={{ minRows: 2}}
+          autoSize={{ minRows: 2 }}
         />
         <Select
           placeholder="Pilih PTKP"

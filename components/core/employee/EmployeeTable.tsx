@@ -22,13 +22,15 @@ import { BsThreeDotsVertical } from "react-icons/bs";
 import { useRouter } from "next/router";
 import dayjs from "dayjs";
 import { supabase } from "@/utils/supabase";
-import { MdArrowRightAlt } from "react-icons/md";
 import ModalEditHistoryPositions from "./ModalEditHistoryPositions";
 
 interface DataType {
   key: string;
   name: string;
+  idType: string;
   nik: string;
+  npwp: string;
+  idPtkp: any;
   ptkp: string;
   jabatanList: Jabatan[];
 }
@@ -68,6 +70,9 @@ const EmployeeTable: any = ({
   const [isEditHistoryPositionModalOpen, setIsEditHistoryPositionModalOpen] =
     useState(false);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
+
+  const [idType, setIdType] = useState<any>();
+  const [idValue, setIdValue] = useState<any>();
   const [newName, setNewName] = useState("");
   const [nik, setNik] = useState("");
   const [newPtkp, setNewPtkp] = useState<string | null>(null);
@@ -235,9 +240,9 @@ const EmployeeTable: any = ({
     },
     {
       title: "NIK/NPWP",
-      dataIndex: "nik",
-      key: "nik",
+      key: "niknpwp",
       width: "20%",
+      render: (text: any, record: any) => record.nik || record.npwp || "-",
     },
     {
       title: "Jabatan Sekarang",
@@ -349,12 +354,14 @@ const EmployeeTable: any = ({
   const openModalEditProfil = (record?: DataType, index?: any) => {
     if (record) {
       setNewName(record.name);
-      setNik(record.nik);
-      setNewPtkp(record.ptkp);
+      setIdType(record?.idType);
+      setIdValue(record?.idType == "NIK" ? record.nik : record.npwp);
+      setNewPtkp(record.idPtkp);
       setEditingIndex(index ?? null);
     } else {
       setNewName("");
-      setNik("");
+      setIdType("");
+      setIdValue("");
       setNewPtkp(null);
       setEditingIndex(null);
     }
@@ -369,9 +376,11 @@ const EmployeeTable: any = ({
       const { error: employeeError } = await supabase
         .from("employees")
         .update({
-          name: selectedEmployee.name,
-          nik: selectedEmployee.nik,
-          idptkp: selectedEmployee.ptkp_id,
+          name: newName,
+          idtype: idType,
+          idptkp: newPtkp,
+          nik: idType === "NIK" ? idValue : null,
+          npwp: idType === "NPWP" ? idValue : null,
         })
         .eq("id", selectedEmployee.id);
 
@@ -507,10 +516,20 @@ const EmployeeTable: any = ({
           onChange={(e) => setNewName(e.target.value)}
           className="mb-3"
         />
+        <Select
+          value={idType || undefined}
+          className="mb-3"
+          style={{ width: "100%" }}
+          onChange={(val) => setIdType(val)}
+          placeholder="Pilih NIK/NPWP"
+        >
+          <Select.Option value="NIK">NIK</Select.Option>
+          <Select.Option value="NPWP">NPWP</Select.Option>
+        </Select>
         <Input
-          placeholder="Masukkan NIK/NPWP"
-          value={nik}
-          onChange={(e) => setNik(e.target.value)}
+          placeholder={`Masukkan ${idType?.toUpperCase()}`}
+          value={idValue}
+          onChange={(e) => setIdValue(e.target.value)}
           className="mb-3"
         />
         <Select
@@ -622,8 +641,8 @@ const EmployeeTable: any = ({
           <Descriptions.Item label="Nama">
             {selectedEmployee?.name}
           </Descriptions.Item>
-          <Descriptions.Item label="NIK">
-            {selectedEmployee?.nik}
+          <Descriptions.Item label={selectedEmployee?.nik ? "NIK" : "NPWP"}>
+            {selectedEmployee?.nik || selectedEmployee?.npwp || "-"}
           </Descriptions.Item>
           <Descriptions.Item label="PTKP">
             {selectedEmployee?.ptkp}
