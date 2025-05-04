@@ -19,8 +19,9 @@ import { useRouter } from "next/router";
 import { supabase } from "@/utils/supabase";
 import {
   calculateBrutoSalary,
-  calculateNettoSalary,
-  calculateTax,
+  getTypeTer,
+  getTerArt21,
+  calcMonthlyTax,
 } from "@/helpers/taxCalc";
 
 interface DataType {
@@ -73,6 +74,23 @@ const AnotherTable: React.FC<AnotherTableProps> = ({
   const [selectedRecord, setSelectedRecord] = useState<any>(null);
 
   const [filteredData, setFilteredData] = useState<any>();
+
+  const [ter, setTer] = useState<any>();
+
+  const fetchTer = async () => {
+    const { data, error } = await supabase.from("ter").select(`*`);
+
+    if (error) {
+      console.error("Error fetching ter data:", error);
+      return [];
+    }
+
+    setTer(data);
+  };
+
+  useEffect(() => {
+    fetchTer();
+  }, []);
 
   useEffect(() => {
     setFilteredData(data);
@@ -310,23 +328,26 @@ const AnotherTable: React.FC<AnotherTableProps> = ({
   };
 
   const handleEditTax = async () => {
-    const nettoSalary = calculateNettoSalary(
-      Number(selectedRecord?.newGajiPokok),
-      Number(selectedRecord?.positionAllowance),
-      Number(selectedRecord?.incentive),
-      Number(selectedRecord?.overtimeAllowance),
-      Number(selectedRecord?.jkk),
-      Number(selectedRecord?.jkm),
-      Number(selectedRecord?.bpjs),
-      Number(selectedRecord?.bonus),
-      Number(selectedRecord?.thr)
+    const typeTer = getTypeTer(selectedRecord.ptkp);
+
+    const brutoSalary = calculateBrutoSalary(
+      Number(selectedRecord?.newGajiPokok) || 0,
+      Number(selectedRecord?.positionAllowance) || 0,
+      Number(selectedRecord?.incentive) || 0,
+      Number(selectedRecord?.overtimeAllowance) || 0,
+      Number(selectedRecord?.jkk) || 0,
+      Number(selectedRecord?.jkm) || 0,
+      Number(selectedRecord?.bpjs) || 0,
+      Number(selectedRecord?.bonus) || 0,
+      Number(selectedRecord?.thr) || 0
     );
 
-    const brutoSalary = Math.round(calculateBrutoSalary(nettoSalary));
+    const terArt = getTerArt21(brutoSalary, typeTer, ter);
+    let monthlyTax = 0;
 
-    const monthlyTax = Math.round(
-      calculateTax(brutoSalary * 12, selectedRecord.ptkp)
-    );
+    if (terArt !== null && terArt !== 0) {
+      monthlyTax = calcMonthlyTax(brutoSalary, terArt);
+    }
 
     const { data, error } = await supabase
       .from("tax")
@@ -340,7 +361,6 @@ const AnotherTable: React.FC<AnotherTableProps> = ({
         bpjs: Number(selectedRecord?.bpjs),
         bonus: Number(selectedRecord?.bonus),
         thr: Number(selectedRecord?.thr),
-        nettosalary: Number(nettoSalary),
         brutosalary: Number(brutoSalary),
         monthlytax: Number(monthlyTax),
       })

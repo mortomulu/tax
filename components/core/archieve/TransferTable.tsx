@@ -25,8 +25,9 @@ import { formatRupiah } from "@/utils/currency";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import {
   calculateBrutoSalary,
-  calculateNettoSalary,
-  calculateTax,
+  getTypeTer,
+  getTerArt21,
+  calcMonthlyTax,
 } from "@/helpers/taxCalc";
 
 type TransferItem = GetProp<TransferProps, "dataSource">[number];
@@ -109,6 +110,7 @@ const App: React.FC<any> = ({ month, year }) => {
   const [totalTHP, setTotalTHP] = useState<number>(0);
 
   const [archieveData, setArchieveData] = useState<any>();
+  const [ter, setTer] = useState<any>();
 
   const [selectedRecord, setSelectedRecord] = useState<any>();
   const [isModalDetailOpen, setIsModalDetailOpen] = useState<boolean>(false);
@@ -207,8 +209,20 @@ const App: React.FC<any> = ({ month, year }) => {
     setTaxes(taxess);
   };
 
+  const fetchTer = async () => {
+    const { data, error } = await supabase.from("ter").select(`*`);
+
+    if (error) {
+      console.error("Error fetching ter data:", error);
+      return [];
+    }
+
+    setTer(data);
+  };
+
   useEffect(() => {
     fetchData();
+    fetchTer();
   }, []);
 
   useEffect(() => {
@@ -273,25 +287,29 @@ const App: React.FC<any> = ({ month, year }) => {
         const gajiPokok = item.thp ?? 0;
         const ptkp = item.ptkp;
 
-        const nettoSalary = calculateNettoSalary(
-          Number(gajiPokok),
-          Number(position_allowance),
-          Number(incentive),
-          Number(overtime_allowance),
-          Number(jkk),
-          Number(jkm),
-          Number(bpjs),
-          Number(bonus),
-          Number(thr)
+        const typeTer = getTypeTer(ptkp);
+
+        const brutoSalary = calculateBrutoSalary(
+          Number(gajiPokok) || 0,
+          Number(position_allowance) || 0,
+          Number(incentive) || 0,
+          Number(overtime_allowance) || 0,
+          Number(jkk) || 0,
+          Number(jkm) || 0,
+          Number(bpjs) || 0,
+          Number(bonus) || 0,
+          Number(thr) || 0
         );
 
-        const brutoSalary = Math.round(calculateBrutoSalary(nettoSalary));
-        const monthlyTax = Math.round(calculateTax(brutoSalary * 12, ptkp));
+        const terArt = getTerArt21(brutoSalary, typeTer, ter);
+        let monthlyTax = 0;
 
+        if (terArt !== null && terArt !== 0) {
+          monthlyTax = calcMonthlyTax(brutoSalary, terArt);
+        }
         return {
           ...item,
           ...values,
-          netto_salary: nettoSalary,
           bruto_salary: brutoSalary,
           tax_total: monthlyTax,
         };
