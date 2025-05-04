@@ -1,7 +1,7 @@
 {
     "crons": [
       {
-        "path": "/api/archive-tax",
+        "path": "/api/archieve-tax",
         "schedule": "0 0 1 * *"
       }
     ]
