@@ -3,9 +3,10 @@ import Layout from "@/components/layouts/Layout";
 import AnotherTable from "@/components/core/tax/AnotherTable";
 import { Button, Modal, Input, Select, message } from "antd";
 import {
-  calculateNettoSalary,
   calculateBrutoSalary,
-  calculateTax,
+  getTypeTer,
+  getTerArt21,
+  calcMonthlyTax,
 } from "@/helpers/taxCalc";
 import { supabase } from "@/utils/supabase";
 
@@ -51,6 +52,7 @@ export default function List() {
   const [etc, setEtc] = useState("");
 
   const [ptkp, setPtkp] = useState<any>();
+  const [ter, setTer] = useState<any>();
 
   const fetchEmployees = async () => {
     const { data, error } = await supabase.from("employees").select(`
@@ -135,9 +137,21 @@ export default function List() {
     setData(formatted);
   };
 
+  const fetchTer = async () => {
+    const { data, error } = await supabase.from("ter").select(`*`);
+
+    if (error) {
+      console.error("Error fetching ter data:", error);
+      return [];
+    }
+
+    setTer(data);
+  };
+
   useEffect(() => {
     fetchEmployees();
     fetchAllTaxData();
+    fetchTer();
   }, []);
 
   useEffect(() => {
@@ -184,21 +198,26 @@ export default function List() {
       return;
     }
 
-    const nettoSalary = calculateNettoSalary(
-      Number(newGajiPokok),
-      Number(positionAllowance),
-      Number(incentive),
-      Number(overtimeAllowance),
-      Number(jkk),
-      Number(jkm),
-      Number(bpjs),
-      Number(bonus),
-      Number(thr)
+    const typeTer = getTypeTer(ptkp);
+
+    const brutoSalary = calculateBrutoSalary(
+      Number(newGajiPokok) || 0,
+      Number(positionAllowance) || 0,
+      Number(incentive) || 0,
+      Number(overtimeAllowance) || 0,
+      Number(jkk) || 0,
+      Number(jkm) || 0,
+      Number(bpjs) || 0,
+      Number(bonus) || 0,
+      Number(thr) || 0
     );
 
-    const brutoSalary = Math.round(calculateBrutoSalary(nettoSalary));
+    const terArt = getTerArt21(brutoSalary, typeTer, ter);
+    let monthlyTax = 0;
 
-    const monthlyTax = Math.round(calculateTax(brutoSalary * 12, ptkp));
+    if (terArt !== null && terArt !== 0) {
+      monthlyTax = calcMonthlyTax(brutoSalary, terArt);
+    }
 
     const { error } = await supabase.from("tax").insert([
       {
@@ -212,7 +231,6 @@ export default function List() {
         bpjs: bpjs || 0,
         bonus: bonus || 0,
         thr: thr || 0,
-        nettosalary: nettoSalary || 0,
         brutosalary: brutoSalary,
         monthlytax: monthlyTax,
       },
