@@ -9,6 +9,7 @@ import {
   calcMonthlyTax,
 } from "@/helpers/taxCalc";
 import { supabase } from "@/utils/supabase";
+import { calcDecTax, calcDecTaxFinal } from "@/helpers/decTaxCalc";
 
 interface DataType {
   id: string;
@@ -29,6 +30,10 @@ interface DataType {
   brutoSalary: number;
   monthlyTax: number;
 }
+
+const today = new Date();
+const year = today.getFullYear();
+const month = today.getMonth() + 1;
 
 export default function List() {
   const [data, setData] = useState<DataType[]>([]);
@@ -53,6 +58,8 @@ export default function List() {
 
   const [ptkp, setPtkp] = useState<any>();
   const [ter, setTer] = useState<any>();
+
+  const [ptkpOptions, setPtkpOptions] = useState<any>();
 
   const fetchEmployees = async () => {
     const { data, error } = await supabase.from("employees").select(`
@@ -148,10 +155,25 @@ export default function List() {
     setTer(data);
   };
 
+  const fetchPtkp = async () => {
+    const { data: ptkp, error: fetchPtkpError } = await supabase
+      .from("ptkp")
+      .select("ptkp, amount");
+
+    if (fetchPtkpError) {
+      console.error("Error fetching ptkp data:", fetchPtkpError);
+      message.error("Error fetching ptkp data");
+      return [];
+    }
+
+    setPtkpOptions(ptkp);
+  };
+
   useEffect(() => {
     fetchEmployees();
     fetchAllTaxData();
     fetchTer();
+    fetchPtkp();
   }, []);
 
   useEffect(() => {
@@ -219,6 +241,39 @@ export default function List() {
       monthlyTax = calcMonthlyTax(brutoSalary, terArt);
     }
 
+    let decTax = undefined;
+
+    if (month === 5) {
+      const { data: monthlyTaxData } = await supabase
+        .from("monthly_tax_archive")
+        .select("tax_total, bruto_salary")
+        .eq("idemployee", idName)
+        .eq("year", year)
+        .lt("month", 12);
+
+      const totalTax11 =
+        monthlyTaxData?.reduce((sum, item) => sum + (item.tax_total || 0), 0) ||
+        0;
+
+      const totalBruto11 =
+        monthlyTaxData?.reduce(
+          (sum, item) => sum + (item.bruto_salary || 0),
+          0
+        ) || 0;
+
+      const yearlyBruto = totalBruto11 + brutoSalary;
+
+      const ptkpEmployee = ptkpOptions.find((item: any) => item.ptkp === ptkp);
+      if (!ptkpEmployee) {
+        console.warn(`PTKP tidak ditemukan untuk ID ${newName}`);
+        return;
+      }
+
+      const totalTaxable = calcDecTax(yearlyBruto, ptkpEmployee.amount);
+      const yearlyPPh = calcDecTaxFinal(totalTaxable);
+      decTax = Math.max(yearlyPPh - (totalTax11 + monthlyTax), 0);
+    }
+
     const { error } = await supabase.from("tax").insert([
       {
         idemployee: idName,
@@ -233,6 +288,7 @@ export default function List() {
         thr: thr || 0,
         brutosalary: brutoSalary,
         monthlytax: monthlyTax,
+        ...(month === 5 && { dectax: Number(decTax) }),
       },
     ]);
 
