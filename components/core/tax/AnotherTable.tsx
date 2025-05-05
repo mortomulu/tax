@@ -23,6 +23,7 @@ import {
   getTerArt21,
   calcMonthlyTax,
 } from "@/helpers/taxCalc";
+import { calcDecTax, calcDecTaxFinal } from "@/helpers/decTaxCalc";
 
 interface DataType {
   id: string;
@@ -58,6 +59,10 @@ interface AnotherTableProps {
   employeeOptions: any;
 }
 
+const today = new Date();
+const year = today.getFullYear();
+const month = today.getMonth() + 1;
+
 const AnotherTable: React.FC<AnotherTableProps> = ({
   data,
   fetchAllTaxData,
@@ -76,25 +81,57 @@ const AnotherTable: React.FC<AnotherTableProps> = ({
   const [filteredData, setFilteredData] = useState<any>();
 
   const [ter, setTer] = useState<any>();
+  const [ptkp, setPtkp] = useState<any>();
 
   const fetchTer = async () => {
     const { data, error } = await supabase.from("ter").select(`*`);
 
     if (error) {
       console.error("Error fetching ter data:", error);
+      message.error("Error fetching ter data");
       return [];
     }
 
     setTer(data);
   };
 
+  const fetchPtkp = async () => {
+    const { data: ptkp, error: fetchPtkpError } = await supabase
+      .from("ptkp")
+      .select("ptkp, amount");
+
+    if (fetchPtkpError) {
+      console.error("Error fetching ptkp data:", fetchPtkpError);
+      message.error("Error fetching ptkp data");
+      return [];
+    }
+
+    setPtkp(ptkp);
+  };
+
   useEffect(() => {
     fetchTer();
+    fetchPtkp();
   }, []);
 
   useEffect(() => {
     setFilteredData(data);
   }, [data]);
+
+  useEffect(() => {
+    if (!selectedRecord) return;
+
+    const gaji = parseFloat(selectedRecord.thp) || 0;
+
+    const updatedRecord = {
+      ...selectedRecord,
+      jkk: (gaji * 0.89) / 100,
+      jkm: (gaji * 0.3) / 100,
+      bpjs: (gaji * 4) / 100,
+    };
+
+    setSelectedRecord(updatedRecord);
+  }, [selectedRecord?.thp]);
 
   const handleSearch = (
     selectedKeys: string[],
@@ -349,6 +386,41 @@ const AnotherTable: React.FC<AnotherTableProps> = ({
       monthlyTax = calcMonthlyTax(brutoSalary, terArt);
     }
 
+    let decTax = undefined;
+
+    if (month === 12) {
+      const { data: monthlyTaxData } = await supabase
+        .from("monthly_tax_archive")
+        .select("month, tax_total, bruto_salary")
+        .eq("idemployee", selectedRecord?.idName)
+        .eq("year", year)
+        .lt("month", 12);
+
+      const totalTax11 =
+        monthlyTaxData?.reduce((sum, item) => sum + (item.tax_total || 0), 0) ??
+        0;
+
+      const totalBruto11 =
+        monthlyTaxData?.reduce(
+          (sum, item) => sum + (item.bruto_salary || 0),
+          0
+        ) ?? 0;
+
+      const yearlyBruto = totalBruto11 + (selectedRecord.brutosalary || 0);
+      const ptkpEmployee = ptkp.find(
+        (item: any) => item.ptkp === selectedRecord.ptkp
+      );
+
+      if (!ptkpEmployee) {
+        console.warn(`PTKP tidak ditemukan untuk ID ${selectedRecord.name}`);
+        return;
+      }
+
+      const totalTaxable = calcDecTax(yearlyBruto, ptkpEmployee.amount);
+      const yearlyPPh = calcDecTaxFinal(totalTaxable);
+      decTax = Math.max(yearlyPPh - totalTax11, 0);
+    }
+
     const { data, error } = await supabase
       .from("tax")
       .update({
@@ -363,8 +435,9 @@ const AnotherTable: React.FC<AnotherTableProps> = ({
         thr: Number(selectedRecord?.thr),
         brutosalary: Number(brutoSalary),
         monthlytax: Number(monthlyTax),
+        ...(month === 12 && { dectax: Number(decTax) }),
       })
-      .eq("id", selectedRecord?.id);
+      .eq("id", selectedRecord?.idName);
 
     if (error) {
       message.error("Gagal update data pajak");
@@ -468,6 +541,7 @@ const AnotherTable: React.FC<AnotherTableProps> = ({
           }
           placeholder="Masukkan Employement Injury Security/JKK"
           className="mb-3"
+          disabled
         />
         <Input
           value={selectedRecord?.jkm}
@@ -476,6 +550,7 @@ const AnotherTable: React.FC<AnotherTableProps> = ({
           }
           placeholder="Masukkan Death Security/JKM"
           className="mb-3"
+          disabled
         />
         <Input
           value={selectedRecord?.bpjs}
@@ -484,6 +559,7 @@ const AnotherTable: React.FC<AnotherTableProps> = ({
           }
           placeholder="Masukkan BPJS Health/Jaminan Kesehatan"
           className="mb-3"
+          disabled
         />
         <Input
           value={selectedRecord?.bonus}
