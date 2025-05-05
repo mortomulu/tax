@@ -28,15 +28,134 @@ const items = [
 ];
 
 const exportToExcel = (data: any[], fileName: string) => {
-  const worksheet = XLSX.utils.json_to_sheet(data);
   const workbook = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
 
+  // === SHEET 1: REKAP ===
+  const rekapData = [
+    Array(8).fill(null), // Row 1 (A1:H1) - gray
+    [null, "Tahun Pajak", null, 2024, "Masa Pajak", null, 1, null], // Row 2 (A2:H2)
+    [null, "Jumlah Bukti Potong PPh Pasal 21", null, null, null, null, 20, null], // Row 3
+    [null, "Jumlah Bukti Potong PPh Pasal 26", null, null, null, null, 0, null],  // Row 4
+    Array(8).fill(null), // Row 5 (A5:H5) - gray
+  ];
+
+  const rekapSheet = XLSX.utils.aoa_to_sheet(rekapData);
+
+  // Merge cells (8 columns total, A-H)
+  rekapSheet["!merges"] = [
+    // Row 2 merges
+    { s: { r: 1, c: 1 }, e: { r: 1, c: 2 } }, // "Tahun Pajak" (B2:C2)
+    { s: { r: 1, c: 4 }, e: { r: 1, c: 5 } }, // "Masa Pajak" (E2:F2)
+    
+    // Row 3 merges
+    { s: { r: 2, c: 1 }, e: { r: 2, c: 5 } }, // "Jumlah..." (B3:F3)
+    
+    // Row 4 merges
+    { s: { r: 3, c: 1 }, e: { r: 3, c: 5 } }, // "Jumlah..." (B4:F4)
+  ];
+
+  // Column widths (A-H)
+  rekapSheet["!cols"] = [
+    { wch: 5 },  // A (gray)
+    { wch: 15 }, // B
+    { wch: 15 }, // C
+    { wch: 10 }, // D (2024)
+    { wch: 15 }, // E
+    { wch: 15 }, // F
+    { wch: 10 }, // G (numbers)
+    { wch: 5 },  // H (gray)
+  ];
+
+  // Style definitions
+  const grayStyle = {
+    fill: { fgColor: { rgb: "D9D9D9" } }
+  };
+  
+  const headerStyle = {
+    font: { bold: true, color: { rgb: "FFFFFF" } },
+    fill: { fgColor: { rgb: "4472C4" } },
+    alignment: { horizontal: "center", vertical: "center" }
+  };
+
+  const dataLabelStyle = {
+    font: { bold: true },
+    alignment: { horizontal: "center", vertical: "center" }
+  };
+
+  const numberStyle = {
+    alignment: { horizontal: "center", vertical: "center" }
+  };
+
+  // Apply styles to all cells (A1:H5)
+  const range = XLSX.utils.decode_range('A1:H5');
+  
+  for (let R = range.s.r; R <= range.e.r; ++R) {
+    for (let C = range.s.c; C <= range.e.c; ++C) {
+      const cellRef = XLSX.utils.encode_cell({ r: R, c: C });
+      
+      if (!rekapSheet[cellRef]) {
+        rekapSheet[cellRef] = { t: 's', v: '', s: {} };
+      }
+
+      // Gray areas (columns A and H, rows 1 and 5)
+      if (C === 0 || C === 7 || R === 0 || R === 4) {
+        rekapSheet[cellRef].s = { ...rekapSheet[cellRef].s, ...grayStyle };
+      }
+
+      // Content styling with center alignment
+      if (R === 1) { // Row 2
+        if (C === 1 || C === 4) { // Header labels
+          rekapSheet[cellRef].s = { ...rekapSheet[cellRef].s, ...headerStyle };
+        } else if (C === 3 || C === 6) { // Numbers
+          rekapSheet[cellRef].s = { ...rekapSheet[cellRef].s, ...numberStyle };
+        }
+      } else if (R === 2 || R === 3) { // Rows 3-4
+        if (C === 1) { // Data labels
+          rekapSheet[cellRef].s = { ...rekapSheet[cellRef].s, ...dataLabelStyle };
+        } else if (C === 6) { // Numbers
+          rekapSheet[cellRef].s = { ...rekapSheet[cellRef].s, ...numberStyle };
+        }
+      }
+
+      // Center alignment for all content cells in the range (improved centering for all cells)
+      if (R >= 1 && R <= 3 && C >= 1 && C <= 6) {
+        if (!rekapSheet[cellRef].s) rekapSheet[cellRef].s = {};
+        rekapSheet[cellRef].s.alignment = { horizontal: "center", vertical: "center" };
+      }
+    }
+  }
+
+  // Set the exact sheet range to only include A1:H5
+  rekapSheet['!ref'] = 'A1:H5';
+
+  XLSX.utils.book_append_sheet(workbook, rekapSheet, "Rekap");
+
+  // === SHEET 2: 21 ===
+  const sheet21 = XLSX.utils.json_to_sheet(data);
+  
+  if (data.length > 0) {
+    const header = Object.keys(data[0]);
+    sheet21["!cols"] = header.map(() => ({ wch: 20 }));
+    
+    const range = XLSX.utils.decode_range(sheet21['!ref'] || 'A1:Z1');
+    for (let C = range.s.c; C <= range.e.c; ++C) {
+      const cell = XLSX.utils.encode_cell({ r: range.s.r, c: C });
+      if (!sheet21[cell]) continue;
+      sheet21[cell].s = {
+        font: { bold: true, color: { rgb: "FFFFFF" } },
+        fill: { fgColor: { rgb: "4472C4" } },
+        alignment: { horizontal: "center", vertical: "center" }
+      };
+    }
+  }
+
+  XLSX.utils.book_append_sheet(workbook, sheet21, "21");
+
+  // Download
   const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
   const excelFile = new Blob([excelBuffer], {
-    type: "application/octet-stream",
+    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
   });
-
   saveAs(excelFile, `${fileName}.xlsx`);
 };
 
@@ -123,7 +242,8 @@ const ReportPage: React.FC = () => {
     if (key === "1") {
       exportToPDF([record], "Data_Karyawan");
     } else if (key === "2") {
-      exportToExcel([record], "Data_Karyawan");
+      // exportToExcel([record], "Data_Karyawan");
+      window.open('/api/export-excel');
     } else if (key === "3") {
       router.push(`/dashboard/archive/${record.id}`);
     }
