@@ -50,6 +50,24 @@ export default function Dashboard() {
   const [chartTax, setChartTax] = useState<any>();
 
   const [summaryTaxLastMonth, setSummaryTaxLastMonth] = useState<any[]>([]);
+  const [summaryTaxesCurrentYear, setSummaryTaxesCurrentYear] = useState<any>();
+  const [missingSummaryMonths, setMissingSummaryMonths] = useState<string[]>(
+    []
+  );
+
+  useEffect(() => {
+    if (!summaryTaxesCurrentYear) return;
+
+    const existingMonths = summaryTaxesCurrentYear.map((d: any) =>
+      Number(d.month)
+    );
+    const currentMonth = new Date().getMonth() + 1;
+    const allMonths = Array.from({ length: currentMonth }, (_, i) => i + 1);
+    const missing = allMonths.filter((m) => !existingMonths.includes(m));
+
+    const missingMonthNames = missing.map((m) => monthNames[m - 1]);
+    setMissingSummaryMonths(missingMonthNames);
+  }, [summaryTaxesCurrentYear]);
 
   // const handleMonthChange = (date: any) => {
   //   if (date) {
@@ -117,6 +135,9 @@ export default function Dashboard() {
         Number(item.month) === lastMonth && Number(item.year) === lastYear
     );
 
+    const summaryTaxCurrentYear = data.filter((item) => item.year == year);
+
+    setSummaryTaxesCurrentYear(summaryTaxCurrentYear);
     setChartTaxMonth(categories);
     setChartTax(dataSeries);
     setSummaryTaxLastMonth(summaryTaxLastMonth);
@@ -309,25 +330,26 @@ export default function Dashboard() {
         <div className="bg-white p-6 rounded-lg shadow-md flex flex-col">
           <div>
             <h2 className="text-xl font-semibold text-gray-800 mb-4">
-              Recent Activities
+              Pengingat Pajak Bulanan Belum Tersedia
             </h2>
-            <ul className="space-y-4">
-              <li className="flex items-center space-x-4">
-                <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
-                <p className="text-gray-700">New user registered</p>
-                <span className="text-sm text-gray-500">2 hours ago</span>
-              </li>
-              <li className="flex items-center space-x-4">
-                <div className="w-2 h-2 bg-green-600 rounded-full"></div>
-                <p className="text-gray-700">Order #12345 completed</p>
-                <span className="text-sm text-gray-500">5 hours ago</span>
-              </li>
-              <li className="flex items-center space-x-4">
-                <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
-                <p className="text-gray-700">New product added</p>
-                <span className="text-sm text-gray-500">1 day ago</span>
-              </li>
-            </ul>
+
+            {missingSummaryMonths.length === 0 ? (
+              <p className="text-gray-600">
+                Semua data pajak bulan ini sudah lengkap 🎉
+              </p>
+            ) : (
+              <ul className="space-y-4">
+                {missingSummaryMonths.map((month, index) => (
+                  <li key={month} className="flex items-center space-x-4">
+                    <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                    <p className="text-gray-700">
+                      Data pajak bulan {month} belum tersedia
+                    </p>
+                    <span className="text-sm text-gray-500"># {index + 1}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
         </div>
       </div>
