@@ -243,7 +243,7 @@ const ReportPage: React.FC = () => {
       exportToPDF([record], "Data_Karyawan");
     } else if (key === "2") {
       // exportToExcel([record], "Data_Karyawan");
-      window.open('/api/export-excel');
+      window.open(`/api/export-excel?id=${record.id}`);
     } else if (key === "3") {
       router.push(`/dashboard/archive/${record.id}`);
     }

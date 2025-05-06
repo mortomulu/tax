@@ -15,12 +15,15 @@ export default async function handler(
       .json({ message: "Hari ini bukan tanggal 1, tidak ada arsip." });
   }
 
-  const { data: employees, error: fetchEmployeesError } = await supabase
-    .from("employees")
-    .select(`
+  const { data: employees, error: fetchEmployeesError } = await supabase.from(
+    "employees"
+  ).select(`
       id,
       name,
+      idtype,
       nik,
+      npwp,
+      address,
       ptkp:ptkp (ptkp),
       positions:idposition (position, incentive)
     `);
@@ -45,6 +48,10 @@ export default async function handler(
   let totalTax = 0;
   let totalTHP = 0;
 
+  const financeEmployee = employees.filter(
+    (item: any) => item.positions.position == "MAN, KEU"
+  );
+
   const archiveData = employees
     .map((emp: any) => {
       const employeeTax = taxes.find((t) => t.idemployee === emp.id);
@@ -68,7 +75,10 @@ export default async function handler(
         month,
         idemployee: emp.id,
         employee_name: emp.name,
+        type_id: emp.idtype,
         nik: emp.nik,
+        npwp: emp.npwp,
+        address: emp.address,
         ptkp: emp.ptkp?.ptkp || null,
         position: emp.positions?.position || null,
         position_allowance: emp.positions?.incentive || 0,
@@ -83,6 +93,9 @@ export default async function handler(
         netto_salary: employeeTax?.nettosalary || 0,
         bruto_salary: employeeTax?.brutosalary || 0,
         tax_total: taxValue,
+        type_id_finance: financeEmployee[0].idtype,
+        npwp_finance: financeEmployee[0].npwp,
+        nik_finance: financeEmployee[0].nik,
       };
     })
     .filter(Boolean);

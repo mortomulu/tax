@@ -1,10 +1,35 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import ExcelJS from "exceljs";
+import { supabase } from "@/utils/supabase";
+
+const today = new Date();
+const year = today.getFullYear();
+const month = today.getMonth() + 1;
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
+  const { id } = req.query;
+
+  if (!id || typeof id !== "string") {
+    return res
+      .status(400)
+      .json({ error: "ID is required and must be a string." });
+  }
+
+  const { data: monthlyTaxes, error: fetchMonthlyTaxesError } = await supabase
+    .from("monthly_tax_archive")
+    .select("*")
+    .eq("id_summary", id);
+
+  if (fetchMonthlyTaxesError) {
+    return res.status(500).json({
+      message: "Gagal ambil data monthly tax",
+      error: fetchMonthlyTaxesError,
+    });
+  }
+
   const workbook = new ExcelJS.Workbook();
 
   // === SHEET 1 ===
@@ -65,9 +90,9 @@ export default async function handler(
   rekapSheet.mergeCells("B2:C2");
   rekapSheet.mergeCells("E2:F2");
   rekapSheet.getCell("B2").value = "Tahun Pajak";
-  rekapSheet.getCell("D2").value = 2024;
+  rekapSheet.getCell("D2").value = year;
   rekapSheet.getCell("E2").value = "Masa Pajak";
-  rekapSheet.getCell("G2").value = 1;
+  rekapSheet.getCell("G2").value = month;
 
   // Style row 2 with font sizes
   ["B2", "E2"].forEach((cell) => {
@@ -86,7 +111,7 @@ export default async function handler(
   // Row 3
   rekapSheet.mergeCells("B3:F3");
   rekapSheet.getCell("B3").value = "Jumlah Bukti Potong PPh Pasal 21";
-  rekapSheet.getCell("G3").value = 20;
+  rekapSheet.getCell("G3").value = monthlyTaxes?.length;
 
   // Style row 3 with font sizes
   rekapSheet.getCell("B3").font = { size: 13 };
@@ -125,29 +150,34 @@ export default async function handler(
 
   // === SHEET 2 ===
   const sheet21 = workbook.addWorksheet("21");
-  const data = [
-    {
-      No: 1,
-      "Tanggal Pemotongan (dd/MM/yyyy)": "31/01/2024",
-      "Penerima Penghasilan? (NPWP/NIK)": "NIK",
-      "NPWP (tanpa format/tanda baca)": "",
-      "NIK (tanpa format/tanda baca)": "3504102303570001",
-      "Nama Penerima Penghasilan Sesuai NIK": "SUMARNO",
-      "Alamat Penerima Penghasilan Sesuai NIK": "KAB. MALANG",
-      "Kode Objek Pajak": "21-100-01",
-      "Penandatangan Menggunakan? (NPWP/NIK)": "NPWP",
-      "NPWP Penandatangan (tanpa format/tanda baca)": "087237533652000",
-      "NIK Penandatangan (tanpa format/tanda baca)": "",
-      "Kode PTKP": "K/2",
-      "Pegawai Harian? (Ya/Tidak)": "Tidak",
-      "Menggunakan Gross Up? (Ya/Tidak)": "Tidak",
-      "Penghasilan Bruto": "4100000",
-      "Terdapat Akumulasi Penghasilan Bruto Sebelumnya? (Ya/Tidak)": "",
-      "Akumulasi Penghasilan Bruto Sebelumnya": "",
-      "Mendapatkan Fasilitas ? (N/SKB/DTP)": "N",
-      "Nomor SKB/Nomor DTP": "",
-    },
-  ];
+  const data = monthlyTaxes.map((item, index) => ({
+    No: index + 1,
+    "Tanggal Pemotongan (dd/MM/yyyy)": `1/${String(item.month).padStart(
+      2,
+      "0"
+    )}/${item.year}`,
+    "Penerima Penghasilan? (NPWP/NIK)": item.type_id || "NIK",
+    "NPWP (tanpa format/tanda baca)": (item.npwp || "").replace(/\D/g, ""),
+    "NIK (tanpa format/tanda baca)": (item.nik || "").replace(/\D/g, ""),
+    "Nama Penerima Penghasilan Sesuai NIK": item.employee_name || "",
+    "Alamat Penerima Penghasilan Sesuai NIK": item.address || "",
+    "Kode Objek Pajak": "21-100-01",
+    "Penandatangan Menggunakan? (NPWP/NIK)": item.type_id_finance || "NPWP",
+    "NPWP Penandatangan (tanpa format/tanda baca)": (
+      item.npwp_finance || ""
+    ).replace(/\D/g, ""),
+    "NIK Penandatangan (tanpa format/tanda baca)": (
+      item.nik_finance || ""
+    ).replace(/\D/g, ""),
+    "Kode PTKP": item.ptkp || "",
+    "Pegawai Harian? (Ya/Tidak)": "Tidak",
+    "Menggunakan Gross Up? (Ya/Tidak)": "Tidak",
+    "Penghasilan Bruto": item.bruto_salary || 0,
+    "Terdapat Akumulasi Penghasilan Bruto Sebelumnya? (Ya/Tidak)": "",
+    "Akumulasi Penghasilan Bruto Sebelumnya": "",
+    "Mendapatkan Fasilitas ? (N/SKB/DTP)": "N",
+    "Nomor SKB/Nomor DTP": "",
+  }));
 
   // Add empty row 1 (will be styled green)
   sheet21.addRow([]);
@@ -219,7 +249,7 @@ export default async function handler(
 
   // Set custom column widths
   sheet21.columns = [
-    { key: "No", width: 5 }, 
+    { key: "No", width: 5 },
     { key: "Tanggal Pemotongan (dd/MM/yyyy)", width: 20 },
     { key: "Penerima Penghasilan? (NPWP/NIK)", width: 14 },
     { key: "NPWP (tanpa format/tanda baca)", width: 20 },
@@ -440,7 +470,7 @@ export default async function handler(
   // Set column widths (B to F)
   taxObjectSheet.columns = [
     { key: "A", width: 5 },
-    { key: "Kode Objek Pajak", width: 20 }, 
+    { key: "Kode Objek Pajak", width: 20 },
     { key: "Nama Objek Pajak", width: 120 },
     { key: "KAP", width: 15 },
     { key: "KJS", width: 15 },
@@ -739,9 +769,9 @@ export default async function handler(
 
   // Set column widths (B to F)
   countryCodeSheet.columns = [
-    { key: "A", width: 5 }, 
-    { key: "KODE", width: 10 }, 
-    { key: "Nama Negara", width: 25 }, 
+    { key: "A", width: 5 },
+    { key: "KODE", width: 10 },
+    { key: "Nama Negara", width: 25 },
   ];
 
   // Add headers starting at B2
@@ -814,7 +844,7 @@ export default async function handler(
 
   // Set column widths (B to F)
   ptkpSheet.columns = [
-    { key: "A", width: 5 }, 
+    { key: "A", width: 5 },
     { key: "PTKP", width: 25 },
     { key: "Nominal", width: 25 },
   ];
