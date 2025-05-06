@@ -243,13 +243,20 @@ export default function List() {
 
     let decTax = undefined;
 
-    if (month === 5) {
-      const { data: monthlyTaxData } = await supabase
+    if (month === 12) {
+      const { data: monthlyTaxData, error } = await supabase
         .from("monthly_tax_archive")
         .select("tax_total, bruto_salary")
         .eq("idemployee", idName)
         .eq("year", year)
-        .lt("month", 12);
+        .lt("month", 12); 
+
+      if (error) {
+        console.error("Gagal mengambil data bulan 1-11:", error.message);
+        return;
+      }
+
+      const monthsCount = monthlyTaxData?.length || 0;
 
       const totalTax11 =
         monthlyTaxData?.reduce((sum, item) => sum + (item.tax_total || 0), 0) ||
@@ -269,8 +276,20 @@ export default function List() {
         return;
       }
 
-      const totalTaxable = calcDecTax(yearlyBruto, ptkpEmployee.amount);
-      const yearlyPPh = calcDecTaxFinal(totalTaxable);
+      const isIncompleteData = monthsCount < 11 && monthsCount > 0;
+
+      const adjustedBruto = isIncompleteData
+        ? (yearlyBruto / monthsCount) * 12
+        : yearlyBruto;
+
+      const totalTaxable = calcDecTax(adjustedBruto, ptkpEmployee.amount);
+
+      let yearlyPPh = calcDecTaxFinal(totalTaxable);
+
+      if (isIncompleteData) {
+        yearlyPPh = (yearlyPPh / 12) * monthsCount;
+      }
+
       decTax = Math.max(yearlyPPh - (totalTax11 + monthlyTax), 0);
     }
 
@@ -288,7 +307,7 @@ export default function List() {
         thr: thr || 0,
         brutosalary: brutoSalary,
         monthlytax: monthlyTax,
-        ...(month === 5 && { dectax: Number(decTax) }),
+        ...(month === 12 && { dectax: Number(decTax) }),
       },
     ]);
 
