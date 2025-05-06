@@ -3,7 +3,7 @@ import { Card, Table, Tabs, Badge, message, Upload, Button, Tag } from "antd";
 import Layout from "@/components/layouts/Layout";
 import { useRouter } from "next/router";
 import { supabase } from "@/utils/supabase";
-import { UploadOutlined } from "@ant-design/icons";
+import { DollarOutlined, FileTextOutlined, HistoryOutlined, UploadOutlined } from "@ant-design/icons";
 
 const { TabPane } = Tabs;
 
@@ -61,6 +61,7 @@ const EmployeeDetailPage: React.FC = () => {
   const [taxArchieve, setTaxArchieve] = useState<any>();
   const [taxArchieveCurrentPeriod, setTaxArchieveCurrentPeriod] =
     useState<any>();
+  const [taxEmployee, setTaxEmployee] = useState<any>();
 
   const fetchEmployee = async () => {
     if (!id) return;
@@ -142,9 +143,43 @@ const EmployeeDetailPage: React.FC = () => {
     }
   };
 
+  const fetchTaxEmployee = async () => {
+    if (!id) return;
+
+    const { data, error } = await supabase
+      .from("tax")
+      .select(
+        `
+          id,
+          thp,
+          incentive,
+          overtime_allowance,
+          jkk,
+          jkm,
+          bonus,
+          thr,
+          brutosalary,
+          monthlytax,
+          dectax
+        `
+      )
+      .eq("idemployee", id)
+      .single();
+
+    if (error) {
+      message.error("Gagal mengambil data pajak karyawan");
+      console.error("Gagal mengambil data pajak karyawan:", error.message);
+      return null;
+    }
+
+    setTaxEmployee(data);
+    return data;
+  };
+
   useEffect(() => {
     fetchEmployee();
     fetchTaxArchieve();
+    fetchTaxEmployee();
   }, [id]);
 
   const handleUpload = async ({ file, onSuccess, onError }: any) => {
@@ -296,7 +331,7 @@ const EmployeeDetailPage: React.FC = () => {
               )}
             </div>
 
-            <div>
+            {/* <div>
               <p className="text-gray-800 font-semibold mb-1">
                 Bukti Pembayaran:
               </p>
@@ -331,19 +366,155 @@ const EmployeeDetailPage: React.FC = () => {
                   )}
                 </>
               )}
-            </div>
+            </div> */}
           </div>
         </div>
       </Card>
 
       {/* Tabs untuk Riwayat Pajak */}
-      <Tabs defaultActiveKey="1">
-        <TabPane tab="Riwayat Pajak" key="1">
-          <Table
-            dataSource={taxArchieve}
-            columns={taxColumns}
-            pagination={{ pageSize: 5 }}
-          />
+      <Tabs
+        defaultActiveKey="1"
+        tabPosition="left"
+        className="bg-white rounded-lg shadow-sm"
+        tabBarStyle={{ padding: 0 }}
+        tabBarGutter={0}
+      >
+        <TabPane
+          tab={
+            <span className="font-medium text-gray-700 px-4 py-2">
+              <FileTextOutlined className="mr-2" />
+              Rincian Pajak
+            </span>
+          }
+          key="1"
+        >
+          <div className="p-4">
+            {taxEmployee && (
+              <Card
+                bordered={false}
+                className="mb-6 bg-white rounded-lg shadow-sm"
+                bodyStyle={{ padding: 0 }}
+              >
+                <div className="p-5 border-b">
+                  <h3 className="text-lg font-semibold text-gray-800 flex items-center">
+                    <DollarOutlined className="mr-2 text-green-600" />
+                    Rincian Pajak Bulanan
+                  </h3>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-5">
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center p-3 hover:bg-gray-50 rounded transition-colors">
+                      <span className="text-gray-600 font-medium">
+                        Take Home Pay (THP)
+                      </span>
+                      <span className="text-gray-900 font-semibold">
+                        Rp{taxEmployee.thp?.toLocaleString("id-ID")}
+                      </span>
+                    </div>
+
+                    <div className="flex justify-between items-center p-3 hover:bg-gray-50 rounded transition-colors">
+                      <span className="text-gray-600 font-medium">
+                        Tunjangan
+                      </span>
+                      <span className="text-gray-900 font-semibold">
+                        Rp{taxEmployee.incentive?.toLocaleString("id-ID")}
+                      </span>
+                    </div>
+
+                    <div className="flex justify-between items-center p-3 hover:bg-gray-50 rounded transition-colors">
+                      <span className="text-gray-600 font-medium">Lembur</span>
+                      <span className="text-gray-900 font-semibold">
+                        Rp
+                        {taxEmployee.overtime_allowance?.toLocaleString(
+                          "id-ID"
+                        )}
+                      </span>
+                    </div>
+
+                    <div className="flex justify-between items-center p-3 hover:bg-gray-50 rounded transition-colors">
+                      <span className="text-gray-600 font-medium">JKK</span>
+                      <span className="text-gray-900 font-semibold">
+                        Rp{taxEmployee.jkk?.toLocaleString("id-ID")}
+                      </span>
+                    </div>
+
+                    <div className="flex justify-between items-center p-3 hover:bg-gray-50 rounded transition-colors">
+                      <span className="text-gray-600 font-medium">JKM</span>
+                      <span className="text-gray-900 font-semibold">
+                        Rp{taxEmployee.jkm?.toLocaleString("id-ID")}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center p-3 hover:bg-gray-50 rounded transition-colors">
+                      <span className="text-gray-600 font-medium">Bonus</span>
+                      <span className="text-gray-900 font-semibold">
+                        Rp{taxEmployee.bonus?.toLocaleString("id-ID")}
+                      </span>
+                    </div>
+
+                    <div className="flex justify-between items-center p-3 hover:bg-gray-50 rounded transition-colors">
+                      <span className="text-gray-600 font-medium">THR</span>
+                      <span className="text-gray-900 font-semibold">
+                        Rp{taxEmployee.thr?.toLocaleString("id-ID")}
+                      </span>
+                    </div>
+
+                    <div className="flex justify-between items-center p-3 bg-blue-50 rounded border-l-4 border-blue-500">
+                      <span className="text-blue-600 font-medium">
+                        Bruto Salary
+                      </span>
+                      <span className="text-blue-900 font-bold">
+                        Rp{taxEmployee.brutosalary?.toLocaleString("id-ID")}
+                      </span>
+                    </div>
+
+                    <div className="flex justify-between items-center p-3 bg-red-50 rounded border-l-4 border-red-500">
+                      <span className="text-red-600 font-medium">
+                        Pajak Bulanan
+                      </span>
+                      <span className="text-red-900 font-bold">
+                        Rp{taxEmployee.monthlytax?.toLocaleString("id-ID")}
+                      </span>
+                    </div>
+
+                    {taxEmployee.dectax !== null && (
+                      <div className="flex justify-between items-center p-3 bg-purple-50 rounded border-l-4 border-purple-500">
+                        <span className="text-purple-600 font-medium">
+                          Pajak Akhir Tahun (Desember)
+                        </span>
+                        <span className="text-purple-900 font-bold">
+                          Rp{taxEmployee.dectax?.toLocaleString("id-ID")}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </Card>
+            )}
+          </div>
+        </TabPane>
+
+        <TabPane
+          tab={
+            <span className="font-medium text-gray-700 px-4 py-2">
+              <HistoryOutlined className="mr-2" />
+              Riwayat Pajak
+            </span>
+          }
+          key="2"
+        >
+          <div className="p-4">
+            <Table
+              dataSource={taxArchieve}
+              columns={taxColumns}
+              pagination={{ pageSize: 5 }}
+              className="rounded-lg shadow-sm"
+              rowClassName="hover:bg-gray-50 transition-colors"
+            />
+          </div>
         </TabPane>
       </Tabs>
     </Layout>

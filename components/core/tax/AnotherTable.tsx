@@ -296,10 +296,10 @@ const AnotherTable: React.FC<AnotherTableProps> = ({
     },
     {
       title: "Gaji Bersih",
-      dataIndex: "nettoSalary",
-      key: "nettoSalary",
+      dataIndex: "thp",
+      key: "thp",
       width: "15%",
-      sorter: (a, b) => a.nettoSalary - b.nettoSalary,
+      sorter: (a, b) => a.thp - b.thp,
       render: (price: number) => <span>{formatRupiah(price)}</span>,
     },
     {
