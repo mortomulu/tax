@@ -50,7 +50,6 @@ const actionItems = [
   { key: "2", label: "Edit" },
 ];
 
-// Customize Table Transfer
 const TableTransfer: React.FC<TableTransferProps> = (props) => {
   const { leftColumns, rightColumns, ...restProps } = props;
   return (

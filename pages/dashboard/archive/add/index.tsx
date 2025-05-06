@@ -1,18 +1,36 @@
 import Layout from "@/components/layouts/Layout";
 import TransferTable from "@/components/core/archieve/TransferTable";
 import { Select, Space } from "antd";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import dayjs from "dayjs";
+import { useRouter } from "next/router";
 
 const { Option } = Select;
 
 const AddArchieveManuallyPage = () => {
+  const router = useRouter();
+
   const [selectedMonth, setSelectedMonth] = useState<number | null>(
     dayjs().month() + 1
   );
   const [selectedYear, setSelectedYear] = useState<number | null>(
     dayjs().year()
   );
+
+  useEffect(() => {
+    if (!router.isReady) return;
+
+    const { month, year } = router.query;
+    const parsedMonth = parseInt(month as string, 10);
+    const parsedYear = parseInt(year as string, 10);
+
+    setSelectedMonth(!isNaN(parsedMonth) ? parsedMonth : dayjs().month() + 1);
+    setSelectedYear(!isNaN(parsedYear) ? parsedYear : dayjs().year());
+  }, [router.isReady]);
+
+  if (!router.isReady || selectedMonth === null || selectedYear === null) {
+    return null;
+  }
 
   const currentYear = dayjs().year();
   const years = Array.from({ length: 1 }, (_, i) => currentYear - i);

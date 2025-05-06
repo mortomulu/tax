@@ -16,21 +16,27 @@ import { message } from "antd";
 import dayjs from "dayjs";
 import { supabase } from "@/utils/supabase";
 import { formatRupiah } from "@/utils/currency";
-import { UploadOutlined } from "@ant-design/icons";
+import {
+  CheckCircleOutlined,
+  ExclamationCircleOutlined,
+  InfoCircleOutlined,
+  UploadOutlined,
+} from "@ant-design/icons";
+import Link from "next/link";
 
 const monthNames = [
-  "Jan",
-  "Feb",
-  "Mar",
-  "Apr",
-  "May",
-  "Jun",
-  "Jul",
-  "Aug",
-  "Sep",
-  "Oct",
-  "Nov",
-  "Dec",
+  "Januari",
+  "Februari",
+  "Maret",
+  "April",
+  "Mei",
+  "Juni",
+  "Juli",
+  "Agustus",
+  "September",
+  "Oktober",
+  "November",
+  "Desember",
 ];
 
 export default function Dashboard() {
@@ -51,7 +57,7 @@ export default function Dashboard() {
 
   const [summaryTaxLastMonth, setSummaryTaxLastMonth] = useState<any[]>([]);
   const [summaryTaxesCurrentYear, setSummaryTaxesCurrentYear] = useState<any>();
-  const [missingSummaryMonths, setMissingSummaryMonths] = useState<string[]>(
+  const [missingSummaryMonths, setMissingSummaryMonths] = useState<number[]>(
     []
   );
 
@@ -65,8 +71,7 @@ export default function Dashboard() {
     const allMonths = Array.from({ length: currentMonth }, (_, i) => i + 1);
     const missing = allMonths.filter((m) => !existingMonths.includes(m));
 
-    const missingMonthNames = missing.map((m) => monthNames[m - 1]);
-    setMissingSummaryMonths(missingMonthNames);
+    setMissingSummaryMonths(missing);
   }, [summaryTaxesCurrentYear]);
 
   // const handleMonthChange = (date: any) => {
@@ -334,21 +339,60 @@ export default function Dashboard() {
             </h2>
 
             {missingSummaryMonths.length === 0 ? (
-              <p className="text-gray-600">
-                Semua data pajak bulan ini sudah lengkap 🎉
-              </p>
+              <div className="p-4 bg-green-50 rounded-lg border border-green-200 flex items-start">
+                <div className="bg-green-100 p-2 rounded-full mr-3">
+                  <CheckCircleOutlined className="text-green-600 text-lg" />
+                </div>
+                <div>
+                  <h4 className="text-green-800 font-medium mb-1">
+                    Data pajak bulan ini sudah lengkap
+                  </h4>
+                  <p className="text-green-600 text-sm">
+                    Semua laporan pajak telah terarsip dengan baik 🎉
+                  </p>
+                </div>
+              </div>
             ) : (
-              <ul className="space-y-4">
-                {missingSummaryMonths.map((month, index) => (
-                  <li key={month} className="flex items-center space-x-4">
-                    <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-                    <p className="text-gray-700">
-                      Data pajak bulan {month} belum tersedia
-                    </p>
-                    <span className="text-sm text-gray-500"># {index + 1}</span>
-                  </li>
-                ))}
-              </ul>
+              <div className="space-y-4">
+                <div className="flex items-center mb-2">
+                  <ExclamationCircleOutlined className="text-red-500 mr-2" />
+                  <h4 className="font-medium text-gray-800">
+                    {missingSummaryMonths.length} Bulan Belum Terlapor
+                  </h4>
+                </div>
+
+                <div className="border rounded-lg divide-y">
+                  {missingSummaryMonths.map((month, index) => (
+                    <div
+                      key={month}
+                      className="p-4 hover:bg-gray-50 transition-colors flex items-center justify-between"
+                    >
+                      <div className="flex items-center space-x-3">
+                        <div className="w-3 h-3 bg-red-400 rounded-full flex-shrink-0"></div>
+                        <div>
+                          <Link
+                            href={`/dashboard/archive/add?month=${month}&year=${new Date().getFullYear()}`}
+                            className="text-blue-600 hover:text-blue-800 hover:underline font-medium"
+                          >
+                            {monthNames[month - 1]} {new Date().getFullYear()}{" "}
+                          </Link>
+                          <p className="text-gray-500 text-sm mt-1">
+                            Belum ada laporan pajak tersedia
+                          </p>
+                        </div>
+                      </div>
+                      <span className="bg-gray-100 text-gray-600 px-2 py-1 rounded text-sm">
+                        #{index + 1}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+
+                <p className="text-gray-500 text-sm mt-2">
+                  <InfoCircleOutlined className="mr-1" />
+                  Klik pada bulan untuk melengkapi laporan pajak
+                </p>
+              </div>
             )}
           </div>
         </div>
