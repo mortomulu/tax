@@ -196,7 +196,7 @@ const JabatanTable: React.FC<JabatanTableProps> = ({
       ...getColumnSearchProps("position"),
     },
     {
-      title: "Incentive",
+      title: "Position Allowance",
       dataIndex: "incentive",
       key: "incentive",
       width: "10%",

@@ -180,7 +180,7 @@ export default function AdditionalDataPage() {
           </Form.Item>
           <Form.Item
             name="incentive"
-            label="Incentive"
+            label="Position Allowance"
             rules={[{ required: true }]}
           >
             <InputNumber min={0} className="w-full" />
