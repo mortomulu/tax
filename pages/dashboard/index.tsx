@@ -203,7 +203,7 @@ export default function Dashboard() {
           <div className="bg-gray-50 p-4 rounded-lg">
             <div className="flex items-center justify-between mb-2">
               <p className="text-gray-700 font-medium">
-                Periode {monthNumber && monthNumber - 1} {year && year}
+                Masa {monthNumber && monthNumber - 1}/{year && year}
               </p>
               {summaryTaxLastMonth.length > 0 ? (
                 summaryTaxLastMonth[0]?.payment_proof_url === null ? (

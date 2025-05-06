@@ -12,7 +12,7 @@ import {
 const { TabPane } = Tabs;
 
 const taxColumns = [
-  { title: "Periode", dataIndex: "periode", key: "periode" },
+  { title: "Masa", dataIndex: "periode", key: "periode" },
   {
     title: "Gaji (Rp)",
     dataIndex: "thp",
@@ -143,7 +143,7 @@ const EmployeeDetailPage: React.FC = () => {
       );
 
       return {
-        periode: `${monthName} ${item.year}`,
+        periode: `${monthIndex}/${item.year}`,
         thp: item.thp,
         tax_total: item.tax_total,
         year: item.year,
@@ -306,8 +306,7 @@ const EmployeeDetailPage: React.FC = () => {
           <div className="flex-1 space-y-4">
             <div>
               <p className="text-gray-800 font-semibold mb-1">
-                Status Pelaporan Periode {month && monthNames[month]}{" "}
-                {year && year}:
+                Status Pelaporan Masa {month && month}/{year && year}:
               </p>
               {taxArchieveCurrentPeriod?.proofPaymentUrl === null ? (
                 <Tag color="red">Belum Dilapor</Tag>
@@ -315,7 +314,6 @@ const EmployeeDetailPage: React.FC = () => {
                 <Tag color="green">Dilapor</Tag>
               )}
             </div>
-
           </div>
         </div>
       </Card>
