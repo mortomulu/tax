@@ -286,13 +286,8 @@ export default function Dashboard() {
               )}
             </div>
           </div> */}
-        </div>
-      </div>
 
-      {/* Chart Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <LineChart chartTax={chartTax} chartTaxMonth={chartTaxMonth} />
-        <div className="bg-white p-6 rounded-lg shadow-md flex flex-col">
+          {/* Date to automate archieve */}
           <div className="mb-6">
             <div className="p-6 rounded-lg shadow-md border-l-4 bg-indigo-950 text-white border-yellow-400">
               <h2 className="text-xl font-semibold text-white mb-4">
@@ -305,6 +300,13 @@ export default function Dashboard() {
               />
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Chart Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <LineChart chartTax={chartTax} chartTaxMonth={chartTaxMonth} />
+        <div className="bg-white p-6 rounded-lg shadow-md flex flex-col">
           <div>
             <h2 className="text-xl font-semibold text-gray-800 mb-4">
               Recent Activities

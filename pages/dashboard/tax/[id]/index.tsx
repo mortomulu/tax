@@ -3,7 +3,11 @@ import { Card, Table, Tabs, Badge, message, Upload, Button, Tag } from "antd";
 import Layout from "@/components/layouts/Layout";
 import { useRouter } from "next/router";
 import { supabase } from "@/utils/supabase";
-import { DollarOutlined, FileTextOutlined, HistoryOutlined, UploadOutlined } from "@ant-design/icons";
+import {
+  DollarOutlined,
+  FileTextOutlined,
+  HistoryOutlined,
+} from "@ant-design/icons";
 
 const { TabPane } = Tabs;
 
@@ -27,9 +31,9 @@ const taxColumns = [
     dataIndex: "proofPaymentUrl",
     render: (proofPaymentUrl: string) =>
       proofPaymentUrl ? (
-        <Badge status="success" text="Dibayar" />
+        <Badge status="success" text="Dilapor" />
       ) : (
-        <Badge status="default" text="Belum Dibayar" />
+        <Badge status="default" text="Belum Dilapor" />
       ),
   },
 ];
@@ -116,9 +120,27 @@ const EmployeeDetailPage: React.FC = () => {
       return null;
     }
 
+    const { data: summaryTax, error: errorSummaryTax } = await supabase
+      .from("summary_monthly_tax")
+      .select(
+        "year, month, total_netto_salary, total_monthly_tax, payment_proof_url"
+      );
+
+    if (errorSummaryTax) {
+      console.error("Error fetching tax summary:", error);
+      message.error("Gagal mengambil taxes summary");
+      return;
+    }
+
     const formatted = data.map((item) => {
       const monthIndex = parseInt(item.month, 10) - 1;
       const monthName = monthNames[monthIndex] || item.month;
+
+      const summary: any = summaryTax.find(
+        (s) =>
+          Number(s.month) === Number(item.month) &&
+          Number(s.year) === Number(item.year)
+      );
 
       return {
         periode: `${monthName} ${item.year}`,
@@ -126,7 +148,7 @@ const EmployeeDetailPage: React.FC = () => {
         tax_total: item.tax_total,
         year: item.year,
         month: item.month,
-        proofPaymentUrl: item.payment_proof_url,
+        proofPaymentUrl: summary?.payment_proof_url || null,
       };
     });
 
@@ -181,43 +203,6 @@ const EmployeeDetailPage: React.FC = () => {
     fetchTaxArchieve();
     fetchTaxEmployee();
   }, [id]);
-
-  const handleUpload = async ({ file, onSuccess, onError }: any) => {
-    const fileExt = file.name.split(".").pop();
-    const fileName = `${Date.now()}.${fileExt}`;
-    const filePath = `payment-proofs/${fileName}`;
-
-    try {
-      const { data, error: uploadError } = await supabase.storage
-        .from("paymentproof")
-        .upload(filePath, file);
-
-      if (uploadError) throw uploadError;
-
-      const { data: publicUrlData } = supabase.storage
-        .from("paymentproof")
-        .getPublicUrl(filePath);
-
-      const publicUrl = publicUrlData?.publicUrl;
-
-      if (!publicUrl) throw new Error("URL publik tidak ditemukan");
-
-      const { error: updateError } = await supabase
-        .from("monthly_tax_archive")
-        .update({ payment_proof_url: publicUrl })
-        .eq("month", month);
-
-      if (updateError) throw updateError;
-
-      fetchTaxArchieve();
-      message.success("Upload dan update berhasil!");
-      onSuccess?.("OK");
-    } catch (error) {
-      console.error("Upload error:", error);
-      message.error("Upload gagal!");
-      onError?.(error);
-    }
-  };
 
   return (
     <Layout>
@@ -321,52 +306,16 @@ const EmployeeDetailPage: React.FC = () => {
           <div className="flex-1 space-y-4">
             <div>
               <p className="text-gray-800 font-semibold mb-1">
-                Status Pembayaran Periode {month && monthNames[month]}{" "}
+                Status Pelaporan Periode {month && monthNames[month]}{" "}
                 {year && year}:
               </p>
               {taxArchieveCurrentPeriod?.proofPaymentUrl === null ? (
-                <Tag color="red">Belum Dibayar</Tag>
+                <Tag color="red">Belum Dilapor</Tag>
               ) : (
-                <Tag color="green">Dibayar</Tag>
+                <Tag color="green">Dilapor</Tag>
               )}
             </div>
 
-            {/* <div>
-              <p className="text-gray-800 font-semibold mb-1">
-                Bukti Pembayaran:
-              </p>
-              {taxArchieveCurrentPeriod?.proofPaymentUrl ? (
-                <a
-                  href={taxArchieveCurrentPeriod?.proofPaymentUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-500 underline"
-                >
-                  Lihat Bukti
-                </a>
-              ) : (
-                <>
-                  <Upload
-                    showUploadList={false}
-                    customRequest={(options) => handleUpload(options)}
-                    disabled={!taxArchieveCurrentPeriod}
-                  >
-                    <Button
-                      icon={<UploadOutlined />}
-                      disabled={!taxArchieveCurrentPeriod}
-                    >
-                      Upload Bukti
-                    </Button>
-                  </Upload>
-
-                  {!taxArchieveCurrentPeriod && (
-                    <p className="text-sm text-red-500 mt-2">
-                      Belum waktunya untuk upload bukti pembayaran
-                    </p>
-                  )}
-                </>
-              )}
-            </div> */}
           </div>
         </div>
       </Card>
