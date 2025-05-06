@@ -60,7 +60,7 @@ export default async function handler(
   const successUpdates: number[] = [];
 
   await Promise.all(
-    taxes.map(async (tax : any) => {
+    taxes.map(async (tax: any) => {
       const employeeId = tax.idemployee;
 
       const monthlyData = monthlyTaxes.filter(
@@ -78,7 +78,7 @@ export default async function handler(
 
       const yearlyBruto = totalBruto11 + (tax.brutosalary || 0);
 
-      const employeePTKP = tax.employees?.ptkp?.ptkp
+      const employeePTKP = tax.employees?.ptkp?.ptkp;
       const ptkpEmployee = ptkp.find((item) => item.ptkp === employeePTKP);
 
       if (!ptkpEmployee) {
@@ -87,8 +87,26 @@ export default async function handler(
         return;
       }
 
-      const totalTaxable = calcDecTax(yearlyBruto, ptkpEmployee.amount);
-      const yearlyPPh = calcDecTaxFinal(totalTaxable);
+      let annualizedTax = 0;
+
+      if (monthlyData.length < 11) {
+        annualizedTax = (yearlyBruto / monthlyData.length) * 12;
+      }
+
+      let totalTaxable = 0;
+
+      if (monthlyData.length < 11) {
+        totalTaxable = calcDecTax(annualizedTax, ptkpEmployee.amount);
+      } else {
+        totalTaxable = calcDecTax(yearlyBruto, ptkpEmployee.amount);
+      }
+
+      let yearlyPPh = calcDecTaxFinal(totalTaxable);
+
+      if (monthlyData.length < 11) {
+        yearlyPPh = (yearlyPPh / 12) * monthlyData.length;
+      }
+
       const decTax = Math.max(yearlyPPh - totalTax11, 0);
 
       const { error: updateError } = await supabase
