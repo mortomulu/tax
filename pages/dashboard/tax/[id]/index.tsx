@@ -411,7 +411,7 @@ const EmployeeDetailPage: React.FC = () => {
 
                     <div className="flex justify-between items-center p-3 bg-blue-50 rounded border-l-4 border-blue-500">
                       <span className="text-blue-600 font-medium">
-                        Bruto Salary
+                        Gaji Bruto
                       </span>
                       <span className="text-blue-900 font-bold">
                         Rp{taxEmployee.brutosalary?.toLocaleString("id-ID")}

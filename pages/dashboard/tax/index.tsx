@@ -249,7 +249,7 @@ export default function List() {
         .select("tax_total, bruto_salary")
         .eq("idemployee", idName)
         .eq("year", year)
-        .lt("month", 12); 
+        .lt("month", 12);
 
       if (error) {
         console.error("Gagal mengambil data bulan 1-11:", error.message);
@@ -328,7 +328,7 @@ export default function List() {
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-2xl font-bold">List Data Pajak Karyawan</h1>
           <Button type="primary" onClick={() => setIsModalOpen(true)}>
-            Add Data
+            Tambah Data Pajak Karyawan
           </Button>
         </div>
         <AnotherTable
@@ -359,94 +359,146 @@ export default function List() {
           </Button>,
         ]}
       >
-        <Select
-          placeholder="Pilih Karyawan"
-          value={idName || undefined}
-          onChange={(value) => setIdName(value)}
-          className="mb-3"
-          style={{ width: "100%" }}
-        >
-          {employeeOptions?.map((option: any) => (
-            <Select.Option key={option.id} value={option.id}>
-              {option.name}
-            </Select.Option>
-          ))}
-        </Select>
+        <div className="space-y-4">
+          {/* Employee Selection */}
+          <div className="flex flex-col gap-1">
+            <label className="text-sm font-medium text-gray-700">
+              Nama Karyawan <span className="text-red-500">*</span>
+            </label>
+            <Select
+              placeholder="Pilih Karyawan"
+              value={idName || undefined}
+              onChange={(value) => setIdName(value)}
+            >
+              {employeeOptions?.map((option: any) => (
+                <Select.Option key={option.id} value={option.id}>
+                  {option.name}
+                </Select.Option>
+              ))}
+            </Select>
+          </div>
 
-        <Input
-          placeholder="Masukkan THP"
-          type="number"
-          value={newGajiPokok}
-          onChange={(e) => setNewGajiPokok(e.target.value)}
-          className="mb-3"
-        />
-        <Input
-          placeholder="Masukkan Position Allowance"
-          type="number"
-          value={idName ? positionAllowance : ""}
-          onChange={(e) => setPositionAllowance(e.target.value)}
-          className="mb-3"
-          disabled
-        />
-        <Input
-          placeholder="Masukkan Incentive"
-          type="number"
-          value={incentive}
-          onChange={(e) => setIncentive(e.target.value)}
-          className="mb-3"
-        />
-        <Input
-          placeholder="Masukkan Overtime Allowance"
-          type="number"
-          value={overtimeAllowance}
-          onChange={(e) => setOvertimeAllowance(e.target.value)}
-          className="mb-3"
-        />
-        <Input
-          placeholder="Masukkan Employement Injury Security/JKK"
-          type="number"
-          value={jkk}
-          onChange={(e) => setJkk(e.target.value)}
-          className="mb-3"
-          disabled
-        />
-        <Input
-          placeholder="Masukkan Death Security/JKM"
-          type="number"
-          value={jkm}
-          onChange={(e) => setJkm(e.target.value)}
-          className="mb-3"
-          disabled
-        />
-        <Input
-          placeholder="Masukkan BPJS Health/Jaminan Kesehatan"
-          type="number"
-          value={bpjs}
-          onChange={(e) => setBpjs(e.target.value)}
-          className="mb-3"
-          disabled
-        />
-        <Input
-          placeholder="Masukkan Bonus"
-          type="number"
-          value={bonus}
-          onChange={(e) => setBonus(e.target.value)}
-          className="mb-3"
-        />
-        <Input
-          placeholder="Masukkan Religius Holiday Allowance/THR"
-          type="number"
-          value={thr}
-          onChange={(e) => setThr(e.target.value)}
-          className="mb-3"
-        />
-        {/* <Input
-          placeholder="Masukkan Etc."
-          type="number"
-          value={etc}
-          onChange={(e) => setEtc(e.target.value)}
-          className="mb-3"
-        /> */}
+          {/* Salary Inputs */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Column 1 */}
+            <div className="space-y-4">
+              <div className="flex flex-col gap-1">
+                <label className="text-sm font-medium text-gray-700">
+                  Take Home Pay (THP) <span className="text-red-500">*</span>
+                </label>
+                <Input
+                  placeholder="Masukkan THP"
+                  type="number"
+                  value={newGajiPokok}
+                  onChange={(e) => setNewGajiPokok(e.target.value)}
+                />
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <label className="text-sm font-medium text-gray-700">
+                  Position Allowance
+                </label>
+                <Input
+                  placeholder="Masukkan Position Allowance"
+                  type="number"
+                  value={idName ? positionAllowance : ""}
+                  onChange={(e) => setPositionAllowance(e.target.value)}
+                  disabled
+                />
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <label className="text-sm font-medium text-gray-700">
+                  Incentive
+                </label>
+                <Input
+                  placeholder="Masukkan Incentive"
+                  type="number"
+                  value={incentive}
+                  onChange={(e) => setIncentive(e.target.value)}
+                />
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <label className="text-sm font-medium text-gray-700">
+                  Overtime Allowance
+                </label>
+                <Input
+                  placeholder="Masukkan Overtime Allowance"
+                  type="number"
+                  value={overtimeAllowance}
+                  onChange={(e) => setOvertimeAllowance(e.target.value)}
+                />
+              </div>
+            </div>
+
+            {/* Column 2 */}
+            <div className="space-y-4">
+              <div className="flex flex-col gap-1">
+                <label className="text-sm font-medium text-gray-700">
+                  Jaminan Kecelakaan Kerja (JKK)
+                </label>
+                <Input
+                  placeholder="Masukkan JKK"
+                  type="number"
+                  value={jkk}
+                  onChange={(e) => setJkk(e.target.value)}
+                  disabled
+                />
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <label className="text-sm font-medium text-gray-700">
+                  Jaminan Kematian (JKM)
+                </label>
+                <Input
+                  placeholder="Masukkan JKM"
+                  type="number"
+                  value={jkm}
+                  onChange={(e) => setJkm(e.target.value)}
+                  disabled
+                />
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <label className="text-sm font-medium text-gray-700">
+                  BPJS Kesehatan
+                </label>
+                <Input
+                  placeholder="Masukkan BPJS Kesehatan"
+                  type="number"
+                  value={bpjs}
+                  onChange={(e) => setBpjs(e.target.value)}
+                  disabled
+                />
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <label className="text-sm font-medium text-gray-700">
+                  Bonus
+                </label>
+                <Input
+                  placeholder="Masukkan Bonus"
+                  type="number"
+                  value={bonus}
+                  onChange={(e) => setBonus(e.target.value)}
+                />
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <label className="text-sm font-medium text-gray-700">
+                  Tunjangan Hari Raya (THR)
+                </label>
+                <Input
+                  placeholder="Masukkan THR"
+                  type="number"
+                  value={thr}
+                  onChange={(e) => setThr(e.target.value)}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
       </Modal>
     </Layout>
   );

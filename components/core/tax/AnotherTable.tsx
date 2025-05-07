@@ -50,7 +50,7 @@ type DataIndex = keyof DataType;
 const items = [
   { key: "1", label: "Detail" },
   { key: "2", label: "Edit" },
-  { key: "3", label: "Delete" },
+  { key: "3", label: "Hapus" },
 ];
 
 interface AnotherTableProps {
@@ -253,7 +253,7 @@ const AnotherTable: React.FC<AnotherTableProps> = ({
 
   const columns: TableColumnsType<DataType> = [
     {
-      title: "Name",
+      title: "Nama",
       dataIndex: "name",
       key: "name",
       width: "20%",
@@ -319,7 +319,7 @@ const AnotherTable: React.FC<AnotherTableProps> = ({
       render: (price: number) => <span>{formatRupiah(price)}</span>,
     },
     {
-      title: "Action",
+      title: "Aksi",
       key: "operation",
       width: "15%",
       render: (_, record) => (
@@ -436,7 +436,7 @@ const AnotherTable: React.FC<AnotherTableProps> = ({
       if (isIncompleteData) {
         yearlyPPh = (yearlyPPh / 12) * monthsCount;
       }
-      
+
       decTax = Math.max(yearlyPPh - totalTax11, 0);
     }
 
@@ -498,104 +498,206 @@ const AnotherTable: React.FC<AnotherTableProps> = ({
           setIsEditModalVisible(false);
         }}
         okText="Simpan"
+        footer={[
+          <Button
+            key="cancel"
+            onClick={() => {
+              setSelectedRecord(null);
+              setIsEditModalVisible(false);
+            }}
+          >
+            Batal
+          </Button>,
+          <Button
+            key="save"
+            type="primary"
+            onClick={() => {
+              setIsEditModalVisible(false);
+              handleEditTax();
+            }}
+          >
+            Simpan
+          </Button>,
+        ]}
       >
-        <Select
-          placeholder="Pilih Karyawan"
-          value={selectedRecord?.idName || undefined}
-          onChange={(value) =>
-            setSelectedRecord({ ...selectedRecord, idName: value })
-          }
-          className="mb-3"
-          style={{ width: "100%" }}
-        >
-          {employeeOptions?.map((option: any) => (
-            <Select.Option key={option.id} value={option.id}>
-              {option.name}
-            </Select.Option>
-          ))}
-        </Select>
-        <Input
-          value={selectedRecord?.thp}
-          onChange={(e) =>
-            setSelectedRecord({ ...selectedRecord, thp: e.target.value })
-          }
-          placeholder="Masukkan THP"
-          className="mb-3"
-        />
-        <Input
-          value={selectedRecord?.positionAllowance}
-          onChange={(e) =>
-            setSelectedRecord({
-              ...selectedRecord,
-              positionAllowance: e.target.value,
-            })
-          }
-          placeholder="Masukkan Position Allowance"
-          className="mb-3"
-          disabled
-        />
-        <Input
-          value={selectedRecord?.incentive}
-          onChange={(e) =>
-            setSelectedRecord({ ...selectedRecord, incentive: e.target.value })
-          }
-          placeholder="Masukkan Incentive"
-          className="mb-3"
-        />
-        <Input
-          value={selectedRecord?.overtimeAllowance}
-          onChange={(e) =>
-            setSelectedRecord({
-              ...selectedRecord,
-              overtimeAllowance: e.target.value,
-            })
-          }
-          placeholder="Masukkan Overtime Allowance"
-          className="mb-3"
-        />
-        <Input
-          value={selectedRecord?.jkk}
-          onChange={(e) =>
-            setSelectedRecord({ ...selectedRecord, jkk: e.target.value })
-          }
-          placeholder="Masukkan Employement Injury Security/JKK"
-          className="mb-3"
-          disabled
-        />
-        <Input
-          value={selectedRecord?.jkm}
-          onChange={(e) =>
-            setSelectedRecord({ ...selectedRecord, jkm: e.target.value })
-          }
-          placeholder="Masukkan Death Security/JKM"
-          className="mb-3"
-          disabled
-        />
-        <Input
-          value={selectedRecord?.bpjs}
-          onChange={(e) =>
-            setSelectedRecord({ ...selectedRecord, bpjs: e.target.value })
-          }
-          placeholder="Masukkan BPJS Health/Jaminan Kesehatan"
-          className="mb-3"
-          disabled
-        />
-        <Input
-          value={selectedRecord?.bonus}
-          onChange={(e) =>
-            setSelectedRecord({ ...selectedRecord, bonus: e.target.value })
-          }
-          placeholder="Masukkan Bonus"
-          className="mb-3"
-        />
-        <Input
-          value={selectedRecord?.thr}
-          onChange={(e) =>
-            setSelectedRecord({ ...selectedRecord, thr: e.target.value })
-          }
-          placeholder="Masukkan Religius Holiday Allowance/THR"
-          className="mb-3"
-        />
+        <div className="space-y-4">
+          {/* Employee Selection */}
+          <div className="flex flex-col gap-1">
+            <label className="text-sm font-medium text-gray-700">
+              Nama Karyawan <span className="text-red-500">*</span>
+            </label>
+            <Select
+              placeholder="Pilih Karyawan"
+              value={selectedRecord?.idName || undefined}
+              onChange={(value) =>
+                setSelectedRecord({ ...selectedRecord, idName: value })
+              }
+            >
+              {employeeOptions?.map((option: any) => (
+                <Select.Option key={option.id} value={option.id}>
+                  {option.name}
+                </Select.Option>
+              ))}
+            </Select>
+          </div>
+
+          {/* Salary Inputs - Two Column Layout */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Column 1 */}
+            <div className="space-y-4">
+              <div className="flex flex-col gap-1">
+                <label className="text-sm font-medium text-gray-700">
+                  Take Home Pay (THP) <span className="text-red-500">*</span>
+                </label>
+                <Input
+                  value={selectedRecord?.thp}
+                  onChange={(e) =>
+                    setSelectedRecord({
+                      ...selectedRecord,
+                      thp: e.target.value,
+                    })
+                  }
+                  placeholder="Masukkan THP"
+                />
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <label className="text-sm font-medium text-gray-700">
+                  Position Allowance
+                </label>
+                <Input
+                  value={selectedRecord?.positionAllowance}
+                  onChange={(e) =>
+                    setSelectedRecord({
+                      ...selectedRecord,
+                      positionAllowance: e.target.value,
+                    })
+                  }
+                  placeholder="Masukkan Position Allowance"
+                  disabled
+                />
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <label className="text-sm font-medium text-gray-700">
+                  Incentive
+                </label>
+                <Input
+                  value={selectedRecord?.incentive}
+                  onChange={(e) =>
+                    setSelectedRecord({
+                      ...selectedRecord,
+                      incentive: e.target.value,
+                    })
+                  }
+                  placeholder="Masukkan Incentive"
+                />
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <label className="text-sm font-medium text-gray-700">
+                  Overtime Allowance
+                </label>
+                <Input
+                  value={selectedRecord?.overtimeAllowance}
+                  onChange={(e) =>
+                    setSelectedRecord({
+                      ...selectedRecord,
+                      overtimeAllowance: e.target.value,
+                    })
+                  }
+                  placeholder="Masukkan Overtime Allowance"
+                />
+              </div>
+            </div>
+
+            {/* Column 2 */}
+            <div className="space-y-4">
+              <div className="flex flex-col gap-1">
+                <label className="text-sm font-medium text-gray-700">
+                  Jaminan Kecelakaan Kerja (JKK)
+                </label>
+                <Input
+                  value={selectedRecord?.jkk}
+                  onChange={(e) =>
+                    setSelectedRecord({
+                      ...selectedRecord,
+                      jkk: e.target.value,
+                    })
+                  }
+                  placeholder="Masukkan JKK"
+                  disabled
+                />
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <label className="text-sm font-medium text-gray-700">
+                  Jaminan Kematian (JKM)
+                </label>
+                <Input
+                  value={selectedRecord?.jkm}
+                  onChange={(e) =>
+                    setSelectedRecord({
+                      ...selectedRecord,
+                      jkm: e.target.value,
+                    })
+                  }
+                  placeholder="Masukkan JKM"
+                  disabled
+                />
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <label className="text-sm font-medium text-gray-700">
+                  BPJS Kesehatan
+                </label>
+                <Input
+                  value={selectedRecord?.bpjs}
+                  onChange={(e) =>
+                    setSelectedRecord({
+                      ...selectedRecord,
+                      bpjs: e.target.value,
+                    })
+                  }
+                  placeholder="Masukkan BPJS Kesehatan"
+                  disabled
+                />
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <label className="text-sm font-medium text-gray-700">
+                  Bonus
+                </label>
+                <Input
+                  value={selectedRecord?.bonus}
+                  onChange={(e) =>
+                    setSelectedRecord({
+                      ...selectedRecord,
+                      bonus: e.target.value,
+                    })
+                  }
+                  placeholder="Masukkan Bonus"
+                />
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <label className="text-sm font-medium text-gray-700">
+                  Tunjangan Hari Raya (THR)
+                </label>
+                <Input
+                  value={selectedRecord?.thr}
+                  onChange={(e) =>
+                    setSelectedRecord({
+                      ...selectedRecord,
+                      thr: e.target.value,
+                    })
+                  }
+                  placeholder="Masukkan THR"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
       </Modal>
 
       {/* modal delete */}
