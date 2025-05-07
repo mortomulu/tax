@@ -32,7 +32,7 @@ type DataIndex = keyof DataType;
 const items = [
   { key: "1", label: "Detail" },
   { key: "2", label: "Edit" },
-  { key: "3", label: "Delete" },
+  { key: "3", label: "Hapus" },
 ];
 
 interface TerTable {
@@ -221,7 +221,7 @@ const TerTable: React.FC<TerTable> = ({ data, fetchTers }) => {
       render: (ter: number) => <span>{ter}%</span>,
     },
     {
-      title: "Action",
+      title: "Aksi",
       key: "operation",
       width: "15%",
       render: (_, record) => (

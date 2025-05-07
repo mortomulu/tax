@@ -49,7 +49,7 @@ const items = [
   { key: "1", label: "Detail" },
   { key: "2", label: "Edit Profil" },
   { key: "3", label: "Edit Riwayat Jabatan" },
-  { key: "4", label: "Delete" },
+  { key: "4", label: "Hapus" },
 ];
 
 interface AnotherTableProps {

@@ -30,7 +30,7 @@ type DataIndex = keyof DataType;
 const items = [
   { key: "1", label: "Detail" },
   { key: "2", label: "Edit" },
-  { key: "3", label: "Delete" },
+  { key: "3", label: "Hapus" },
 ];
 
 interface PtkpTable {
@@ -201,7 +201,7 @@ const PtkpTable: React.FC<PtkpTable> = ({ data, fetchPtkps }) => {
       render: (price: number) => <span>{formatRupiah(price)}</span>,
     },
     {
-      title: "Action",
+      title: "Aksi",
       key: "operation",
       width: "15%",
       render: (_, record) => (
