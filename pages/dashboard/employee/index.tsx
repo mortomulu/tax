@@ -246,7 +246,7 @@ export default function EmployeePage() {
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-2xl font-bold">List Data Karyawan</h1>
           <Button type="primary" onClick={() => setIsAddModalOpen(true)}>
-            Add Data Karyawan
+            Tambah Data Karyawan
           </Button>
         </div>
         <EmployeeTable
@@ -304,120 +304,172 @@ export default function EmployeePage() {
           </Button>,
         ]}
       >
-        <Input
-          placeholder="Masukkan Nama Karyawan"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          className="mb-3"
-        />
-        <Select
-          value={idType || undefined}
-          className="mb-3"
-          style={{ width: "100%" }}
-          onChange={(val) => setIdType(val)}
-          placeholder="Pilih NIK/NPWP"
-        >
-          <Select.Option value="NIK">NIK</Select.Option>
-          <Select.Option value="NPWP">NPWP</Select.Option>
-        </Select>
-        <Input
-          placeholder={`Masukkan ${idType?.toUpperCase()}`}
-          value={idValue}
-          onChange={(e) => setIdValue(e.target.value)}
-          className="mb-3"
-        />
-        {/* <Input
-          placeholder="Masukkan NIK"
-          value={nik}
-          onChange={(e) => setNik(e.target.value)}
-          className="mb-3"
-        />
-        <Input
-          placeholder="Masukkan NPWP"
-          value={npwp}
-          onChange={(e) => setNpwp(e.target.value)}
-          className="mb-3"
-        /> */}
-        <TextArea
-          placeholder="Masukkan Alamat"
-          value={address}
-          onChange={(e) => setAddress(e.target.value)}
-          className="mb-3"
-          autoSize={{ minRows: 2 }}
-        />
-        <Select
-          placeholder="Pilih PTKP"
-          value={ptkp || undefined}
-          onChange={setPtkp}
-          className="mb-3"
-          style={{ width: "100%" }}
-        >
-          {ptkpOptions?.map((option: any) => (
-            <Select.Option key={option.id} value={option.id}>
-              {option.ptkp}
-            </Select.Option>
-          ))}
-        </Select>
+        <div className="space-y-4">
+          {/* Nama Karyawan */}
+          <div className="flex flex-col gap-1">
+            <label className="text-sm font-medium text-gray-700">
+              Nama Karyawan
+            </label>
+            <Input
+              placeholder="Masukkan Nama Karyawan"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="w-full"
+            />
+          </div>
 
-        <h3 className="mb-2">Jabatan</h3>
-        {jabatanList.map((jabatan, index) => (
-          <div key={jabatan.id} className="mb-4 border p-3 rounded">
+          {/* Jenis Identitas */}
+          <div className="flex flex-col gap-1">
+            <label className="text-sm font-medium text-gray-700">
+              Jenis Identitas
+            </label>
             <Select
-              placeholder="Pilih Jabatan"
-              value={jabatan.jabatan || undefined}
-              onChange={(value) => handleJabatanChange(index, "jabatan", value)}
-              className="mb-2"
-              style={{ width: "100%" }}
+              value={idType || undefined}
+              className="w-full"
+              onChange={(val) => setIdType(val)}
+              placeholder="Pilih NIK/NPWP"
             >
-              {positionOptions?.map((option: any) => (
+              <Select.Option value="NIK">NIK</Select.Option>
+              <Select.Option value="NPWP">NPWP</Select.Option>
+            </Select>
+          </div>
+
+          {/* Nomor Identitas */}
+          <div className="flex flex-col gap-1">
+            <label className="text-sm font-medium text-gray-700">
+              {idType ? idType.toUpperCase() : "Nomor Identitas"}
+            </label>
+            <Input
+              placeholder={`Masukkan ${idType?.toUpperCase() || "Identitas"}`}
+              value={idValue}
+              onChange={(e) => setIdValue(e.target.value)}
+              className="w-full"
+            />
+          </div>
+
+          {/* Alamat */}
+          <div className="flex flex-col gap-1">
+            <label className="text-sm font-medium text-gray-700">Alamat</label>
+            <TextArea
+              placeholder="Masukkan Alamat"
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+              autoSize={{ minRows: 2 }}
+              className="w-full"
+            />
+          </div>
+
+          {/* PTKP */}
+          <div className="flex flex-col gap-1">
+            <label className="text-sm font-medium text-gray-700">PTKP</label>
+            <Select
+              placeholder="Pilih PTKP"
+              value={ptkp || undefined}
+              onChange={setPtkp}
+              className="w-full"
+            >
+              {ptkpOptions?.map((option: any) => (
                 <Select.Option key={option.id} value={option.id}>
-                  {option.position}
+                  {option.ptkp}
                 </Select.Option>
               ))}
             </Select>
-
-            <Checkbox
-              onChange={(e) =>
-                handleJabatanChange(index, "now", e.target.checked)
-              }
-              checked={jabatan.now}
-              className="w-full mb-3"
-            >
-              Jabatan Sekarang
-            </Checkbox>
-
-            <div className="flex items-center gap-4">
-              <DatePicker
-                placeholder="Mulai Jabatan"
-                onChange={(date) =>
-                  handleJabatanChange(index, "startDate", date)
-                }
-                value={jabatan.startDate ? dayjs(jabatan.startDate) : null}
-              />
-              <MdArrowRightAlt className="text-xl" />
-              <DatePicker
-                placeholder="Akhir Jabatan"
-                onChange={(date) => handleJabatanChange(index, "endDate", date)}
-                value={jabatan.endDate ? dayjs(jabatan.endDate) : null}
-                disabled={jabatan.now}
-              />
-            </div>
-
-            {jabatanList.length > 1 && (
-              <Button
-                danger
-                onClick={() => handleRemoveJabatan(index)}
-                className="mt-2"
-              >
-                Hapus Jabatan
-              </Button>
-            )}
           </div>
-        ))}
 
-        <Button type="dashed" onClick={handleAddJabatan} className="w-full">
-          + Tambah Jabatan
-        </Button>
+          {/* Jabatan Section */}
+          <div className="space-y-3">
+            <h3 className="text-base font-semibold text-gray-800">Jabatan</h3>
+            {jabatanList.map((jabatan, index) => (
+              <div
+                key={jabatan.id}
+                className="p-4 border border-gray-200 rounded-lg space-y-3"
+              >
+                {/* Jabatan */}
+                <div className="flex flex-col gap-1">
+                  <label className="text-sm font-medium text-gray-700">
+                    Jabatan
+                  </label>
+                  <Select
+                    placeholder="Pilih Jabatan"
+                    value={jabatan.jabatan || undefined}
+                    onChange={(value) =>
+                      handleJabatanChange(index, "jabatan", value)
+                    }
+                    className="w-full"
+                  >
+                    {positionOptions?.map((option: any) => (
+                      <Select.Option key={option.id} value={option.id}>
+                        {option.position}
+                      </Select.Option>
+                    ))}
+                  </Select>
+                </div>
+
+                {/* Checkbox */}
+                <div className="flex items-center">
+                  <Checkbox
+                    onChange={(e) =>
+                      handleJabatanChange(index, "now", e.target.checked)
+                    }
+                    checked={jabatan.now}
+                  >
+                    <span className="text-sm text-gray-700">
+                      Jabatan Sekarang
+                    </span>
+                  </Checkbox>
+                </div>
+
+                {/* Date Range */}
+                <div className="flex items-end gap-3">
+                  <div className="flex-1 flex flex-col gap-1">
+                    <label className="text-sm font-medium text-gray-700">
+                      Mulai Jabatan
+                    </label>
+                    <DatePicker
+                      placeholder="Mulai Jabatan"
+                      onChange={(date) =>
+                        handleJabatanChange(index, "startDate", date)
+                      }
+                      value={
+                        jabatan.startDate ? dayjs(jabatan.startDate) : null
+                      }
+                      className="w-full"
+                    />
+                  </div>
+                  <MdArrowRightAlt className="text-xl text-gray-500 mb-1" />
+                  <div className="flex-1 flex flex-col gap-1">
+                    <label className="text-sm font-medium text-gray-700">
+                      Akhir Jabatan
+                    </label>
+                    <DatePicker
+                      placeholder="Akhir Jabatan"
+                      onChange={(date) =>
+                        handleJabatanChange(index, "endDate", date)
+                      }
+                      value={jabatan.endDate ? dayjs(jabatan.endDate) : null}
+                      disabled={jabatan.now}
+                      className="w-full"
+                    />
+                  </div>
+                </div>
+
+                {jabatanList.length > 1 && (
+                  <Button
+                    danger
+                    onClick={() => handleRemoveJabatan(index)}
+                    className="mt-2"
+                  >
+                    Hapus Jabatan
+                  </Button>
+                )}
+              </div>
+            ))}
+
+            <Button type="dashed" onClick={handleAddJabatan} className="w-full">
+              + Tambah Jabatan
+            </Button>
+          </div>
+        </div>
       </Modal>
     </Layout>
   );

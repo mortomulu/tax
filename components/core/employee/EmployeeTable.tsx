@@ -280,7 +280,7 @@ const EmployeeTable: any = ({
       onFilter: (value, record) => record.ptkp.indexOf(value as string) === 0,
     },
     {
-      title: "Action",
+      title: "Aksi",
       key: "operation",
       width: "15%",
       render: (_, record) => (
@@ -304,9 +304,9 @@ const EmployeeTable: any = ({
 
   const columnsHistoryPositions = [
     { title: "Jabatan", dataIndex: "position", key: "position" },
-    { title: "Incentive", dataIndex: "incentive", key: "incentive" },
-    { title: "Tahun Mulai", dataIndex: "startDate", key: "startDate" },
-    { title: "Tahun Selesai", dataIndex: "endDate", key: "endDate" },
+    { title: "Position Allowance", dataIndex: "incentive", key: "incentive" },
+    { title: "Mulai Jabatan", dataIndex: "startDate", key: "startDate" },
+    { title: "Selesai Jabatan", dataIndex: "endDate", key: "endDate" },
   ];
 
   const handleMenuClick = (key: string, record: any) => {
@@ -498,7 +498,7 @@ const EmployeeTable: any = ({
 
       {/* modal edit data */}
       <Modal
-        title={"Edit Data Karyawan"}
+        title="Edit Data Karyawan"
         open={isEditModalOpen}
         onCancel={() => setIsEditModalOpen(false)}
         footer={[
@@ -510,105 +510,68 @@ const EmployeeTable: any = ({
           </Button>,
         ]}
       >
-        <Input
-          placeholder="Masukkan Nama Karyawan"
-          value={newName}
-          onChange={(e) => setNewName(e.target.value)}
-          className="mb-3"
-        />
-        <Select
-          value={idType || undefined}
-          className="mb-3"
-          style={{ width: "100%" }}
-          onChange={(val) => setIdType(val)}
-          placeholder="Pilih NIK/NPWP"
-        >
-          <Select.Option value="NIK">NIK</Select.Option>
-          <Select.Option value="NPWP">NPWP</Select.Option>
-        </Select>
-        <Input
-          placeholder={`Masukkan ${idType?.toUpperCase()}`}
-          value={idValue}
-          onChange={(e) => setIdValue(e.target.value)}
-          className="mb-3"
-        />
-        <Select
-          placeholder="Pilih PTKP"
-          value={newPtkp || undefined}
-          onChange={setNewPtkp}
-          className="mb-3"
-          style={{ width: "100%" }}
-        >
-          {ptkpOptions?.map((option: any) => (
-            <Select.Option key={option.id} value={option.id}>
-              {option.ptkp}
-            </Select.Option>
-          ))}
-        </Select>
+        <div className="space-y-4">
+          {/* Nama Karyawan */}
+          <div className="flex flex-col gap-1">
+            <label className="text-sm font-medium text-gray-700">
+              Nama Karyawan
+              <span className="text-red-500">*</span>
+            </label>
+            <Input
+              placeholder="Masukkan Nama Karyawan"
+              value={newName}
+              onChange={(e) => setNewName(e.target.value)}
+            />
+          </div>
 
-        {/* <h3>Jabatan</h3>
-        {historiesPosition?.map((jabatan: any, index: any) => (
-          <>
-            <div key={jabatan.id} className="mb-4 border p-3 rounded">
-              <Select
-                placeholder="Pilih Jabatan"
-                value={jabatan.position || undefined}
-                onChange={() => {
-                  handleJabatanChange(index, "position", jabatan.id);
-                }}
-                className="mb-2"
-                style={{ width: "100%" }}
-              >
-                {positionOptions.map((option: any) => (
-                  <Select.Option key={option.id} value={option.id}>
-                    {option.position}
-                  </Select.Option>
-                ))}
-              </Select>
+          {/* Jenis Identitas */}
+          <div className="flex flex-col gap-1">
+            <label className="text-sm font-medium text-gray-700">
+              Jenis Identitas
+              <span className="text-red-500">*</span>
+            </label>
+            <Select
+              value={idType || undefined}
+              onChange={(val) => setIdType(val)}
+              placeholder="Pilih NIK/NPWP"
+            >
+              <Select.Option value="NIK">NIK</Select.Option>
+              <Select.Option value="NPWP">NPWP</Select.Option>
+            </Select>
+          </div>
 
-              <Checkbox
-                onChange={(e) =>
-                  handleJabatanChange(index, "now", e.target.checked)
-                }
-                checked={jabatan.now}
-                className="w-full mb-3"
-              >
-                Jabatan Sekarang
-              </Checkbox>
+          {/* Nomor Identitas */}
+          <div className="flex flex-col gap-1">
+            <label className="text-sm font-medium text-gray-700">
+              {idType ? `${idType.toUpperCase()}` : "Nomor Identitas"}
+              <span className="text-red-500">*</span>
+            </label>
+            <Input
+              placeholder={`Masukkan ${idType?.toUpperCase() || "Identitas"}`}
+              value={idValue}
+              onChange={(e) => setIdValue(e.target.value)}
+            />
+          </div>
 
-              <div className="flex items-center gap-4">
-                <DatePicker
-                  onChange={(date) =>
-                    handleJabatanChange(index, "startDate", date)
-                  }
-                  value={jabatan.startDate ? dayjs(jabatan.startDate) : null}
-                />
-                <MdArrowRightAlt className="text-xl" />
-                <DatePicker
-                  placeholder="Akhir Jabatan"
-                  onChange={(date) =>
-                    handleJabatanChange(index, "endDate", date)
-                  }
-                  value={jabatan.endDate ? dayjs(jabatan.endDate) : null}
-                  disabled={jabatan.now}
-                />
-              </div>
-              {historiesPosition?.length > 1 && (
-                <Button
-                  danger
-                  onClick={() => handleRemoveJabatan(index)}
-                  className="mt-2"
-                >
-                  Hapus Jabatan
-                </Button>
-              )}
-            </div>
-          </>
-        ))}
-
-        <Button type="dashed" onClick={handleAddJabatan} className="w-full">
-          + Tambah Jabatan
-        </Button> */}
+          {/* PTKP */}
+          <div className="flex flex-col gap-1">
+            <label className="text-sm font-medium text-gray-700">
+              PTKP
+              <span className="text-red-500">*</span>
+            </label>
+            <Select
+              placeholder="Pilih PTKP"
+              value={newPtkp || undefined}
+              onChange={setNewPtkp}
+            >
+              {ptkpOptions?.map((option: any) => (
+                <Select.Option key={option.id} value={option.id}>
+                  {option.ptkp}
+                </Select.Option>
+              ))}
+            </Select>
+          </div>
+        </div>
       </Modal>
 
       {/* modal edit history positions */}
@@ -652,7 +615,7 @@ const EmployeeTable: any = ({
           </Descriptions.Item>
         </Descriptions>
 
-        <h3 className="mt-8 mb-4 font-semibold">History Jabatan</h3>
+        <h3 className="mt-8 mb-4 font-semibold">Riwayat Jabatan</h3>
         <Table
           columns={columnsHistoryPositions}
           dataSource={historiesPosition}

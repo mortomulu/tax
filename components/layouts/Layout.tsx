@@ -78,7 +78,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
         <div>
           <h2 className="text-2xl font-bold flex items-center space-x-2 mb-6">
             <HiReceiptTax className="text-yellow-400" />
-            <span>Dashboard</span>
+            <span>SIPEKA</span>
           </h2>
           <nav>
             <div className="flex flex-col h-full justify-between">
