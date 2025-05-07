@@ -44,8 +44,9 @@ export default function Dashboard() {
   const year = today.getFullYear();
   const month = String(today.getMonth() + 1).padStart(2, "0");
   const monthNumber = today.getMonth() + 1;
-
-  const defaultValue = dayjs(`${year}-${Number(month)}-1`, "YYYY-MM-DD");
+  
+  const defaultDayjs = dayjs(`${year}-${month}-01`, "YYYY-MM-DD"); 
+  const [defaultValue, setDefaultValue] = useState<any>(defaultDayjs);
 
   const [selectedMonth, setSelectedMonth] = useState<Date | null>(null);
 
@@ -317,7 +318,8 @@ export default function Dashboard() {
           <div className="mb-6">
             <div className="p-6 rounded-lg shadow-md border-l-4 bg-indigo-950 text-white border-yellow-400">
               <h2 className="text-xl font-semibold text-white mb-4">
-                Archive Laporan Pajak Per Bulan
+                Laporan Pajak Bulanan Diarsipkan Secara Otomatis pada Tanggal
+                Berikut
               </h2>
               <DatePicker
                 value={defaultValue}
