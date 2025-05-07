@@ -264,7 +264,7 @@ const ReportPage: React.FC = () => {
       render: (value: number) => `Rp ${value.toLocaleString("id-ID")}`,
     },
     {
-      title: "Action",
+      title: "Aksi",
       key: "operation",
       width: "15%",
       render: (_: any, record: any) => (

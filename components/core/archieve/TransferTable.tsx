@@ -156,7 +156,7 @@ const App: React.FC<any> = ({ month, year }) => {
   const columns: TableColumnsType<any> = [
     {
       dataIndex: "employee_name",
-      title: "Name",
+      title: "Nama",
     },
     {
       dataIndex: "ptkp",
@@ -169,28 +169,34 @@ const App: React.FC<any> = ({ month, year }) => {
     },
     {
       dataIndex: "tax_total",
-      title: "Tax",
+      title: "Pajak",
       render: (price: number) => <span>{formatRupiah(price || 0)}</span>,
     },
     {
-      title: "Action",
+      title: "Aksi",
       key: "operation",
       width: "15%",
       render: (_: any, record: any) => (
-        <Dropdown
-          menu={{
-            items: actionItems.map((item) => ({
-              ...item,
-              onClick: (e) => {
-                e.domEvent.stopPropagation();
-                handleMenuClick(item, record);
-              },
-            })),
-          }}
-          trigger={["click"]}
-        >
-          <Button type="text" icon={<BsThreeDotsVertical />} />
-        </Dropdown>
+        <div onClick={(e) => e.stopPropagation()}>
+          <Dropdown
+            menu={{
+              items: actionItems.map((item) => ({
+                ...item,
+                onClick: (e) => {
+                  e.domEvent.stopPropagation();
+                  handleMenuClick(item, record);
+                },
+              })),
+            }}
+            trigger={["click"]}
+          >
+            <Button
+              type="text"
+              icon={<BsThreeDotsVertical />}
+              onClick={(e) => e.stopPropagation()}
+            />
+          </Dropdown>
+        </div>
       ),
     },
   ];
@@ -487,7 +493,7 @@ const App: React.FC<any> = ({ month, year }) => {
           onClick={handleAddArchieve}
           loading={false}
         >
-          Simpan Archive ({rightSideData?.length} items)
+          Simpan Arsip ({rightSideData?.length} items)
         </Button>
       </Flex>
 
@@ -576,7 +582,15 @@ const App: React.FC<any> = ({ month, year }) => {
               <InputNumber style={{ width: "100%" }} />
             </Form.Item> */}
 
+            <Form.Item name="thp" label="THP">
+              <InputNumber style={{ width: "100%" }} />
+            </Form.Item>
+
             <Form.Item name="incentive" label="Insentif">
+              <InputNumber style={{ width: "100%" }} />
+            </Form.Item>
+
+            <Form.Item name="overtime_allowance" label="Overtime Allowance">
               <InputNumber style={{ width: "100%" }} />
             </Form.Item>
 
@@ -591,10 +605,6 @@ const App: React.FC<any> = ({ month, year }) => {
             {/* <Form.Item name="tax_total" label="Pajak">
               <InputNumber style={{ width: "100%" }} />
             </Form.Item> */}
-
-            <Form.Item name="thp" label="THP">
-              <InputNumber style={{ width: "100%" }} />
-            </Form.Item>
 
             <Form.Item>
               <Button htmlType="submit" type="primary" block>
