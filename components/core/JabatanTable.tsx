@@ -334,7 +334,7 @@ const JabatanTable: React.FC<JabatanTableProps> = ({
           </Form.Item>
           <Form.Item
             name="incentive"
-            label="Incentive"
+            label="Position Allowance"
             rules={[{ required: true }]}
           >
             <InputNumber className="w-full" />

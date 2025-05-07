@@ -18,7 +18,7 @@ function toTitleCase(str: string) {
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter();
-  const pathname = router.asPath; 
+  const pathname = router.asPath;
 
   const generateBreadcrumb = () => {
     const segments = pathname.split("/").filter((segment) => segment);
@@ -63,8 +63,8 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
 
   const handleLogout = async () => {
     try {
-      await axios.post("/api/logout"); 
-      router.push("/"); 
+      await axios.post("/api/logout");
+      router.push("/");
     } catch (err) {
       message.error("Gagal logout");
       console.error("Logout error:", err);
@@ -197,7 +197,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                         d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"
                       />
                     </svg>
-                    Additional Data
+                    Data Tambahan
                   </Link>
                 </li>
               </ul>

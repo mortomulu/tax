@@ -338,7 +338,7 @@ const PtkpTable: React.FC<PtkpTable> = ({ data, fetchPtkps }) => {
           <Form.Item name="ptkp" label="PTKP" rules={[{ required: true }]}>
             <Input />
           </Form.Item>
-          <Form.Item name="amount" label="Amount" rules={[{ required: true }]}>
+          <Form.Item name="amount" label="Jumlah" rules={[{ required: true }]}>
             <InputNumber className="w-full" />
           </Form.Item>
         </Form>
