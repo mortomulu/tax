@@ -42,7 +42,7 @@ const monthNames = [
 export default function Dashboard() {
   const today = new Date();
   const year = today.getFullYear();
-  const month = String(today.getMonth() + 1).padStart(2, "0");
+  const month = String(today.getMonth() + 2).padStart(2, "0");
   const monthNumber = today.getMonth() + 1;
   
   const defaultDayjs = dayjs(`${year}-${month}-01`, "YYYY-MM-DD"); 
@@ -318,7 +318,7 @@ export default function Dashboard() {
           <div className="mb-6">
             <div className="p-6 rounded-lg shadow-md border-l-4 bg-indigo-950 text-white border-yellow-400">
               <h2 className="text-xl font-semibold text-white mb-4">
-                Laporan Pajak Bulanan Diarsipkan Secara Otomatis pada Tanggal
+                Laporan Pajak Bulan {monthNames[monthNumber - 1]} Diarsipkan Secara Otomatis pada Tanggal
                 Berikut
               </h2>
               <DatePicker
