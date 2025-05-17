@@ -169,6 +169,8 @@ export default function AdditionalDataPage() {
         open={isJabatanModalOpen}
         onCancel={() => setIsJabatanModalOpen(false)}
         onOk={() => formJabatan.submit()}
+        okText="Simpan Data"
+        cancelText="Batal"
       >
         <Form form={formJabatan} layout="vertical" onFinish={handleAddJabatan}>
           <Form.Item
@@ -193,6 +195,8 @@ export default function AdditionalDataPage() {
         open={isPtkpModalOpen}
         onCancel={() => setIsPtkpModalOpen(false)}
         onOk={() => formPtkp.submit()}
+        okText="Simpan Data"
+        cancelText="Batal"
       >
         <Form form={formPtkp} layout="vertical" onFinish={handleAddPtkp}>
           <Form.Item name="ptkp" label="Nama PTKP" rules={[{ required: true }]}>
@@ -209,6 +213,8 @@ export default function AdditionalDataPage() {
         open={isTerModalOpen}
         onCancel={() => setIsTerModalOpen(false)}
         onOk={() => formTer.submit()}
+        okText="Simpan Data"
+        cancelText="Batal"
       >
         <Form form={formTer} layout="vertical" onFinish={handleAddTer}>
           <Form.Item

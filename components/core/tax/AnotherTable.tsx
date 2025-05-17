@@ -497,7 +497,7 @@ const AnotherTable: React.FC<AnotherTableProps> = ({
           setSelectedRecord(null);
           setIsEditModalVisible(false);
         }}
-        okText="Simpan"
+        okText="Perbarui Data"
         footer={[
           <Button
             key="cancel"
@@ -516,7 +516,7 @@ const AnotherTable: React.FC<AnotherTableProps> = ({
               handleEditTax();
             }}
           >
-            Simpan
+            Perbarui Data
           </Button>,
         ]}
       >
@@ -709,7 +709,8 @@ const AnotherTable: React.FC<AnotherTableProps> = ({
           setIsDeleteModalVisible(false);
         }}
         onCancel={() => setIsDeleteModalVisible(false)}
-        okText="Hapus"
+        okText="Ya, Hapus"
+        cancelText="Batal"
         okButtonProps={{ danger: true }}
       >
         <p>

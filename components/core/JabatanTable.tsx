@@ -323,6 +323,8 @@ const JabatanTable: React.FC<JabatanTableProps> = ({
           editForm.resetFields();
         }}
         onOk={() => editForm.submit()}
+        okText="Perbarui Data"
+        cancelText="Batal"
       >
         <Form form={editForm} layout="vertical" onFinish={handleEdit}>
           <Form.Item
@@ -346,17 +348,11 @@ const JabatanTable: React.FC<JabatanTableProps> = ({
         open={isDeleteModalOpen}
         onCancel={() => setIsDeleteModalOpen(false)}
         onOk={handleDeleteData}
+        okText="Ya, Hapus"
+        cancelText="Batal"
+        okButtonProps={{ danger: true }}
       >
-        <p>Apakah Anda yakin ingin menghapus data ini?</p>
-        <p>
-          <strong>ID:</strong> {activeRecord?.id}
-        </p>
-        <p>
-          <strong>Nama:</strong>{" "}
-          {activeRecord?.position ||
-            activeRecord?.ptkp ||
-            activeRecord?.typeTer}
-        </p>
+        <p>Apakah Anda yakin ingin menghapus data {activeRecord?.position}?</p>
       </Modal>
     </div>
   );

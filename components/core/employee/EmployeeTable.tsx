@@ -232,7 +232,7 @@ const EmployeeTable: any = ({
 
   const columns: TableColumnsType<DataType> = [
     {
-      title: "Name",
+      title: "Nama",
       dataIndex: "name",
       key: "name",
       width: "20%",
@@ -503,10 +503,10 @@ const EmployeeTable: any = ({
         onCancel={() => setIsEditModalOpen(false)}
         footer={[
           <Button key="cancel" onClick={() => setIsEditModalOpen(false)}>
-            Cancel
+            Batal
           </Button>,
           <Button key="save" type="primary" onClick={handleSave}>
-            Save Changes
+            Perbarui Data
           </Button>,
         ]}
       >

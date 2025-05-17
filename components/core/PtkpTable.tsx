@@ -333,6 +333,8 @@ const PtkpTable: React.FC<PtkpTable> = ({ data, fetchPtkps }) => {
           editForm.resetFields();
         }}
         onOk={() => editForm.submit()}
+        okText="Perbarui Data"
+        cancelText="Batal"
       >
         <Form form={editForm} layout="vertical" onFinish={handleEdit}>
           <Form.Item name="ptkp" label="PTKP" rules={[{ required: true }]}>
@@ -348,17 +350,11 @@ const PtkpTable: React.FC<PtkpTable> = ({ data, fetchPtkps }) => {
         open={isDeleteModalOpen}
         onCancel={() => setIsDeleteModalOpen(false)}
         onOk={handleDeleteData}
+        okText="Ya, Hapus"
+        cancelText="Batal"
+        okButtonProps={{ danger: true }}
       >
-        <p>Apakah Anda yakin ingin menghapus data ini?</p>
-        <p>
-          <strong>ID:</strong> {activeRecord?.id}
-        </p>
-        <p>
-          <strong>Nama:</strong>{" "}
-          {activeRecord?.position ||
-            activeRecord?.ptkp ||
-            activeRecord?.typeTer}
-        </p>
+        <p>Apakah Anda yakin ingin menghapus data {activeRecord?.ptkp}?</p>
       </Modal>
     </div>
   );

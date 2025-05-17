@@ -244,7 +244,7 @@ export default function EmployeePage() {
     <Layout>
       <div className="bg-white p-6 rounded-lg shadow-md">
         <div className="flex justify-between items-center mb-4">
-          <h1 className="text-2xl font-bold">List Data Karyawan</h1>
+          <h1 className="text-2xl font-bold">Data Karyawan</h1>
           <Button type="primary" onClick={() => setIsAddModalOpen(true)}>
             Tambah Data Karyawan
           </Button>
@@ -297,10 +297,10 @@ export default function EmployeePage() {
               setIsAddModalOpen(false);
             }}
           >
-            Cancel
+            Batal
           </Button>,
           <Button key="add" type="primary" onClick={handleAdd}>
-            Add
+            Simpan Data
           </Button>,
         ]}
       >
