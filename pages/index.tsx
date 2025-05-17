@@ -42,12 +42,12 @@ export default function Login() {
       <FaCircle className="text-primary-secondary text-5xl" />
       <div className="bg-white p-8 border border-gray-200 rounded-xl shadow-lg w-full max-w-md">
         <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">
-          Sign In to Your Account
+          Masuk ke Akun Anda
         </h2>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-4">
             <label className="block text-sm font-medium text-gray-700">
-              Email Address
+              Email
             </label>
             <input
               type="email"
@@ -68,7 +68,7 @@ export default function Login() {
                 href="/forgot-password"
                 className="text-sm text-primary-primary hover:text-primary-secondary transition-colors"
               >
-                Forgot password?
+                Lupa password?
               </Link>
             </div>
             <input
