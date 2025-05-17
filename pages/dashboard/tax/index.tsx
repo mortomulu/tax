@@ -351,7 +351,8 @@ export default function List() {
               <p className="text-sm text-blue-700">
                 Jika diperlukan, Anda dapat mengedit data pajak untuk bulan{" "}
                 <span className="font-semibold">{monthNames[month - 1]}</span>{" "}
-                sebelum sistem melakukan pembaruan otomatis pada tanggal{" "}
+                sebelum sistem melakukan arsip laporan pajak otomatis pada
+                tanggal{" "}
                 <span className="font-semibold">
                   {year}-{month + 1}-01
                 </span>
@@ -382,7 +383,7 @@ export default function List() {
         </div>
 
         {/* Table */}
-        <div className="border rounded-lg overflow-hidden">
+        <div className=" rounded-lg overflow-hidden">
           <AnotherTable
             data={data}
             fetchAllTaxData={fetchAllTaxData}
