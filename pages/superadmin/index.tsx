@@ -111,7 +111,7 @@ export default function UserList() {
 
     const { error: profileError } = await supabase
       .from("profiles")
-      .insert({ id: userId, role, email });
+      .insert({ id: userId, role: "admin", email });
 
     if (profileError) {
       message.error("User dibuat tapi gagal simpan role");
@@ -174,10 +174,10 @@ export default function UserList() {
 
   const handleLogout = async () => {
     try {
-      await axios.post("/api/logout"); // panggil API logout
-      router.push("/"); // redirect ke halaman login/landing
+      await axios.post("/api/logout");
+      router.push("/");
     } catch (err) {
-      message.error("Gagal logout")
+      message.error("Gagal logout");
       console.error("Logout error:", err);
     }
   };
@@ -190,7 +190,7 @@ export default function UserList() {
           <div className="flex justify-between h-16 items-center">
             <div className="flex items-center">
               <h1 className="text-xl font-bold text-gray-800">
-                Admin Dashboard
+                Superadmin Dashboard
               </h1>
             </div>
             <div className="flex items-center space-x-4">
@@ -238,10 +238,10 @@ export default function UserList() {
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
           <div>
             <h1 className="text-2xl font-bold text-gray-800">
-              User Management
+              Manajemen Pengguna
             </h1>
             <p className="text-gray-600 mt-1">
-              Manage all system users and their permissions
+              Kelola seluruh pengguna sistem dan hak akses mereka
             </p>
           </div>
           <Button
@@ -250,7 +250,7 @@ export default function UserList() {
             className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700"
             icon={<PlusOutlined />}
           >
-            Add User
+            Tambah Pengguna
           </Button>
         </div>
 
@@ -273,11 +273,14 @@ export default function UserList() {
 
         {/* Add User Modal */}
         <Modal
-          title={<span className="text-lg font-semibold">Add New User</span>}
+          title={
+            <span className="text-lg font-semibold">Tambah Pengguna Baru</span>
+          }
           open={modalOpen}
           onCancel={() => setModalOpen(false)}
           onOk={() => form.submit()}
-          okText="Add User"
+          okText="Simpan Data"
+          cancelText="Batal"
           okButtonProps={{ className: "bg-blue-600 hover:bg-blue-700" }}
           cancelButtonProps={{ className: "hover:bg-gray-100" }}
           width={600}
@@ -309,7 +312,7 @@ export default function UserList() {
                 className="py-2"
               />
             </Form.Item>
-            <Form.Item
+            {/* <Form.Item
               name="role"
               label={<span className="font-medium text-gray-700">Role</span>}
               rules={[{ required: true }]}
@@ -323,14 +326,16 @@ export default function UserList() {
                   { value: "superadmin", label: "Super Admin" },
                 ]}
               />
-            </Form.Item>
+            </Form.Item> */}
           </Form>
         </Modal>
 
         {/* Delete Confirmation Modal */}
         <Modal
           title={
-            <span className="text-lg font-semibold">Confirm User Deletion</span>
+            <span className="text-lg font-semibold">
+              Konfirmasi Hapus Pengguna
+            </span>
           }
           open={modalDeleteOpen}
           onOk={handleDelete}
@@ -338,7 +343,8 @@ export default function UserList() {
             setModalDeleteOpen(false);
             setSelectedId("");
           }}
-          okText="Delete"
+          okText="Ya, Hapus"
+          cancelText="Batal"
           okButtonProps={{
             danger: true,
             className: "bg-red-600 hover:bg-red-700",
@@ -350,14 +356,14 @@ export default function UserList() {
             <ExclamationCircleFilled className="text-2xl text-yellow-500 mt-1" />
             <div>
               <p className="text-gray-700 mb-2">
-                Are you sure you want to permanently delete the user:
+                Apakah Anda yakin ingin menghapus pengguna ini secara permanen:
               </p>
               <p className="font-medium text-gray-900">
                 {selectedId?.name || selectedId?.email}
               </p>
               <p className="text-gray-500 mt-2 text-sm">
-                This action cannot be undone and will revoke all user access
-                immediately.
+                Tindakan ini tidak dapat dibatalkan dan akan mencabut semua
+                akses pengguna secara langsung.
               </p>
             </div>
           </div>
