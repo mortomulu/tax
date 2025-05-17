@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import Layout from "@/components/layouts/Layout";
 import AnotherTable from "@/components/core/tax/AnotherTable";
 import { Button, Modal, Input, Select, message } from "antd";
+import InformationCircleIcon, { PlusOutlined } from "@ant-design/icons";
 import {
   calculateBrutoSalary,
   getTypeTer,
@@ -30,6 +31,21 @@ interface DataType {
   brutoSalary: number;
   monthlyTax: number;
 }
+
+const monthNames = [
+  "Januari",
+  "Februari",
+  "Maret",
+  "April",
+  "Mei",
+  "Juni",
+  "Juli",
+  "Agustus",
+  "September",
+  "Oktober",
+  "November",
+  "Desember",
+];
 
 const today = new Date();
 const year = today.getFullYear();
@@ -325,17 +341,54 @@ export default function List() {
   return (
     <Layout>
       <div className="bg-white p-6 rounded-lg shadow-md">
-        <div className="flex justify-between items-center mb-4">
-          <h1 className="text-2xl font-bold">List Data Pajak Karyawan</h1>
-          <Button type="primary" onClick={() => setIsModalOpen(true)}>
-            Tambah Data Pajak Karyawan
+        {/* Information Alert */}
+        <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6 rounded-r-lg">
+          <div className="flex items-start">
+            <div className="flex-shrink-0">
+              <InformationCircleIcon className="h-5 w-5 text-blue-500" />
+            </div>
+            <div className="ml-3">
+              <p className="text-sm text-blue-700">
+                Jika diperlukan, Anda dapat mengedit data pajak untuk bulan{" "}
+                <span className="font-semibold">{monthNames[month - 1]}</span>{" "}
+                sebelum sistem melakukan pembaruan otomatis pada tanggal{" "}
+                <span className="font-semibold">
+                  {year}-{month + 1}-01
+                </span>
+                .
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Header with Button */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-800">
+              List Data Pajak Karyawan
+            </h1>
+            <p className="text-sm text-gray-500 mt-1">
+              Total {data.length} karyawan
+            </p>
+          </div>
+          <Button
+            type="primary"
+            onClick={() => setIsModalOpen(true)}
+            icon={<PlusOutlined />}
+            className="w-full sm:w-auto"
+          >
+            Tambah Data Pajak
           </Button>
         </div>
-        <AnotherTable
-          data={data}
-          fetchAllTaxData={fetchAllTaxData}
-          employeeOptions={employeeOptions}
-        />
+
+        {/* Table */}
+        <div className="border rounded-lg overflow-hidden">
+          <AnotherTable
+            data={data}
+            fetchAllTaxData={fetchAllTaxData}
+            employeeOptions={employeeOptions}
+          />
+        </div>
       </div>
 
       {/* Modal Add Data */}
