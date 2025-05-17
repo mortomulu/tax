@@ -1,22 +1,44 @@
 import React, { useEffect, useState } from "react";
-import { Card, Table, Tabs, Badge, message, Upload, Button, Tag } from "antd";
+import { Card, Table, Tabs, Badge, message } from "antd";
 import Layout from "@/components/layouts/Layout";
 import { useRouter } from "next/router";
 import { supabase } from "@/utils/supabase";
 import {
   DollarOutlined,
+  EnvironmentOutlined,
   FileTextOutlined,
   HistoryOutlined,
+  IdcardOutlined,
+  SolutionOutlined,
+  UserOutlined,
 } from "@ant-design/icons";
 
 const { TabPane } = Tabs;
 
+const InfoItem = ({ icon, label, value, fullWidth = false }: any) => (
+  <div className={`flex items-start ${fullWidth ? "w-full" : ""}`}>
+    <span className="text-gray-500 mr-3 mt-1">
+      {React.cloneElement(icon, { className: "text-lg" })}
+    </span>
+    <div>
+      <p className="text-sm font-medium text-gray-500">{label}</p>
+      <p
+        className={`text-gray-800 ${
+          value === "Tidak tersedia" ? "italic text-gray-400" : ""
+        }`}
+      >
+        {value}
+      </p>
+    </div>
+  </div>
+);
+
 const taxColumns = [
   { title: "Masa", dataIndex: "periode", key: "periode" },
   {
-    title: "Gaji (Rp)",
-    dataIndex: "thp",
-    key: "thp",
+    title: "Gaji Bruto",
+    dataIndex: "bruto_salary",
+    key: "bruto_salary",
     render: (value: number) => value.toLocaleString("id-ID"),
   },
   {
@@ -77,6 +99,7 @@ const EmployeeDetailPage: React.FC = () => {
           id,
           name,
           nik,
+          address,
           ptkp:ptkp (id, ptkp),
           positions:idposition (id, position, incentive)
         `
@@ -108,6 +131,7 @@ const EmployeeDetailPage: React.FC = () => {
         year,
         month,
         thp,
+        bruto_salary,
         tax_total,
         payment_proof_url
       `
@@ -145,6 +169,7 @@ const EmployeeDetailPage: React.FC = () => {
       return {
         periode: `${monthIndex}/${item.year}`,
         thp: item.thp,
+        bruto_salary: item.bruto_salary,
         tax_total: item.tax_total,
         year: item.year,
         month: item.month,
@@ -157,6 +182,8 @@ const EmployeeDetailPage: React.FC = () => {
     const currentPeriod = formatted.find(
       (item) => parseInt(item.year) === year && parseInt(item.month) === month
     );
+
+    console.log("currentPeriod", currentPeriod);
 
     if (currentPeriod) {
       setTaxArchieveCurrentPeriod(currentPeriod);
@@ -210,112 +237,78 @@ const EmployeeDetailPage: React.FC = () => {
 
       {/* Informasi Karyawan */}
       <Card
-        title="Informasi Karyawan"
+        title={
+          <div className="flex items-center">
+            <UserOutlined className="text-blue-500 text-lg mr-2" />
+            <span className="text-lg font-semibold">Informasi Karyawan</span>
+          </div>
+        }
         bordered={false}
         className="mt-5 mb-5 p-6 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 border-l-4 border-blue-500"
+        headStyle={{ borderBottom: "none", padding: 0 }}
       >
-        <div className="flex flex-col md:flex-row justify-between gap-10">
-          <div className="space-y-3 flex-1">
-            <div className="flex items-center">
-              <svg
-                className="w-5 h-5 text-gray-500 mr-2"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                />
-              </svg>
-              <p className="text-gray-700">
-                <span className="font-semibold text-gray-800">Nama:</span>{" "}
-                {employee?.name}
-              </p>
-            </div>
+        <div className="flex flex-col md:flex-row justify-between gap-6">
+          <div className="space-y-4 flex-1">
+            {/* Information Item Component */}
+            <InfoItem
+              icon={<UserOutlined />}
+              label="Nama"
+              value={employee?.name || "Tidak tersedia"}
+            />
 
-            <div className="flex items-center">
-              <svg
-                className="w-5 h-5 text-gray-500 mr-2"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                />
-              </svg>
-              <p className="text-gray-700">
-                <span className="font-semibold text-gray-800">Jabatan:</span>{" "}
-                {employee?.positions?.position}
-              </p>
-            </div>
+            <InfoItem
+              icon={<SolutionOutlined />}
+              label="Jabatan"
+              value={employee?.positions?.position || "Tidak tersedia"}
+            />
 
-            <div className="flex items-center">
-              <svg
-                className="w-5 h-5 text-gray-500 mr-2"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
-                />
-              </svg>
-              <p className="text-gray-700">
-                <span className="font-semibold text-gray-800">NIK/NPWP:</span>{" "}
-                {employee?.nik}
-              </p>
-            </div>
+            <InfoItem
+              icon={<IdcardOutlined />}
+              label="NIK/NPWP"
+              value={employee?.nik || "Tidak tersedia"}
+            />
 
-            <div className="flex items-center">
-              <svg
-                className="w-5 h-5 text-gray-500 mr-2"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z"
-                />
-              </svg>
-              <p className="text-gray-700">
-                <span className="font-semibold text-gray-800">
-                  Status PTKP:
-                </span>{" "}
-                {employee?.ptkp?.ptkp}
-              </p>
-            </div>
+            <InfoItem
+              icon={<FileTextOutlined />}
+              label="Status PTKP"
+              value={employee?.ptkp?.ptkp || "Tidak tersedia"}
+            />
           </div>
 
-          <div className="flex-1 space-y-4">
-            <div>
-              <p className="text-gray-800 font-semibold mb-1">
-                Status Pelaporan Masa {month && month}/{year && year}:
-              </p>
-              {taxArchieveCurrentPeriod?.proofPaymentUrl === null ? (
-                <Tag color="red">Belum Dilapor</Tag>
-              ) : (
-                <Tag color="green">Dilapor</Tag>
-              )}
-            </div>
+          {/* Additional Information Column (optional) */}
+          <div className="space-y-4 flex-1">
+            {/* <InfoItem
+              icon={<MailOutlined />}
+              label="Email"
+              value={employee?.email || "Tidak tersedia"}
+            />
+
+            <InfoItem
+              icon={<PhoneOutlined />}
+              label="Nomor Telepon"
+              value={employee?.phone || "Tidak tersedia"}
+            /> */}
+
+            <InfoItem
+              icon={<EnvironmentOutlined />}
+              label="Alamat"
+              value={employee?.address || "Tidak tersedia"}
+              fullWidth
+            />
           </div>
         </div>
+
+        {/* Edit Button (optional) */}
+        {/* <div className="flex justify-end mt-6">
+          <Button
+            type="primary"
+            icon={<EditOutlined />}
+            onClick={() => handleEditEmployee(employee)}
+            className="flex items-center"
+          >
+            Edit Informasi
+          </Button>
+        </div> */}
       </Card>
 
       {/* Tabs untuk Riwayat Pajak */}
