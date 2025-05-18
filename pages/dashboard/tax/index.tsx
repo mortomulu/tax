@@ -14,7 +14,7 @@ import { calcDecTax, calcDecTaxFinal } from "@/helpers/decTaxCalc";
 
 interface DataType {
   id: string;
-  idName: string;
+  idName: any;
   name: string;
   isActiveEmployee: boolean;
   position: string;
@@ -79,7 +79,9 @@ export default function List() {
   const [ptkpOptions, setPtkpOptions] = useState<any>();
 
   const fetchEmployees = async () => {
-    const { data, error } = await supabase.from("employees").select(
+    const existingEmployeeIds = data?.map((item) => item.idName);
+
+    const { data: employees, error } = await supabase.from("employees").select(
       `
       id,
       name,
@@ -104,7 +106,11 @@ export default function List() {
       return;
     }
 
-    const formatted = data.map((item: any) => ({
+    const filteredEmployees = employees.filter(
+      (emp: any) => !existingEmployeeIds.includes(emp.id)
+    );
+
+    const formatted = filteredEmployees.map((item: any) => ({
       id: item.id,
       name: item.name,
       nik: item.nik,
@@ -193,8 +199,8 @@ export default function List() {
   };
 
   useEffect(() => {
-    fetchEmployees();
     fetchAllTaxData();
+    fetchEmployees();
     fetchTer();
     fetchPtkp();
   }, []);
