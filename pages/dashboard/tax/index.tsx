@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import Layout from "@/components/layouts/Layout";
 import AnotherTable from "@/components/core/tax/AnotherTable";
-import { Button, Modal, Input, Select, message } from "antd";
+import { Button, Modal, Input, Select, message, Tabs } from "antd";
 import InformationCircleIcon, { PlusOutlined } from "@ant-design/icons";
 import {
   calculateBrutoSalary,
@@ -16,6 +16,7 @@ interface DataType {
   id: string;
   idName: string;
   name: string;
+  isActiveEmployee: boolean;
   position: string;
   positionAllowance: number;
   ptkp: string;
@@ -78,10 +79,12 @@ export default function List() {
   const [ptkpOptions, setPtkpOptions] = useState<any>();
 
   const fetchEmployees = async () => {
-    const { data, error } = await supabase.from("employees").select(`
+    const { data, error } = await supabase.from("employees").select(
+      `
       id,
       name,
       nik,
+      is_active,
       ptkp (
         id,
         ptkp
@@ -92,7 +95,8 @@ export default function List() {
           incentive
         )
       )
-    `);
+    `
+    );
 
     if (error) {
       message.error("Gagal mengambil opsi pegawai");
@@ -104,6 +108,7 @@ export default function List() {
       id: item.id,
       name: item.name,
       nik: item.nik,
+      isActiveEmployee: item.is_active,
       ptkp: item.ptkp?.ptkp || "-",
       idPosition: item?.positions?.id,
       positionNow: item?.positions?.position || null,
@@ -115,22 +120,23 @@ export default function List() {
 
   const fetchAllTaxData = async () => {
     const { data, error } = await supabase.from("tax").select(`
-    *,
-    positions: idposition (
-      id,
-      position, 
-      incentive
-    ),
-    employees: idemployee (
-      id,
-      name,
-      nik,
-      ptkp (
+      *,
+      positions: idposition (
         id,
-        ptkp
+        position, 
+        incentive
+      ),
+      employees: idemployee (
+        id,
+        name,
+        nik,
+        is_active,
+        ptkp (
+          id,
+          ptkp
+        )
       )
-    )
-  `);
+    `);
 
     if (error) {
       console.error("Error fetching tax data:", error);
@@ -141,6 +147,7 @@ export default function List() {
       id: item?.id,
       idName: item?.employees?.id,
       name: item?.employees?.name,
+      isActiveEmployee: item?.employees?.is_active,
       position: item?.positions?.position,
       positionAllowance: item?.positions?.incentive,
       ptkp: item?.employees?.ptkp?.ptkp,
@@ -368,9 +375,9 @@ export default function List() {
             <h1 className="text-2xl font-bold text-gray-800">
               Data Pajak Karyawan
             </h1>
-            <p className="text-sm text-gray-500 mt-1">
+            {/* <p className="text-sm text-gray-500 mt-1">
               Total {data.length} karyawan
-            </p>
+            </p> */}
           </div>
           <Button
             type="primary"
@@ -384,11 +391,23 @@ export default function List() {
 
         {/* Table */}
         <div className=" rounded-lg overflow-hidden">
-          <AnotherTable
-            data={data}
-            fetchAllTaxData={fetchAllTaxData}
-            employeeOptions={employeeOptions}
-          />
+          <Tabs defaultActiveKey="active" className="mb-6">
+            <Tabs.TabPane tab="Pajak Karyawan Aktif" key="active">
+              <AnotherTable
+                data={data.filter((item) => item.isActiveEmployee === true)}
+                fetchAllTaxData={fetchAllTaxData}
+                employeeOptions={employeeOptions}
+              />
+            </Tabs.TabPane>
+
+            <Tabs.TabPane tab="Pajak Karyawan Tidak Aktif" key="inactive">
+              <AnotherTable
+                data={data.filter((item) => item.isActiveEmployee === false)}
+                fetchAllTaxData={fetchAllTaxData}
+                employeeOptions={employeeOptions}
+              />
+            </Tabs.TabPane>
+          </Tabs>
         </div>
       </div>
 
@@ -423,10 +442,27 @@ export default function List() {
               placeholder="Pilih Karyawan"
               value={idName || undefined}
               onChange={(value) => setIdName(value)}
+              className="w-full min-w-[200px]"
+              optionFilterProp="children"
             >
               {employeeOptions?.map((option: any) => (
-                <Select.Option key={option.id} value={option.id}>
-                  {option.name}
+                <Select.Option
+                  key={option.id}
+                  value={option.id}
+                  className="hover:bg-gray-50"
+                >
+                  <div className="flex justify-between items-center">
+                    <span className="truncate">{option.name}</span>
+                    <span
+                      className={`ml-2 px-2 py-0.5 rounded-full text-xs font-medium ${
+                        option.isActiveEmployee
+                          ? "bg-green-100 text-green-800"
+                          : "bg-red-100 text-red-800"
+                      }`}
+                    >
+                      {option.isActiveEmployee ? "Aktif" : "Non-Aktif"}
+                    </span>
+                  </div>
                 </Select.Option>
               ))}
             </Select>

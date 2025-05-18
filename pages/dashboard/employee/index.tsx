@@ -53,6 +53,7 @@ export default function EmployeePage() {
   const [nik, setNik] = useState("");
   const [npwp, setNpwp] = useState("");
   const [ptkp, setPtkp] = useState("");
+  const [isActiveEmployee, setIsActiveEmployee] = useState<any>();
   const [jabatanList, setJabatanList] = useState<JabatanType[]>([
     { id: 1, jabatan: "", startDate: null, endDate: null, now: false },
   ]);
@@ -92,6 +93,7 @@ export default function EmployeePage() {
       nik,
       npwp,
       address,
+      is_active,
       ptkp (
         id,
         ptkp
@@ -123,6 +125,7 @@ export default function EmployeePage() {
       address: item.address,
       idPtkp: item.ptkp?.id,
       ptkp: item.ptkp?.ptkp || "-",
+      isActiveEmployee: item?.is_active,
       positionNow: item?.histories_positions?.[0]?.positions?.position || null,
       historiesPosition: item.histories_positions || [],
     }));
@@ -137,7 +140,7 @@ export default function EmployeePage() {
   }, []);
 
   const handleAdd = async () => {
-    if (name == "" && idValue == "") {
+    if (name == "" || idValue == "" || isActiveEmployee == null) {
       message.error("Isi data terlebih dahulu");
       return;
     }
@@ -166,6 +169,7 @@ export default function EmployeePage() {
             idposition: idPositionTerbaru,
             address,
             idtype: idType,
+            is_active: isActiveEmployee,
             ...(idType === "NIK" ? { nik: idValue } : { npwp: idValue }),
           },
         ])
@@ -197,6 +201,7 @@ export default function EmployeePage() {
       setName("");
       setNik("");
       setPtkp("");
+      setIsActiveEmployee(null);
       setAddress("");
       setIdType("");
       setIdValue("");
@@ -266,6 +271,7 @@ export default function EmployeePage() {
           setNik("");
           setName("");
           setPtkp("");
+          setIsActiveEmployee(null);
           setJabatanList([
             { id: 1, jabatan: "", startDate: null, endDate: null, now: false },
           ]);
@@ -282,6 +288,7 @@ export default function EmployeePage() {
               setNik("");
               setName("");
               setPtkp("");
+              setIsActiveEmployee(null);
               setJabatanList([
                 {
                   id: 1,
@@ -373,6 +380,22 @@ export default function EmployeePage() {
                   {option.ptkp}
                 </Select.Option>
               ))}
+            </Select>
+          </div>
+
+          {/* status karyawan */}
+          <div className="flex flex-col gap-1">
+            <label className="text-sm font-medium text-gray-700">
+              Status Karyawan
+            </label>
+            <Select
+              value={isActiveEmployee}
+              className="w-full"
+              onChange={(val) => setIsActiveEmployee(val)}
+              placeholder="Pilih Status"
+            >
+              <Select.Option value={true}>Aktif</Select.Option>
+              <Select.Option value={false}>Tidak Aktif</Select.Option>
             </Select>
           </div>
 

@@ -32,6 +32,7 @@ interface DataType {
   npwp: string;
   idPtkp: any;
   ptkp: string;
+  isActiveEmployee: boolean;
   jabatanList: Jabatan[];
 }
 
@@ -230,6 +231,21 @@ const EmployeeTable: any = ({
       ),
   });
 
+  const handleStatusChange = async (newStatus: boolean, record: any) => {
+    const { error } = await supabase
+      .from("employees")
+      .update({ is_active: newStatus })
+      .eq("id", record.id);
+
+    if (error) {
+      message.error("Gagal memperbarui status");
+      console.error(error);
+    } else {
+      message.success("Status berhasil diperbarui");
+      fetchEmployees();
+    }
+  };
+
   const columns: TableColumnsType<DataType> = [
     {
       title: "Nama",
@@ -249,35 +265,46 @@ const EmployeeTable: any = ({
       dataIndex: "positionNow",
       key: "positionNow",
       width: "20%",
+      render: (_: any, record: any) => {
+        return record.isActiveEmployee ? record.positionNow || "-" : "-";
+      },
     },
     {
-      title: "PTKP",
-      dataIndex: "ptkp",
-      key: "ptkp",
+      title: "Status",
+      dataIndex: "isActiveEmployee",
+      key: "isActiveEmployee",
       width: "10%",
-      filters: [
-        {
-          text: "TK/0",
-          value: "TK/0",
-        },
-        {
-          text: "K/0",
-          value: "K/0",
-        },
-        {
-          text: "K/1",
-          value: "K/1",
-        },
-        {
-          text: "K/2",
-          value: "K/2",
-        },
-        {
-          text: "K/3",
-          value: "K/3",
-        },
-      ],
-      onFilter: (value, record) => record.ptkp.indexOf(value as string) === 0,
+      render: (value: boolean, record: any) => (
+        <Select
+          value={value}
+          onChange={(val) => handleStatusChange(val, record)}
+          className="w-32" // Equivalent to width: 128px (Tailwind's w-32)
+          dropdownClassName="[&_.ant-select-item]:px-4 [&_.ant-select-item]:py-2" // Styling dropdown items
+        >
+          <Select.Option 
+            value={true}
+            className={`${value ? 'bg-green-50 text-green-600' : ''} hover:bg-green-100`}
+          >
+            <span className="flex items-center">
+              {value && (
+                <span className="w-2 h-2 rounded-full bg-green-500 mr-2"></span>
+              )}
+              Aktif
+            </span>
+          </Select.Option>
+          <Select.Option 
+            value={false}
+            className={`${!value ? 'bg-red-50 text-red-600' : ''} hover:bg-red-100`}
+          >
+            <span className="flex items-center">
+              {!value && (
+                <span className="w-2 h-2 rounded-full bg-red-500 mr-2"></span>
+              )}
+              Tidak Aktif
+            </span>
+          </Select.Option>
+        </Select>
+      ),
     },
     {
       title: "Aksi",

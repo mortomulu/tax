@@ -15,9 +15,10 @@ export default async function handler(
       .json({ message: "Hari ini bukan tanggal 1, tidak ada arsip." });
   }
 
-  const { data: employees, error: fetchEmployeesError } = await supabase.from(
-    "employees"
-  ).select(`
+  const { data: employees, error: fetchEmployeesError } = await supabase
+    .from("employees")
+    .select(
+      `
       id,
       name,
       idtype,
@@ -26,7 +27,9 @@ export default async function handler(
       address,
       ptkp:ptkp (ptkp),
       positions:idposition (position, incentive)
-    `);
+    `
+    )
+    .eq("is_active", true);
 
   if (fetchEmployeesError) {
     return res.status(500).json({

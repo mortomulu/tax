@@ -10,12 +10,8 @@ const { Option } = Select;
 const AddArchieveManuallyPage = () => {
   const router = useRouter();
 
-  const [selectedMonth, setSelectedMonth] = useState<number | null>(
-    dayjs().month() + 1
-  );
-  const [selectedYear, setSelectedYear] = useState<number | null>(
-    dayjs().year()
-  );
+  const [selectedMonth, setSelectedMonth] = useState<number | null>(null);
+  const [selectedYear, setSelectedYear] = useState<number | null>(null);
 
   useEffect(() => {
     if (!router.isReady) return;

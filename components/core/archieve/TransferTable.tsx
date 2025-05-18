@@ -159,11 +159,11 @@ const App: React.FC<any> = ({ month, year }) => {
       title: "Nama",
     },
     {
-      dataIndex: "ptkp",
-      title: "PTKP",
-      render: (tag: string) => (
-        <Tag style={{ marginInlineEnd: 0 }} color="cyan">
-          {tag?.toUpperCase() || "N/A"}
+      dataIndex: "is_active",
+      title: "Status",
+      render: (isActive: boolean) => (
+        <Tag style={{ marginInlineEnd: 0 }} color={isActive ? "green" : "red"}>
+          {isActive ? "AKTIF" : "TIDAK AKTIF"}
         </Tag>
       ),
     },
@@ -212,6 +212,7 @@ const App: React.FC<any> = ({ month, year }) => {
           nik,
           npwp,
           address,
+          is_active,
           ptkp:ptkp (ptkp),
           positions:idposition (position, incentive)
         `
@@ -276,6 +277,7 @@ const App: React.FC<any> = ({ month, year }) => {
           idemployee: emp.id,
           employee_name: emp.name,
           nik: emp.nik,
+          is_active: emp?.is_active,
           ptkp: emp.ptkp?.ptkp || null,
           position: emp.positions?.position || null,
           position_allowance: emp.positions?.incentive || 0,
