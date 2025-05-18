@@ -78,54 +78,9 @@ export default function List() {
 
   const [ptkpOptions, setPtkpOptions] = useState<any>();
 
-  const fetchEmployees = async () => {
-    const existingEmployeeIds = data?.map((item) => item.idName);
-
-    const { data: employees, error } = await supabase.from("employees").select(
-      `
-      id,
-      name,
-      nik,
-      is_active,
-      ptkp (
-        id,
-        ptkp
-      ),
-      positions (
-          id,
-          position,
-          incentive
-        )
-      )
-    `
-    );
-
-    if (error) {
-      message.error("Gagal mengambil opsi pegawai");
-      console.error("Gagal mengambil employee options", error);
-      return;
-    }
-
-    const filteredEmployees = employees.filter(
-      (emp: any) => !existingEmployeeIds.includes(emp.id)
-    );
-
-    const formatted = filteredEmployees.map((item: any) => ({
-      id: item.id,
-      name: item.name,
-      nik: item.nik,
-      isActiveEmployee: item.is_active,
-      ptkp: item.ptkp?.ptkp || "-",
-      idPosition: item?.positions?.id,
-      positionNow: item?.positions?.position || null,
-      positionAllowance: item?.positions?.incentive,
-    }));
-
-    setEmployeeOptions(formatted);
-  };
-
-  const fetchAllTaxData = async () => {
-    const { data, error } = await supabase.from("tax").select(`
+  const fetchAll = async () => {
+    const { data: taxData, error: taxError } = await supabase.from("tax")
+      .select(`
       *,
       positions: idposition (
         id,
@@ -144,12 +99,12 @@ export default function List() {
       )
     `);
 
-    if (error) {
-      console.error("Error fetching tax data:", error);
-      return [];
+    if (taxError) {
+      console.error("Error fetching tax data:", taxError);
+      return;
     }
 
-    const formatted = data.map((item: any) => ({
+    const formattedTax = taxData.map((item: any) => ({
       id: item?.id,
       idName: item?.employees?.id,
       name: item?.employees?.name,
@@ -170,7 +125,50 @@ export default function List() {
       monthlyTax: item?.monthlytax,
     }));
 
-    setData(formatted);
+    setData(formattedTax);
+
+    const existingEmployeeIds = formattedTax.map((item) => item.idName);
+
+    const { data: employees, error: empError } = await supabase.from(
+      "employees"
+    ).select(`
+      id,
+      name,
+      nik,
+      is_active,
+      ptkp (
+        id,
+        ptkp
+      ),
+      positions (
+          id,
+          position,
+          incentive
+        )
+    `);
+
+    if (empError) {
+      message.error("Gagal mengambil opsi pegawai");
+      console.error("Gagal mengambil employee options", empError);
+      return;
+    }
+
+    const filteredEmployees = employees.filter(
+      (emp: any) => !existingEmployeeIds.includes(emp.id)
+    );
+
+    const formattedEmployees = filteredEmployees.map((item: any) => ({
+      id: item.id,
+      name: item.name,
+      nik: item.nik,
+      isActiveEmployee: item.is_active,
+      ptkp: item.ptkp?.ptkp || "-",
+      idPosition: item?.positions?.id,
+      positionNow: item?.positions?.position || null,
+      positionAllowance: item?.positions?.incentive,
+    }));
+
+    setEmployeeOptions(formattedEmployees);
   };
 
   const fetchTer = async () => {
@@ -199,8 +197,7 @@ export default function List() {
   };
 
   useEffect(() => {
-    fetchAllTaxData();
-    fetchEmployees();
+    fetchAll();
     fetchTer();
     fetchPtkp();
   }, []);
@@ -344,8 +341,7 @@ export default function List() {
       console.error("Gagal menambahkan data:", error.message);
       message.error("Gagal menambahkan data pajak.");
     } else {
-      fetchEmployees();
-      fetchAllTaxData();
+      fetchAll();
       message.success("Data berhasil ditambahkan!");
       resetForm();
     }
@@ -375,6 +371,32 @@ export default function List() {
           </div>
         </div>
 
+        {employeeOptions?.length > 0 && (
+          <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-md mb-6">
+            <p className="text-sm text-yellow-800 font-medium mb-2">
+              ⚠️ Perhatian:
+            </p>
+            <p className="text-sm text-yellow-800">
+              Terdapat beberapa karyawan yang belum memiliki data pajak untuk
+              bulan{" "}
+              <strong>
+                {monthNames[month-1]} {year}
+              </strong>
+              . Harap lengkapi data pajak mereka sebelum sistem mengarsipkan
+              laporan secara otomatis pada{" "}
+              <strong>
+                {year}-{month + 1}-01
+              </strong>
+              .
+            </p>
+            <ul className="list-disc list-inside mt-2 text-sm text-yellow-800">
+              {employeeOptions?.map((item: any, i: number) => (
+                <li key={i}>{item.name}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+
         {/* Header with Button */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
           <div>
@@ -401,7 +423,7 @@ export default function List() {
             <Tabs.TabPane tab="Pajak Karyawan Aktif" key="active">
               <AnotherTable
                 data={data.filter((item) => item.isActiveEmployee === true)}
-                fetchAllTaxData={fetchAllTaxData}
+                fetchAllTaxData={fetchAll}
                 employeeOptions={employeeOptions}
               />
             </Tabs.TabPane>
@@ -409,7 +431,7 @@ export default function List() {
             <Tabs.TabPane tab="Pajak Karyawan Tidak Aktif" key="inactive">
               <AnotherTable
                 data={data.filter((item) => item.isActiveEmployee === false)}
-                fetchAllTaxData={fetchAllTaxData}
+                fetchAllTaxData={fetchAll}
                 employeeOptions={employeeOptions}
               />
             </Tabs.TabPane>
