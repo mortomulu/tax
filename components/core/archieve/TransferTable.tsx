@@ -585,23 +585,63 @@ const App: React.FC<any> = ({ month, year }) => {
             </Form.Item> */}
 
             <Form.Item name="thp" label="THP">
-              <InputNumber style={{ width: "100%" }} />
+              <InputNumber
+                style={{ width: "100%" }}
+                formatter={(value) =>
+                  `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ".")
+                }
+                parser={(value) =>
+                  parseInt(value?.replace(/Rp\s?|\./g, "") || "0", 10)
+                }
+              />
             </Form.Item>
 
             <Form.Item name="incentive" label="Insentif">
-              <InputNumber style={{ width: "100%" }} />
+              <InputNumber
+                style={{ width: "100%" }}
+                formatter={(value) =>
+                  `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ".")
+                }
+                parser={(value) =>
+                  parseInt(value?.replace(/Rp\s?|\./g, "") || "0", 10)
+                }
+              />{" "}
             </Form.Item>
 
             <Form.Item name="overtime_allowance" label="Overtime Allowance">
-              <InputNumber style={{ width: "100%" }} />
+              <InputNumber
+                style={{ width: "100%" }}
+                formatter={(value) =>
+                  `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ".")
+                }
+                parser={(value) =>
+                  parseInt(value?.replace(/Rp\s?|\./g, "") || "0", 10)
+                }
+              />{" "}
             </Form.Item>
 
             <Form.Item name="bonus" label="Bonus">
-              <InputNumber style={{ width: "100%" }} />
+              <InputNumber
+                style={{ width: "100%" }}
+                formatter={(value) =>
+                  `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ".")
+                }
+                parser={(value) =>
+                  parseInt(value?.replace(/Rp\s?|\./g, "") || "0", 10)
+                }
+              />{" "}
             </Form.Item>
 
             <Form.Item name="thr" label="THR">
-              <InputNumber style={{ width: "100%" }} />
+              <InputNumber
+                style={{ width: "100%" }}
+                formatter={(value) =>
+                  `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ".")
+                }
+                parser={(value) =>
+                  parseInt(value?.replace(/Rp\s?|\./g, "") || "0", 10)
+                }
+              />{" "}
             </Form.Item>
 
             {/* <Form.Item name="tax_total" label="Pajak">

@@ -372,14 +372,30 @@ const TerTable: React.FC<TerTable> = ({ data, fetchTers }) => {
             label="Start Range"
             rules={[{ required: true }]}
           >
-            <InputNumber className="w-full" />
+            <InputNumber
+              className="w-full"
+              formatter={(value) =>
+                `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ".")
+              }
+              parser={(value) =>
+                parseInt(value?.replace(/Rp\s?|\./g, "") || "0", 10)
+              }
+            />
           </Form.Item>
           <Form.Item
             name="endRange"
             label="End Range"
             rules={[{ required: true }]}
           >
-            <InputNumber className="w-full" />
+            <InputNumber
+              className="w-full"
+              formatter={(value) =>
+                `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ".")
+              }
+              parser={(value) =>
+                parseInt(value?.replace(/Rp\s?|\./g, "") || "0", 10)
+              }
+            />
           </Form.Item>
           <Form.Item name="ter" label="TER" rules={[{ required: true }]}>
             <InputNumber className="w-full" />

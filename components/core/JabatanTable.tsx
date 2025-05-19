@@ -339,7 +339,15 @@ const JabatanTable: React.FC<JabatanTableProps> = ({
             label="Position Allowance"
             rules={[{ required: true }]}
           >
-            <InputNumber className="w-full" />
+            <InputNumber
+              className="w-full"
+              formatter={(value) =>
+                `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ".")
+              }
+              parser={(value) =>
+                parseInt(value?.replace(/Rp\s?|\./g, "") || "0", 10)
+              }
+            />
           </Form.Item>
         </Form>
       </Modal>

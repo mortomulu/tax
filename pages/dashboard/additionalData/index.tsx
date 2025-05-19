@@ -86,7 +86,9 @@ export default function AdditionalDataPage() {
       message.error("Gagal fetch data positions");
       console.error("Positions error:", error);
     } else {
-      const formatted = data.sort((a, b) => a.position.localeCompare(b.position));
+      const formatted = data.sort((a, b) =>
+        a.position.localeCompare(b.position)
+      );
       setPositions(formatted);
     }
   };
@@ -170,7 +172,10 @@ export default function AdditionalDataPage() {
       <Modal
         title="Tambah Jabatan"
         open={isJabatanModalOpen}
-        onCancel={() => setIsJabatanModalOpen(false)}
+        onCancel={() => {
+          formJabatan.resetFields();
+          setIsJabatanModalOpen(false);
+        }}
         onOk={() => formJabatan.submit()}
         okText="Simpan Data"
         cancelText="Batal"
@@ -188,7 +193,15 @@ export default function AdditionalDataPage() {
             label="Position Allowance"
             rules={[{ required: true }]}
           >
-            <InputNumber min={0} className="w-full" />
+            <InputNumber
+              className="w-full"
+              formatter={(value) =>
+                `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ".")
+              }
+              parser={(value) =>
+                parseInt(value?.replace(/Rp\s?|\./g, "") || "0", 10)
+              }
+            />
           </Form.Item>
         </Form>
       </Modal>
@@ -196,7 +209,10 @@ export default function AdditionalDataPage() {
       <Modal
         title="Tambah PTKP"
         open={isPtkpModalOpen}
-        onCancel={() => setIsPtkpModalOpen(false)}
+        onCancel={() => {
+          formPtkp.resetFields();
+          setIsPtkpModalOpen(false);
+        }}
         onOk={() => formPtkp.submit()}
         okText="Simpan Data"
         cancelText="Batal"
@@ -206,7 +222,15 @@ export default function AdditionalDataPage() {
             <Input />
           </Form.Item>
           <Form.Item name="amount" label="Jumlah" rules={[{ required: true }]}>
-            <InputNumber min={0} className="w-full" />
+            <InputNumber
+              className="w-full"
+              formatter={(value) =>
+                `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ".")
+              }
+              parser={(value) =>
+                parseInt(value?.replace(/Rp\s?|\./g, "") || "0", 10)
+              }
+            />
           </Form.Item>
         </Form>
       </Modal>
@@ -214,7 +238,10 @@ export default function AdditionalDataPage() {
       <Modal
         title="Tambah TER"
         open={isTerModalOpen}
-        onCancel={() => setIsTerModalOpen(false)}
+        onCancel={() => {
+          formTer.resetFields();
+          setIsTerModalOpen(false);
+        }}
         onOk={() => formTer.submit()}
         okText="Simpan Data"
         cancelText="Batal"
@@ -232,14 +259,30 @@ export default function AdditionalDataPage() {
             label="Start Range"
             rules={[{ required: true }]}
           >
-            <InputNumber min={0} className="w-full" />
+            <InputNumber
+              className="w-full"
+              formatter={(value) =>
+                `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ".")
+              }
+              parser={(value) =>
+                parseInt(value?.replace(/Rp\s?|\./g, "") || "0", 10)
+              }
+            />
           </Form.Item>
           <Form.Item
             name="endRange"
             label="End Range"
             rules={[{ required: true }]}
           >
-            <InputNumber min={0} className="w-full" />
+            <InputNumber
+              className="w-full"
+              formatter={(value) =>
+                `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ".")
+              }
+              parser={(value) =>
+                parseInt(value?.replace(/Rp\s?|\./g, "") || "0", 10)
+              }
+            />
           </Form.Item>
           <Form.Item name="ter" label="TER (%)" rules={[{ required: true }]}>
             <InputNumber min={0} max={100} className="w-full" />

@@ -341,7 +341,15 @@ const PtkpTable: React.FC<PtkpTable> = ({ data, fetchPtkps }) => {
             <Input />
           </Form.Item>
           <Form.Item name="amount" label="Jumlah" rules={[{ required: true }]}>
-            <InputNumber className="w-full" />
+            <InputNumber
+              className="w-full"
+              formatter={(value) =>
+                `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ".")
+              }
+              parser={(value) =>
+                parseInt(value?.replace(/Rp\s?|\./g, "") || "0", 10)
+              }
+            />
           </Form.Item>
         </Form>
       </Modal>
