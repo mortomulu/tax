@@ -116,19 +116,22 @@ export default function EmployeePage() {
       return;
     }
 
-    const formatted = data.map((item: any) => ({
-      id: item.id,
-      name: item.name,
-      idType: item.idtype,
-      nik: item.nik,
-      npwp: item.npwp,
-      address: item.address,
-      idPtkp: item.ptkp?.id,
-      ptkp: item.ptkp?.ptkp || "-",
-      isActiveEmployee: item?.is_active,
-      positionNow: item?.histories_positions?.[0]?.positions?.position || null,
-      historiesPosition: item.histories_positions || [],
-    }));
+    const formatted = data
+      .map((item: any) => ({
+        id: item.id,
+        name: item.name,
+        idType: item.idtype,
+        nik: item.nik,
+        npwp: item.npwp,
+        address: item.address,
+        idPtkp: item.ptkp?.id,
+        ptkp: item.ptkp?.ptkp || "-",
+        isActiveEmployee: item?.is_active,
+        positionNow:
+          item?.histories_positions?.[0]?.positions?.position || null,
+        historiesPosition: item.histories_positions || [],
+      }))
+      .sort((a, b) => a.id - b.id);
 
     setData(formatted);
   };

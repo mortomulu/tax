@@ -104,26 +104,28 @@ export default function List() {
       return;
     }
 
-    const formattedTax = taxData.map((item: any) => ({
-      id: item?.id,
-      idName: item?.employees?.id,
-      name: item?.employees?.name,
-      isActiveEmployee: item?.employees?.is_active,
-      position: item?.positions?.position,
-      positionAllowance: item?.positions?.incentive,
-      ptkp: item?.employees?.ptkp?.ptkp,
-      thp: item?.thp,
-      incentive: item?.incentive,
-      overtimeAllowance: item?.overtime_allowance,
-      jkk: item?.jkk,
-      jkm: item?.jkm,
-      bpjs: item?.bpjs,
-      bonus: item?.bonus,
-      thr: item?.thr,
-      nettoSalary: item?.nettosalary,
-      brutoSalary: item?.brutosalary,
-      monthlyTax: item?.monthlytax,
-    }));
+    const formattedTax = taxData
+      .map((item: any) => ({
+        id: item?.id,
+        idName: item?.employees?.id,
+        name: item?.employees?.name,
+        isActiveEmployee: item?.employees?.is_active,
+        position: item?.positions?.position,
+        positionAllowance: item?.positions?.incentive,
+        ptkp: item?.employees?.ptkp?.ptkp,
+        thp: item?.thp,
+        incentive: item?.incentive,
+        overtimeAllowance: item?.overtime_allowance,
+        jkk: item?.jkk,
+        jkm: item?.jkm,
+        bpjs: item?.bpjs,
+        bonus: item?.bonus,
+        thr: item?.thr,
+        nettoSalary: item?.nettosalary,
+        brutoSalary: item?.brutosalary,
+        monthlyTax: item?.monthlytax,
+      }))
+      .sort((a, b) => a.id - b.id);
 
     setData(formattedTax);
 
@@ -380,7 +382,7 @@ export default function List() {
               Terdapat beberapa karyawan yang belum memiliki data pajak untuk
               bulan{" "}
               <strong>
-                {monthNames[month-1]} {year}
+                {monthNames[month - 1]} {year}
               </strong>
               . Harap lengkapi data pajak mereka sebelum sistem mengarsipkan
               laporan secara otomatis pada{" "}

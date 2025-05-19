@@ -86,7 +86,8 @@ export default function AdditionalDataPage() {
       message.error("Gagal fetch data positions");
       console.error("Positions error:", error);
     } else {
-      setPositions(data);
+      const formatted = data.sort((a, b) => a.position.localeCompare(b.position));
+      setPositions(formatted);
     }
   };
 
@@ -99,7 +100,8 @@ export default function AdditionalDataPage() {
       message.error("Gagal fetch data PTKP");
       console.error("PTKP error:", error);
     } else {
-      setPtkps(data);
+      const formatted = data.sort((a, b) => a.ptkp.localeCompare(b.ptkp));
+      setPtkps(formatted);
     }
   };
 
@@ -112,7 +114,8 @@ export default function AdditionalDataPage() {
       message.error("Gagal fetch data TER");
       console.error("TER error:", error);
     } else {
-      setTers(data);
+      const formatted = data.sort((a, b) => a.typeTer.localeCompare(b.typeTer));
+      setTers(formatted);
     }
   };
 
