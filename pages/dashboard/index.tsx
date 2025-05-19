@@ -44,8 +44,8 @@ export default function Dashboard() {
   const year = today.getFullYear();
   const month = String(today.getMonth() + 2).padStart(2, "0");
   const monthNumber = today.getMonth() + 1;
-  
-  const defaultDayjs = dayjs(`${year}-${month}-01`, "YYYY-MM-DD"); 
+
+  const defaultDayjs = dayjs(`${year}-${month}-01`, "YYYY-MM-DD");
   const [defaultValue, setDefaultValue] = useState<any>(defaultDayjs);
 
   const [selectedMonth, setSelectedMonth] = useState<Date | null>(null);
@@ -102,7 +102,7 @@ export default function Dashboard() {
     const { data, error } = await supabase
       .from("summary_monthly_tax")
       .select(
-        "year, month, total_netto_salary, total_monthly_tax, payment_proof_url"
+        "id, year, month, total_netto_salary, total_monthly_tax, payment_proof_url"
       );
 
     if (error) {
@@ -195,6 +195,42 @@ export default function Dashboard() {
     }
   };
 
+  const handleDeleteProof = async () => {
+    try {
+      const publicUrl = summaryTaxLastMonth[0]?.payment_proof_url;
+
+      const filePath = publicUrl?.split("/paymentproof/")[1];
+
+      if (!filePath) {
+        throw new Error("Path file tidak ditemukan dari URL.");
+      }
+
+      const { error: deleteError } = await supabase.storage
+        .from("paymentproof")
+        .remove([filePath]);
+
+      if (deleteError) {
+        console.error("Gagal menghapus file:", deleteError.message);
+        return;
+      }
+
+      const { error: updateError } = await supabase
+        .from("summary_monthly_tax")
+        .update({ payment_proof_url: null })
+        .eq("id", summaryTaxLastMonth[0]?.id);
+
+      if (updateError) {
+        throw updateError;
+      }
+
+      message.success("Bukti pelaporan berhasil dihapus.");
+      fetchTaxesSummary();
+    } catch (err: any) {
+      console.error("Terjadi kesalahan:", err.message);
+      message.error("Terjadi kesalahan saat menghapus bukti pelaporan.");
+    }
+  };
+
   return (
     <Layout>
       {/* Dashboard Grid */}
@@ -249,46 +285,169 @@ export default function Dashboard() {
               )}
             </div>
 
-            <div className="mt-4">
-              <p className="text-gray-700 font-medium mb-2">Bukti Pelaporan</p>
+            <div className="mt-6 p-4 bg-white rounded-lg border border-gray-200 shadow-sm">
+              <h3 className="text-gray-800 font-medium text-lg mb-4 flex items-center">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5 text-blue-500 mr-2"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                  />
+                </svg>
+                Bukti Pelaporan
+              </h3>
+
               {summaryTaxLastMonth.length > 0 &&
               summaryTaxLastMonth[0]?.payment_proof_url ? (
-                <a
-                  href={summaryTaxLastMonth[0].payment_proof_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center text-blue-600 hover:text-blue-800 transition-colors"
-                >
-                  <FaEye className="mr-2" />
-                  Lihat Bukti Pelaporan
-                </a>
+                <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                  <div className="flex-1 p-3 bg-gray-50 rounded-md border border-gray-200 hover:bg-gray-100 transition-colors duration-200">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-blue-50 rounded-full">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-5 w-5 text-blue-600"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                          />
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                          />
+                        </svg>
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium text-gray-500 mb-1">
+                          File Terupload
+                        </p>
+                        <a
+                          href={summaryTaxLastMonth[0].payment_proof_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:text-blue-800 hover:underline text-sm font-medium truncate block"
+                        >
+                          {summaryTaxLastMonth[0].payment_proof_url
+                            .split("/")
+                            .pop() || "Bukti Pelaporan"}
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+
+                  <Button
+                    danger
+                    onClick={handleDeleteProof}
+                    className="flex items-center gap-2 bg-red-50 hover:bg-red-100 text-red-600 border-red-200 hover:border-red-300 px-4 py-2 rounded-md transition-colors"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                      />
+                    </svg>
+                    Hapus
+                  </Button>
+                </div>
               ) : summaryTaxLastMonth.length > 0 ? (
-                <div>
+                <div className="space-y-4">
                   <Upload
                     showUploadList={false}
                     customRequest={(options) => handleUpload(options)}
                     disabled={!summaryTaxLastMonth[0]}
+                    className="w-full"
                   >
                     <Button
                       icon={<UploadOutlined />}
                       disabled={!summaryTaxLastMonth[0]}
-                      className="flex items-center bg-blue-50 text-blue-600 hover:bg-blue-100 border-blue-100"
+                      className={`w-full sm:w-auto flex items-center justify-center gap-2 ${
+                        !summaryTaxLastMonth[0]
+                          ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                          : "bg-blue-50 hover:bg-blue-100 text-blue-600 border-blue-200 hover:border-blue-300"
+                      } px-4 py-2 rounded-md transition-colors`}
                     >
-                      Upload Bukti
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-5 w-5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                        />
+                      </svg>
+                      Upload Bukti Pelaporan
                     </Button>
                   </Upload>
+
                   {!summaryTaxLastMonth[0] && (
-                    <p className="text-sm text-red-500 mt-2 flex items-center">
-                      <FaInfoCircle className="mr-1" />
-                      Belum waktunya untuk upload bukti pelaporan
-                    </p>
+                    <div className="p-3 bg-yellow-50 border border-yellow-100 rounded-md flex items-start gap-2">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-5 w-5 text-yellow-500 mt-0.5 flex-shrink-0"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                        />
+                      </svg>
+                      <p className="text-sm text-yellow-700">
+                        Belum waktunya untuk upload bukti pelaporan
+                      </p>
+                    </div>
                   )}
                 </div>
               ) : (
-                <p className="text-sm text-gray-500 flex items-center">
-                  <FaInfoCircle className="mr-1" />
-                  Data pelaporan tidak tersedia
-                </p>
+                <div className="p-3 bg-gray-50 border border-gray-200 rounded-md flex items-start gap-2">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5 text-gray-500 mt-0.5 flex-shrink-0"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                  <p className="text-sm text-gray-600">
+                    Data pelaporan tidak tersedia
+                  </p>
+                </div>
               )}
             </div>
           </div>
@@ -318,8 +477,8 @@ export default function Dashboard() {
           <div className="mb-6">
             <div className="p-6 rounded-lg shadow-md border-l-4 bg-indigo-950 text-white border-yellow-400">
               <h2 className="text-xl font-semibold text-white mb-4">
-                Laporan Pajak Bulan {monthNames[monthNumber - 1]} Diarsipkan Secara Otomatis pada Tanggal
-                Berikut
+                Laporan Pajak Bulan {monthNames[monthNumber - 1]} Diarsipkan
+                Secara Otomatis pada Tanggal Berikut
               </h2>
               <DatePicker
                 value={defaultValue}
