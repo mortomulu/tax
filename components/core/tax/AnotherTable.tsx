@@ -24,6 +24,7 @@ import {
   calcMonthlyTax,
 } from "@/helpers/taxCalc";
 import { calcDecTax, calcDecTaxFinal } from "@/helpers/decTaxCalc";
+import { anotherFormatRupiah } from "@/helpers/formatter";
 
 interface DataType {
   id: string;
@@ -550,13 +551,16 @@ const AnotherTable: React.FC<AnotherTableProps> = ({
                   Take Home Pay (THP) <span className="text-red-500">*</span>
                 </label>
                 <Input
-                  value={selectedRecord?.thp}
-                  onChange={(e) =>
+                  value={anotherFormatRupiah(selectedRecord?.thp)}
+                  type="text"
+                  onChange={(e) => {
+                    const rawValue = e.target.value.replace(/\D/g, "");
+                    if (rawValue.length > 1 && rawValue.startsWith("0")) return;
                     setSelectedRecord({
                       ...selectedRecord,
-                      thp: e.target.value,
-                    })
-                  }
+                      thp: rawValue,
+                    });
+                  }}
                   placeholder="Masukkan THP"
                 />
               </div>
@@ -566,13 +570,14 @@ const AnotherTable: React.FC<AnotherTableProps> = ({
                   Position Allowance
                 </label>
                 <Input
-                  value={selectedRecord?.positionAllowance}
-                  onChange={(e) =>
+                  value={anotherFormatRupiah(selectedRecord?.positionAllowance)}
+                  type="text"
+                  onChange={(e) => {
                     setSelectedRecord({
                       ...selectedRecord,
                       positionAllowance: e.target.value,
-                    })
-                  }
+                    });
+                  }}
                   placeholder="Masukkan Position Allowance"
                   disabled
                 />
@@ -583,13 +588,16 @@ const AnotherTable: React.FC<AnotherTableProps> = ({
                   Incentive
                 </label>
                 <Input
-                  value={selectedRecord?.incentive}
-                  onChange={(e) =>
+                  value={anotherFormatRupiah(selectedRecord?.incentive)}
+                  type="text"
+                  onChange={(e) => {
+                    const rawValue = e.target.value.replace(/\D/g, "");
+                    if (rawValue.length > 1 && rawValue.startsWith("0")) return;
                     setSelectedRecord({
                       ...selectedRecord,
-                      incentive: e.target.value,
-                    })
-                  }
+                      incentive: rawValue,
+                    });
+                  }}
                   placeholder="Masukkan Incentive"
                 />
               </div>
@@ -599,13 +607,16 @@ const AnotherTable: React.FC<AnotherTableProps> = ({
                   Overtime Allowance
                 </label>
                 <Input
-                  value={selectedRecord?.overtimeAllowance}
-                  onChange={(e) =>
+                  value={anotherFormatRupiah(selectedRecord?.overtimeAllowance)}
+                  type="text"
+                  onChange={(e) => {
+                    const rawValue = e.target.value.replace(/\D/g, "");
+                    if (rawValue.length > 1 && rawValue.startsWith("0")) return;
                     setSelectedRecord({
                       ...selectedRecord,
-                      overtimeAllowance: e.target.value,
-                    })
-                  }
+                      overtimeAllowance: rawValue,
+                    });
+                  }}
                   placeholder="Masukkan Overtime Allowance"
                 />
               </div>
@@ -618,13 +629,16 @@ const AnotherTable: React.FC<AnotherTableProps> = ({
                   Jaminan Kecelakaan Kerja (JKK)
                 </label>
                 <Input
-                  value={selectedRecord?.jkk}
-                  onChange={(e) =>
+                  value={anotherFormatRupiah(selectedRecord?.jkk)}
+                  type="text"
+                  onChange={(e) => {
+                    const rawValue = e.target.value.replace(/\D/g, "");
+                    if (rawValue.length > 1 && rawValue.startsWith("0")) return;
                     setSelectedRecord({
                       ...selectedRecord,
-                      jkk: e.target.value,
-                    })
-                  }
+                      jkk: rawValue,
+                    });
+                  }}
                   placeholder="Masukkan JKK"
                   disabled
                 />
@@ -635,7 +649,8 @@ const AnotherTable: React.FC<AnotherTableProps> = ({
                   Jaminan Kematian (JKM)
                 </label>
                 <Input
-                  value={selectedRecord?.jkm}
+                  value={anotherFormatRupiah(selectedRecord?.jkm)}
+                  type="text"
                   onChange={(e) =>
                     setSelectedRecord({
                       ...selectedRecord,
@@ -652,7 +667,8 @@ const AnotherTable: React.FC<AnotherTableProps> = ({
                   BPJS Kesehatan
                 </label>
                 <Input
-                  value={selectedRecord?.bpjs}
+                  value={anotherFormatRupiah(selectedRecord?.bpjs)}
+                  type="text"
                   onChange={(e) =>
                     setSelectedRecord({
                       ...selectedRecord,
@@ -669,13 +685,16 @@ const AnotherTable: React.FC<AnotherTableProps> = ({
                   Bonus
                 </label>
                 <Input
-                  value={selectedRecord?.bonus}
-                  onChange={(e) =>
+                  value={anotherFormatRupiah(selectedRecord?.bonus)}
+                  type="text"
+                  onChange={(e) => {
+                    const rawValue = e.target.value.replace(/\D/g, "");
+                    if (rawValue.length > 1 && rawValue.startsWith("0")) return;
                     setSelectedRecord({
                       ...selectedRecord,
-                      bonus: e.target.value,
-                    })
-                  }
+                      bonus: rawValue,
+                    });
+                  }}
                   placeholder="Masukkan Bonus"
                 />
               </div>
@@ -685,13 +704,16 @@ const AnotherTable: React.FC<AnotherTableProps> = ({
                   Tunjangan Hari Raya (THR)
                 </label>
                 <Input
-                  value={selectedRecord?.thr}
-                  onChange={(e) =>
+                  value={anotherFormatRupiah(selectedRecord?.thr)}
+                  type="text"
+                  onChange={(e) => {
+                    const rawValue = e.target.value.replace(/\D/g, "");
+                    if (rawValue.length > 1 && rawValue.startsWith("0")) return;
                     setSelectedRecord({
                       ...selectedRecord,
-                      thr: e.target.value,
-                    })
-                  }
+                      thr: rawValue,
+                    });
+                  }}
                   placeholder="Masukkan THR"
                 />
               </div>

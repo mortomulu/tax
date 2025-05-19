@@ -11,6 +11,7 @@ import {
 } from "@/helpers/taxCalc";
 import { supabase } from "@/utils/supabase";
 import { calcDecTax, calcDecTaxFinal } from "@/helpers/decTaxCalc";
+import { anotherFormatRupiah } from "@/helpers/formatter";
 
 interface DataType {
   id: string;
@@ -508,9 +509,13 @@ export default function List() {
                 </label>
                 <Input
                   placeholder="Masukkan THP"
-                  type="number"
-                  value={newGajiPokok}
-                  onChange={(e) => setNewGajiPokok(e.target.value)}
+                  type="text"
+                  value={anotherFormatRupiah(newGajiPokok)}
+                  onChange={(e) => {
+                    const rawValue = e.target.value.replace(/\D/g, "");
+                    if (rawValue.length > 1 && rawValue.startsWith("0")) return;
+                    setNewGajiPokok(rawValue);
+                  }}
                 />
               </div>
 
@@ -520,8 +525,8 @@ export default function List() {
                 </label>
                 <Input
                   placeholder="Masukkan Position Allowance"
-                  type="number"
-                  value={idName ? positionAllowance : ""}
+                  type="text"
+                  value={idName ? anotherFormatRupiah(positionAllowance) : ""}
                   onChange={(e) => setPositionAllowance(e.target.value)}
                   disabled
                 />
@@ -533,9 +538,13 @@ export default function List() {
                 </label>
                 <Input
                   placeholder="Masukkan Incentive"
-                  type="number"
-                  value={incentive}
-                  onChange={(e) => setIncentive(e.target.value)}
+                  type="text"
+                  value={anotherFormatRupiah(incentive)}
+                  onChange={(e) => {
+                    const rawValue = e.target.value.replace(/\D/g, "");
+                    if (rawValue.length > 1 && rawValue.startsWith("0")) return;
+                    setIncentive(rawValue);
+                  }}
                 />
               </div>
 
@@ -545,9 +554,13 @@ export default function List() {
                 </label>
                 <Input
                   placeholder="Masukkan Overtime Allowance"
-                  type="number"
-                  value={overtimeAllowance}
-                  onChange={(e) => setOvertimeAllowance(e.target.value)}
+                  type="text"
+                  value={anotherFormatRupiah(overtimeAllowance)}
+                  onChange={(e) => {
+                    const rawValue = e.target.value.replace(/\D/g, "");
+                    if (rawValue.length > 1 && rawValue.startsWith("0")) return;
+                    setOvertimeAllowance(rawValue);
+                  }}
                 />
               </div>
             </div>
@@ -560,8 +573,8 @@ export default function List() {
                 </label>
                 <Input
                   placeholder="Masukkan JKK"
-                  type="number"
-                  value={jkk}
+                  type="text"
+                  value={anotherFormatRupiah(jkk)}
                   onChange={(e) => setJkk(e.target.value)}
                   disabled
                 />
@@ -573,8 +586,8 @@ export default function List() {
                 </label>
                 <Input
                   placeholder="Masukkan JKM"
-                  type="number"
-                  value={jkm}
+                  type="text"
+                  value={anotherFormatRupiah(jkm)}
                   onChange={(e) => setJkm(e.target.value)}
                   disabled
                 />
@@ -586,8 +599,8 @@ export default function List() {
                 </label>
                 <Input
                   placeholder="Masukkan BPJS Kesehatan"
-                  type="number"
-                  value={bpjs}
+                  type="text"
+                  value={anotherFormatRupiah(bpjs)}
                   onChange={(e) => setBpjs(e.target.value)}
                   disabled
                 />
@@ -599,9 +612,13 @@ export default function List() {
                 </label>
                 <Input
                   placeholder="Masukkan Bonus"
-                  type="number"
-                  value={bonus}
-                  onChange={(e) => setBonus(e.target.value)}
+                  type="text"
+                  value={anotherFormatRupiah(bonus)}
+                  onChange={(e) => {
+                    const rawValue = e.target.value.replace(/\D/g, "");
+                    if (rawValue.length > 1 && rawValue.startsWith("0")) return;
+                    setBonus(rawValue);
+                  }}
                 />
               </div>
 
@@ -611,9 +628,13 @@ export default function List() {
                 </label>
                 <Input
                   placeholder="Masukkan THR"
-                  type="number"
-                  value={thr}
-                  onChange={(e) => setThr(e.target.value)}
+                  type="text"
+                  value={anotherFormatRupiah(thr)}
+                  onChange={(e) => {
+                    const rawValue = e.target.value.replace(/\D/g, "");
+                    if (rawValue.length > 1 && rawValue.startsWith("0")) return;
+                    setThr(rawValue);
+                  }}
                 />
               </div>
             </div>
