@@ -78,7 +78,7 @@ const getEditableCell = (positionOptions: any[], form: any) => {
           <Form.Item
             name={dataIndex}
             style={{ margin: 0 }}
-            rules={[{ required: true, message: `Please Input ${title}!` }]}
+            rules={[{ required: false, message: `Please Input ${title}!` }]}
           >
             {inputNode}
           </Form.Item>
@@ -178,7 +178,6 @@ const EditHistoryModal = ({
   const save = async (key: React.Key) => {
     try {
       const row = await form.validateFields();
-      console.log(row);
 
       const newData = [...data];
       const index = newData.findIndex((item) => key === item.key);
@@ -206,7 +205,7 @@ const EditHistoryModal = ({
           ...item,
           ...row,
           position: selectedPosition.position,
-          incentive: selectedPosition.incentive,
+          incentive: item.incentive,
           startDate: formattedStartDate,
           endDate: formattedEndDate,
         };
@@ -311,13 +310,7 @@ const EditHistoryModal = ({
       render: (text: string) => (text ? dayjs(text).format("YYYY-MM-DD") : "-"),
     },
     {
-      title: "Sekarang?",
-      dataIndex: "now",
-      editable: true,
-      render: (checked: boolean) => (checked ? "✔️" : "❌"),
-    },
-    {
-      title: "Incentive",
+      title: "Position Allowance",
       dataIndex: "incentive",
       editable: false,
     },
