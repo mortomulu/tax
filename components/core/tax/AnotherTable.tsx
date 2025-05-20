@@ -369,7 +369,7 @@ const AnotherTable: React.FC<AnotherTableProps> = ({
     const typeTer = getTypeTer(selectedRecord.ptkp);
 
     const brutoSalary = calculateBrutoSalary(
-      Number(selectedRecord?.newGajiPokok) || 0,
+      Number(selectedRecord?.thp) || 0,
       Number(selectedRecord?.positionAllowance) || 0,
       Number(selectedRecord?.incentive) || 0,
       Number(selectedRecord?.overtimeAllowance) || 0,
@@ -444,7 +444,6 @@ const AnotherTable: React.FC<AnotherTableProps> = ({
     const { data, error } = await supabase
       .from("tax")
       .update({
-        idemployee: selectedRecord?.idName,
         thp: Number(selectedRecord?.thp),
         incentive: Number(selectedRecord?.incentive),
         overtime_allowance: Number(selectedRecord?.overtimeAllowance),
@@ -457,7 +456,7 @@ const AnotherTable: React.FC<AnotherTableProps> = ({
         monthlytax: Number(monthlyTax),
         ...(month === 12 && { dectax: Number(decTax) }),
       })
-      .eq("id", selectedRecord?.idName);
+      .eq("id", selectedRecord?.id);
 
     if (error) {
       message.error("Gagal update data pajak");
@@ -529,10 +528,8 @@ const AnotherTable: React.FC<AnotherTableProps> = ({
             </label>
             <Select
               placeholder="Pilih Karyawan"
-              value={selectedRecord?.idName || undefined}
-              onChange={(value) =>
-                setSelectedRecord({ ...selectedRecord, idName: value })
-              }
+              value={selectedRecord?.name || undefined}
+              disabled
             >
               {employeeOptions?.map((option: any) => (
                 <Select.Option key={option.id} value={option.id}>
