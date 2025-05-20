@@ -1,6 +1,6 @@
 import Layout from "@/components/layouts/Layout";
 import Header from "@/components/dashboard/Header";
-import Card from "@/components/dashboard/Card";
+import Cardmanual from "@/components/dashboard/Card";
 import LineChart from "@/components/dashboard/Chart";
 import {
   FaUsers,
@@ -24,6 +24,7 @@ import {
   UploadOutlined,
 } from "@ant-design/icons";
 import Link from "next/link";
+import { FiAlertCircle, FiInfo, FiLoader, FiUserCheck } from "react-icons/fi";
 
 const monthNames = [
   "Januari",
@@ -52,6 +53,11 @@ export default function Dashboard() {
   const [selectedMonth, setSelectedMonth] = useState<Date | null>(null);
 
   const [employeesTotal, setEmployeesTotal] = useState<any>();
+  const [employees, setEmployees] = useState<any>();
+  const [selectedAdminId, setSelectedAdminId] = useState<number | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [updating, setUpdating] = useState(false);
+
   const [taxPayTotal, setTaxPayTotal] = useState<any>();
   const [salaryPayTotal, setSalaryPayTotal] = useState<any>();
   const [chartTaxMonth, setChartTaxMonth] = useState<any>();
@@ -87,15 +93,17 @@ export default function Dashboard() {
   // };
 
   const fetchEmployees = async () => {
-    const { count, error } = await supabase
-      .from("employees")
-      .select("*", { count: "exact", head: true });
+    const { data, error } = await supabase.from("employees").select("*");
 
     if (error) {
       console.error("Error fetching employees:", error);
       message.error("Gagal mengambil data karyawan");
     } else {
-      setEmployeesTotal(count || 0);
+      const activeAdmin = data.find((emp) => emp.is_finance_admin);
+      setSelectedAdminId(activeAdmin?.id || null);
+      setEmployeesTotal(data.length || 0);
+      setEmployees(data);
+      setLoading(false);
     }
   };
 
@@ -232,23 +240,51 @@ export default function Dashboard() {
     }
   };
 
+  const handleChangeAdmin = async (newAdminId: number) => {
+    if (!newAdminId) return;
+
+    setLoading(true);
+
+    try {
+      // Nonaktifkan semua status admin
+      await supabase
+        .from("employees")
+        .update({ is_finance_admin: false })
+        .neq("id", newAdminId);
+
+      // Aktifkan admin baru
+      const { error } = await supabase
+        .from("employees")
+        .update({ is_finance_admin: true })
+        .eq("id", newAdminId);
+
+      if (error) throw error;
+
+      setSelectedAdminId(newAdminId);
+    } catch (error) {
+      console.error("Gagal mengupdate admin keuangan:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <Layout>
       {/* Dashboard Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-        <Card
+        <Cardmanual
           title="Total Karyawan"
           value={employeesTotal}
           color="bg-blue-600"
           icon={<FaUsers className="text-white" />}
         />
-        <Card
+        <Cardmanual
           title="Total Gaji Dibayar"
           value={formatRupiah(salaryPayTotal)}
           color="bg-green-600"
           icon={<GiMoneyStack className="text-white" />}
         />
-        <Card
+        <Cardmanual
           title="Total Pajak Dibayar"
           value={formatRupiah(taxPayTotal)}
           color="bg-yellow-500"
@@ -475,7 +511,7 @@ export default function Dashboard() {
           </div> */}
 
           {/* Date to automate archieve */}
-          <div className="mb-6">
+          {/* <div className="mb-6">
             <div className="p-6 rounded-lg shadow-md border-l-4 bg-indigo-950 text-white border-yellow-400">
               <h2 className="text-xl font-semibold text-white mb-4">
                 Laporan Pajak Bulan {monthNames[monthNumber - 1]} Diarsipkan
@@ -487,6 +523,98 @@ export default function Dashboard() {
                 disabled
               />
             </div>
+          </div> */}
+          <div className="p-6 bg-white rounded-xl shadow-md border border-gray-100">
+            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2 text-gray-800">
+              <FiUserCheck className="text-blue-500" />
+              Admin Keuangan
+            </h2>
+
+            {loading ? (
+              <div className="flex items-center justify-center py-8 gap-2 text-gray-500">
+                <FiLoader className="animate-spin" />
+                <span>Memuat data karyawan...</span>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div className="flex flex-col gap-2">
+                  <label className="block text-sm font-medium text-gray-700">
+                    Pilih Admin Keuangan:
+                  </label>
+                  <div className="relative">
+                    <select
+                      value={selectedAdminId || ""}
+                      onChange={(e) =>
+                        handleChangeAdmin(Number(e.target.value))
+                      }
+                      className="block w-full px-4 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all appearance-none bg-white pr-10"
+                      disabled={updating}
+                    >
+                      <option value="">-- Pilih Karyawan --</option>
+                      {employees.map((emp: any) => (
+                        <option key={emp.id} value={emp.id}>
+                          {emp.name}{" "}
+                          {emp.npwp ? `(NPWP: ${emp.npwp})` : "(NPWP Kosong)"}
+                        </option>
+                      ))}
+                    </select>
+                    <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                      <FiInfo className="text-gray-400" />
+                    </div>
+                  </div>
+                  <p className="text-xs text-gray-500">
+                    NPWP admin akan digunakan untuk pelaporan pajak perusahaan
+                  </p>
+                </div>
+
+                {selectedAdminId && (
+                  <div className="p-4 bg-blue-50 rounded-lg border border-blue-100">
+                    <div className="flex items-start gap-3">
+                      <div className="p-2 bg-blue-100 rounded-full">
+                        <FiUserCheck className="text-blue-600" />
+                      </div>
+                      <div>
+                        <p className="font-medium text-gray-800">
+                          Admin Terpilih:{" "}
+                          <span className="text-blue-600">
+                            {
+                              employees.find(
+                                (e: any) => e.id === selectedAdminId
+                              )?.name
+                            }
+                          </span>
+                        </p>
+                        <p className="text-sm text-gray-600 mt-1 flex items-center gap-1">
+                          <span>NPWP:</span>
+                          {employees.find((e: any) => e.id === selectedAdminId)
+                            ?.npwp ? (
+                            <span className="font-mono bg-blue-100 px-2 py-0.5 rounded">
+                              {
+                                employees.find(
+                                  (e: any) => e.id === selectedAdminId
+                                )?.npwp
+                              }
+                            </span>
+                          ) : (
+                            <span className="text-red-500 flex items-center gap-1">
+                              <FiAlertCircle />
+                              Belum diisi
+                            </span>
+                          )}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {updating && (
+              <div className="mt-4 flex items-center gap-2 text-blue-600">
+                <FiLoader className="animate-spin" />
+                <span>Menyimpan perubahan...</span>
+              </div>
+            )}
           </div>
         </div>
       </div>

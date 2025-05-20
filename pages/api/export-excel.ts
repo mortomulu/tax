@@ -30,6 +30,19 @@ export default async function handler(
     });
   }
 
+  const { data: employees, error: fetchEmployeesError } = await supabase
+    .from("employees")
+    .select("*");
+
+  if (fetchEmployeesError) {
+    return res.status(500).json({
+      message: "Gagal ambil data employees",
+      error: fetchEmployeesError,
+    });
+  }
+
+  const activeAdmin = employees.find((emp) => emp.is_finance_admin);
+
   const workbook = new ExcelJS.Workbook();
 
   // === SHEET 1 ===
@@ -162,12 +175,12 @@ export default async function handler(
     "Nama Penerima Penghasilan Sesuai NIK": item.employee_name || "",
     "Alamat Penerima Penghasilan Sesuai NIK": item.address || "",
     "Kode Objek Pajak": "21-100-01",
-    "Penandatangan Menggunakan? (NPWP/NIK)": item.type_id_finance || "NPWP",
+    "Penandatangan Menggunakan? (NPWP/NIK)": activeAdmin.idtype || "NPWP",
     "NPWP Penandatangan (tanpa format/tanda baca)": (
-      item.npwp_finance || ""
+      activeAdmin.npwp || ""
     ).replace(/\D/g, ""),
     "NIK Penandatangan (tanpa format/tanda baca)": (
-      item.nik_finance || ""
+      activeAdmin.nik || ""
     ).replace(/\D/g, ""),
     "Kode PTKP": item.ptkp || "",
     "Pegawai Harian? (Ya/Tidak)": "Tidak",
