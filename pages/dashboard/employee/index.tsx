@@ -68,7 +68,9 @@ export default function EmployeePage() {
       return;
     }
 
-    setPtkpOptions(data);
+    const sortedData = [...data].sort((a, b) => a.ptkp.localeCompare(b.ptkp));
+
+    setPtkpOptions(sortedData);
   };
 
   const fetchPositionOptions = async () => {
@@ -82,7 +84,11 @@ export default function EmployeePage() {
       return;
     }
 
-    setPositionOptions(data);
+    const sortedData = [...data].sort((a, b) =>
+      a.position.localeCompare(b.position)
+    );
+
+    setPositionOptions(sortedData);
   };
 
   const fetchEmployees = async () => {
@@ -432,7 +438,7 @@ export default function EmployeePage() {
                 </div>
 
                 {/* Checkbox */}
-                <div className="flex items-center">
+                {/* <div className="flex items-center">
                   <Checkbox
                     onChange={(e) =>
                       handleJabatanChange(index, "now", e.target.checked)
@@ -443,7 +449,7 @@ export default function EmployeePage() {
                       Jabatan Sekarang
                     </span>
                   </Checkbox>
-                </div>
+                </div> */}
 
                 {/* Date Range */}
                 <div className="flex items-end gap-3">

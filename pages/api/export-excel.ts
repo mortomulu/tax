@@ -883,7 +883,7 @@ export default async function handler(
   );
   res.setHeader(
     "Content-Disposition",
-    `attachment; filename="${"rekap"}.xlsx"`
+    `attachment; filename="Arsip Bulanan ${monthlyTaxes[0].month}.xlsx"`
   );
 
   await workbook.xlsx.write(res);

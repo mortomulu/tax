@@ -9,6 +9,7 @@ import {
   FaEye,
   FaInfoCircle,
 } from "react-icons/fa";
+import { GiMoneyStack } from "react-icons/gi";
 import { TbTax } from "react-icons/tb";
 import { Button, DatePicker, Tag, Upload } from "antd";
 import { useEffect, useState } from "react";
@@ -245,7 +246,7 @@ export default function Dashboard() {
           title="Total Gaji Dibayar"
           value={formatRupiah(salaryPayTotal)}
           color="bg-green-600"
-          icon={<FaDollarSign className="text-white" />}
+          icon={<GiMoneyStack className="text-white" />}
         />
         <Card
           title="Total Pajak Dibayar"
