@@ -303,7 +303,7 @@ const App: React.FC<any> = ({ month, year }) => {
 
   const handleEditSubmit = (values: any) => {
     const updatedData = archieveData.map((item: any) => {
-      if (item.key === selectedRecord.key) {
+      if (item.key === Number(selectedRecord.key)) {
         const {
           position_allowance,
           incentive,
@@ -351,6 +351,7 @@ const App: React.FC<any> = ({ month, year }) => {
 
     setArchieveData(updatedData);
     setIsModalEditOpen(false);
+    setSelectedRecord(null);
     message.success("Berhasil mengubah data");
   };
 
@@ -569,6 +570,7 @@ const App: React.FC<any> = ({ month, year }) => {
           setIsModalEditOpen(false);
         }}
         footer={null}
+        destroyOnClose // This ensures the form is destroyed when closed
       >
         {selectedRecord && (
           <Form
