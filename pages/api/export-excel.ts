@@ -90,9 +90,9 @@ export default async function handler(
   rekapSheet.mergeCells("B2:C2");
   rekapSheet.mergeCells("E2:F2");
   rekapSheet.getCell("B2").value = "Tahun Pajak";
-  rekapSheet.getCell("D2").value = year;
+  rekapSheet.getCell("D2").value = monthlyTaxes[0].year;
   rekapSheet.getCell("E2").value = "Masa Pajak";
-  rekapSheet.getCell("G2").value = month;
+  rekapSheet.getCell("G2").value = monthlyTaxes[0].month;
 
   // Style row 2 with font sizes
   ["B2", "E2"].forEach((cell) => {
