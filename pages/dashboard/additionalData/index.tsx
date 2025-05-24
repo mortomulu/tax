@@ -5,6 +5,7 @@ import TerTable from "@/components/core/TerTable";
 import { supabase } from "@/utils/supabase";
 import { useEffect, useState } from "react";
 import { Form, Input, InputNumber, message, Modal, Button } from "antd";
+import CompanyProfileForm from "@/components/core/additionalData/CompanyProfileForm";
 
 type Position = {
   id: string;
@@ -30,11 +31,17 @@ export default function AdditionalDataPage() {
   const [positions, setPositions] = useState<Position[]>([]);
   const [ptkps, setPtkps] = useState<any[]>([]);
   const [ters, setTers] = useState<any[]>([]);
+  const [companyData, setCompanyData] = useState({
+    company_name: "",
+    company_npwp: "",
+    loading: true,
+  });
 
   // Modal Visibility
   const [isJabatanModalOpen, setIsJabatanModalOpen] = useState(false);
   const [isPtkpModalOpen, setIsPtkpModalOpen] = useState(false);
   const [isTerModalOpen, setIsTerModalOpen] = useState(false);
+  const [isCompanyModalOpen, setIsCompanyModalOpen] = useState(false);
 
   // Form Refs
   const [formJabatan] = Form.useForm();
@@ -74,6 +81,28 @@ export default function AdditionalDataPage() {
       fetchTers();
       formTer.resetFields();
       setIsTerModalOpen(false);
+    }
+  };
+
+  const fetchCompanyProfile = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("company_profile")
+        .select("*")
+        .eq("id", 1)
+        .single();
+
+      if (error) throw error;
+
+      setCompanyData({
+        company_name: data?.company_name || "",
+        company_npwp: data?.company_npwp || "",
+        loading: false,
+      });
+    } catch (error) {
+      message.error("Gagal memuat data perusahaan");
+      console.error(error);
+      setCompanyData((prev) => ({ ...prev, loading: false }));
     }
   };
 
@@ -122,6 +151,7 @@ export default function AdditionalDataPage() {
   };
 
   useEffect(() => {
+    fetchCompanyProfile();
     fetchPositions();
     fetchPtkps();
     fetchTers();
@@ -130,6 +160,54 @@ export default function AdditionalDataPage() {
   return (
     <Layout>
       <div className="flex flex-col gap-6">
+        <div className="bg-white p-6 rounded-lg border-l-4 border-blue-500 shadow-md flex flex-col">
+          <div className="flex flex-row justify-between mb-4">
+            <h1 className="text-xl font-semibold text-gray-800">
+              Profil Perusahaan
+            </h1>
+            <Button
+              onClick={() => setIsCompanyModalOpen(true)}
+              type="primary"
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              Edit Profil Perusahaan
+            </Button>
+          </div>
+
+          {/* Data Display */}
+          <div className="space-y-3 mt-2">
+            <div className="flex items-baseline">
+              <span className="text-gray-600 w-32">Nama Perusahaan:</span>
+              <span className="font-medium">
+                {companyData.loading
+                  ? "Memuat..."
+                  : companyData.company_name || "-"}
+              </span>
+            </div>
+            <div className="flex items-baseline">
+              <span className="text-gray-600 w-32">NPWP Perusahaan:</span>
+              <span className="font-mono bg-gray-100 px-2 py-1 rounded">
+                {companyData.loading
+                  ? "Memuat..."
+                  : companyData.company_npwp || "Belum diisi"}
+              </span>
+            </div>
+          </div>
+
+          {/* Modal Edit */}
+          <CompanyProfileForm
+            visible={isCompanyModalOpen}
+            onCancel={() => setIsCompanyModalOpen(false)}
+            initialValues={{
+              company_name: companyData.company_name,
+              company_npwp: companyData.company_npwp,
+            }}
+            onSuccess={() => {
+              fetchCompanyProfile();
+              setIsCompanyModalOpen(false);
+            }}
+          />
+        </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="bg-white p-6 rounded-lg border-l-4 border-yellow-400 shadow-md grid-rows-2 flex flex-col">
             <div className="flex flex-row justify-between mb-4">
