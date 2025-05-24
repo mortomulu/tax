@@ -213,6 +213,7 @@ const App: React.FC<any> = ({ month, year }) => {
           npwp,
           address,
           is_active,
+          is_finance_admin,
           ptkp:ptkp (ptkp),
           positions:idposition (position, incentive)
         `
@@ -365,11 +366,11 @@ const App: React.FC<any> = ({ month, year }) => {
 
     try {
       const financeEmployee = employees.find(
-        (item: any) => item.positions?.position === "MAN, KEU"
+        (item: any) => item?.is_finance_admin === true
       );
 
       if (!financeEmployee) {
-        message.error("Finance employee (MAN, KEU) tidak ditemukan");
+        message.error("Bagian keuangan tidak ditemukan");
         return;
       }
 
