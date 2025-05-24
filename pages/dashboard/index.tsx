@@ -54,7 +54,10 @@ export default function Dashboard() {
 
   const [employeesTotal, setEmployeesTotal] = useState<any>();
   const [employees, setEmployees] = useState<any>();
-  const [selectedAdminId, setSelectedAdminId] = useState<number | null>(null);
+
+  const [npwpOptions, setNpwpOptions] = useState<any>();
+  const [selectedAdminId, setSelectedAdminId] = useState<any>(null);
+
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
 
@@ -108,17 +111,48 @@ export default function Dashboard() {
     setConfig({ ...data, loading: false });
   };
 
-  const fetchEmployees = async () => {
-    const { data, error } = await supabase.from("employees").select("*");
+  const fetchEmployeesAndCompany = async () => {
+    try {
+      const { data: employees, error: employeesError } = await supabase
+        .from("employees")
+        .select("id, name, npwp");
 
-    if (error) {
-      console.error("Error fetching employees:", error);
-      message.error("Gagal mengambil data karyawan");
-    } else {
-      const activeAdmin = data.find((emp) => emp.is_finance_admin);
+      if (employeesError) throw employeesError;
+
+      const { data: companyProfile, error: companyError } = await supabase
+        .from("company_profile")
+        .select("company_name, company_npwp, selected_npwp")
+        .eq("id", 1)
+        .single();
+
+      if (companyError) throw companyError;
+
+      const combinedOptions = [
+        {
+          id: 1,
+          name: companyProfile.company_name,
+          npwp: companyProfile.company_npwp,
+          is_company: true,
+        },
+        ...(employees?.map((emp) => ({
+          ...emp,
+          is_company: false,
+        })) || []),
+      ];
+
+      setNpwpOptions(combinedOptions);
+
+      const activeAdmin = combinedOptions.find(
+        (opt) => opt.npwp && opt.npwp === companyProfile.selected_npwp
+      );
+
       setSelectedAdminId(activeAdmin?.id || null);
-      setEmployeesTotal(data.length || 0);
-      setEmployees(data);
+      setEmployees(employees || []);
+      setEmployeesTotal(employees?.length || 0);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      message.error("Gagal mengambil data NPWP");
+    } finally {
       setLoading(false);
     }
   };
@@ -175,7 +209,7 @@ export default function Dashboard() {
   };
 
   useEffect(() => {
-    fetchEmployees();
+    fetchEmployeesAndCompany();
     fetchTaxesSummary();
     fetchConfig();
   }, []);
@@ -257,29 +291,42 @@ export default function Dashboard() {
     }
   };
 
-  const handleChangeAdmin = async (newAdminId: number) => {
+  const handleChangeAdmin = async (newAdminId: string | number) => {
     if (!newAdminId) return;
-
     setLoading(true);
 
     try {
-      // Nonaktifkan semua status admin
-      await supabase
-        .from("employees")
-        .update({ is_finance_admin: false })
-        .neq("id", newAdminId);
+      const selectedOption = npwpOptions.find(
+        (opt: any) => opt.id === newAdminId
+      );
 
-      // Aktifkan admin baru
+      if (!selectedOption || !selectedOption.npwp) {
+        throw new Error("NPWP tidak tersedia");
+      }
+
       const { error } = await supabase
-        .from("employees")
-        .update({ is_finance_admin: true })
-        .eq("id", newAdminId);
+        .from("company_profile")
+        .update({ selected_npwp: selectedOption.npwp })
+        .eq("id", 1);
 
       if (error) throw error;
 
+      if (!selectedOption.is_company) {
+        await supabase.from("employees").update({ is_finance_admin: false });
+
+        await supabase
+          .from("employees")
+          .update({ is_finance_admin: true })
+          .eq("id", newAdminId);
+      }
+
       setSelectedAdminId(newAdminId);
+      message.success(`NPWP aktif diatur ke: ${selectedOption.npwp}`);
     } catch (error) {
-      console.error("Gagal mengupdate admin keuangan:", error);
+      console.error("Gagal mengupdate NPWP:", error);
+      message.error(
+        error instanceof Error ? error.message : "Terjadi kesalahan"
+      );
     } finally {
       setLoading(false);
     }
@@ -287,7 +334,6 @@ export default function Dashboard() {
 
   const updateConfig = async (key: string, value: boolean) => {
     try {
-      console.log(key, value)
       const { error } = await supabase
         .from("tax_config")
         .update({ [key]: value })
@@ -558,6 +604,8 @@ export default function Dashboard() {
               />
             </div>
           </div>
+
+          {/* select npwp */}
           <div className="p-6 bg-white rounded-xl shadow-md border border-gray-100">
             <h2 className="text-xl font-semibold mb-4 flex items-center gap-2 text-gray-800">
               <FiUserCheck className="text-blue-500" />
@@ -577,7 +625,7 @@ export default function Dashboard() {
                   </label>
                   <div className="relative">
                     <select
-                      value={selectedAdminId || ""}
+                      value={selectedAdminId ?? ""}
                       onChange={(e) =>
                         handleChangeAdmin(Number(e.target.value))
                       }
@@ -585,13 +633,14 @@ export default function Dashboard() {
                       disabled={updating}
                     >
                       <option value="">-- Pilih Karyawan --</option>
-                      {employees.map((emp: any) => (
+                      {npwpOptions.map((emp: any) => (
                         <option key={emp.id} value={emp.id}>
                           {emp.name}{" "}
                           {emp.npwp ? `(NPWP: ${emp.npwp})` : "(NPWP Kosong)"}
                         </option>
                       ))}
                     </select>
+
                     <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                       <FiInfo className="text-gray-400" />
                     </div>
@@ -612,7 +661,7 @@ export default function Dashboard() {
                           Admin Terpilih:{" "}
                           <span className="text-blue-600">
                             {
-                              employees.find(
+                              npwpOptions.find(
                                 (e: any) => e.id === selectedAdminId
                               )?.name
                             }
@@ -620,11 +669,12 @@ export default function Dashboard() {
                         </p>
                         <p className="text-sm text-gray-600 mt-1 flex items-center gap-1">
                           <span>NPWP:</span>
-                          {employees.find((e: any) => e.id === selectedAdminId)
-                            ?.npwp ? (
+                          {npwpOptions.find(
+                            (e: any) => e.id === selectedAdminId
+                          )?.npwp ? (
                             <span className="font-mono bg-blue-100 px-2 py-0.5 rounded">
                               {
-                                employees.find(
+                                npwpOptions.find(
                                   (e: any) => e.id === selectedAdminId
                                 )?.npwp
                               }
@@ -676,19 +726,17 @@ export default function Dashboard() {
                     checked={config.jkm_enabled}
                     onChange={(checked) => updateConfig("jkm_enabled", checked)}
                   />
-                  <span className="font-medium">
-                    Jaminan Kematian (JKM)
-                  </span>
+                  <span className="font-medium">Jaminan Kematian (JKM)</span>
                 </div>
 
                 <div className="flex items-center gap-4">
                   <Switch
                     checked={config.bpjs_enabled}
-                    onChange={(checked) => updateConfig("bpjs_enabled", checked)}
+                    onChange={(checked) =>
+                      updateConfig("bpjs_enabled", checked)
+                    }
                   />
-                  <span className="font-medium">
-                    Jaminan Kematian (JKM)
-                  </span>
+                  <span className="font-medium">Jaminan Kematian (JKM)</span>
                 </div>
 
                 <p className="text-gray-500 text-sm mt-2">
