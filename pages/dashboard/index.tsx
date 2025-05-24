@@ -11,7 +11,7 @@ import {
 } from "react-icons/fa";
 import { GiMoneyStack } from "react-icons/gi";
 import { TbTax } from "react-icons/tb";
-import { Button, DatePicker, Tag, Upload } from "antd";
+import { Button, Card, DatePicker, Spin, Switch, Tag, Upload } from "antd";
 import { useEffect, useState } from "react";
 import { message } from "antd";
 import dayjs from "dayjs";
@@ -69,6 +69,13 @@ export default function Dashboard() {
     []
   );
 
+  const [config, setConfig] = useState({
+    jkk_enabled: false,
+    jkm_enabled: false,
+    bpjs_enabled: false,
+    loading: true,
+  });
+
   useEffect(() => {
     if (!summaryTaxesCurrentYear) return;
 
@@ -91,6 +98,15 @@ export default function Dashboard() {
   //     message.info("No month selected.");
   //   }
   // };
+
+  const fetchConfig = async () => {
+    const { data } = await supabase
+      .from("tax_config")
+      .select("*")
+      .eq("id", 1)
+      .single();
+    setConfig({ ...data, loading: false });
+  };
 
   const fetchEmployees = async () => {
     const { data, error } = await supabase.from("employees").select("*");
@@ -161,6 +177,7 @@ export default function Dashboard() {
   useEffect(() => {
     fetchEmployees();
     fetchTaxesSummary();
+    fetchConfig();
   }, []);
 
   const handleUpload = async ({ file, onSuccess, onError }: any) => {
@@ -265,6 +282,23 @@ export default function Dashboard() {
       console.error("Gagal mengupdate admin keuangan:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const updateConfig = async (key: string, value: boolean) => {
+    try {
+      console.log(key, value)
+      const { error } = await supabase
+        .from("tax_config")
+        .update({ [key]: value })
+        .eq("id", 1);
+
+      if (error) throw error;
+
+      setConfig((prev) => ({ ...prev, [key]: value }));
+      message.success("Konfigurasi diperbarui!");
+    } catch (error) {
+      message.error("Gagal menyimpan perubahan");
     }
   };
 
@@ -511,7 +545,7 @@ export default function Dashboard() {
           </div> */}
 
           {/* Date to automate archieve */}
-          {/* <div className="mb-6">
+          <div className="mb-6">
             <div className="p-6 rounded-lg shadow-md border-l-4 bg-indigo-950 text-white border-yellow-400">
               <h2 className="text-xl font-semibold text-white mb-4">
                 Laporan Pajak Bulan {monthNames[monthNumber - 1]} Diarsipkan
@@ -523,7 +557,7 @@ export default function Dashboard() {
                 disabled
               />
             </div>
-          </div> */}
+          </div>
           <div className="p-6 bg-white rounded-xl shadow-md border border-gray-100">
             <h2 className="text-xl font-semibold mb-4 flex items-center gap-2 text-gray-800">
               <FiUserCheck className="text-blue-500" />
@@ -616,6 +650,53 @@ export default function Dashboard() {
               </div>
             )}
           </div>
+
+          {/* toggle jkk, jkm, bpjs */}
+          <Card
+            title="Konfigurasi Benefit"
+            bordered={false}
+            className="shadow-sm"
+          >
+            {config.loading ? (
+              <Spin />
+            ) : (
+              <div className="space-y-4">
+                <div className="flex items-center gap-4">
+                  <Switch
+                    checked={config.jkk_enabled}
+                    onChange={(checked) => updateConfig("jkk_enabled", checked)}
+                  />
+                  <span className="font-medium">
+                    Jaminan Kecelakaan Kerja (JKK)
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-4">
+                  <Switch
+                    checked={config.jkm_enabled}
+                    onChange={(checked) => updateConfig("jkm_enabled", checked)}
+                  />
+                  <span className="font-medium">
+                    Jaminan Kematian (JKM)
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-4">
+                  <Switch
+                    checked={config.bpjs_enabled}
+                    onChange={(checked) => updateConfig("bpjs_enabled", checked)}
+                  />
+                  <span className="font-medium">
+                    Jaminan Kematian (JKM)
+                  </span>
+                </div>
+
+                <p className="text-gray-500 text-sm mt-2">
+                  Catatan: Perubahan akan berlaku untuk semua karyawan.
+                </p>
+              </div>
+            )}
+          </Card>
         </div>
       </div>
 
