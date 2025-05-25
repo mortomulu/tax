@@ -325,7 +325,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
         </div>
 
         {/* Main Content Area */}
-        <div className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-200">
+        <div className="overflow-hidden">
           {children}
         </div>
 

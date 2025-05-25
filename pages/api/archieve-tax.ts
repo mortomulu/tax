@@ -40,7 +40,7 @@ export default async function handler(
 
   const { data: companyProfile, error: companyError }: any = await supabase
     .from("company_profile")
-    .select("company_name, company_npwp, selected_npwp")
+    .select("company_name, company_npwp, selected_npwp, selected_name")
     .eq("id", 1)
     .single();
 
@@ -110,7 +110,7 @@ export default async function handler(
         bruto_salary: employeeTax?.brutosalary || 0,
         tax_total: taxValue,
         type_id_finance: financeEmployee[0].idtype,
-        npwp_finance: companyProfile[0].selected_npwp,
+        npwp_finance: companyProfile.selected_npwp,
         nik_finance: financeEmployee[0].nik,
       };
     })

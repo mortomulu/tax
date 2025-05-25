@@ -121,7 +121,7 @@ export default function Dashboard() {
 
       const { data: companyProfile, error: companyError } = await supabase
         .from("company_profile")
-        .select("company_name, company_npwp, selected_npwp")
+        .select("company_name, company_npwp, selected_npwp, selected_name")
         .eq("id", 1)
         .single();
 
@@ -306,7 +306,10 @@ export default function Dashboard() {
 
       const { error } = await supabase
         .from("company_profile")
-        .update({ selected_npwp: selectedOption.npwp })
+        .update({
+          selected_npwp: selectedOption.npwp,
+          selected_name: selectedOption.name,
+        })
         .eq("id", 1);
 
       if (error) throw error;

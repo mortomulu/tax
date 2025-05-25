@@ -242,7 +242,7 @@ const App: React.FC<any> = ({ month, year }) => {
 
     const { data: companyProfile, error: companyError } = await supabase
       .from("company_profile")
-      .select("company_name, company_npwp, selected_npwp")
+      .select("company_name, company_npwp, selected_npwp, selected_name")
       .eq("id", 1)
       .single();
 

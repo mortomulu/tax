@@ -72,7 +72,6 @@ const CompanyProfileForm = ({
           label="NPWP Perusahaan"
           rules={[
             { required: true, message: "Wajib diisi" },
-            { pattern: /^\d{15,20}$/, message: "Format NPWP tidak valid" },
           ]}
         >
           <Input placeholder="Contoh: 123456789012345" maxLength={20} />

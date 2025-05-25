@@ -53,7 +53,7 @@ const headers = [
   "Nomor SKB/Nomor DTP",
 ];
 
-const exportToPDF = (data: any[], fileName: string) => {
+const exportToPDF = (data: any[], companyProfile: any, fileName: string) => {
   const doc: any = new jsPDF({
     orientation: "landscape",
     unit: "mm",
@@ -169,7 +169,9 @@ const exportToPDF = (data: any[], fileName: string) => {
 
   doc.setFontSize(10);
   doc.text("Malang, 25 Mei 2025", 340, signatureY + 10);
-  doc.text("Kepala Staff Keuangan", 340, signatureY + 45);
+
+  doc.text(companyProfile.selected_name, 340, signatureY + 45);
+  doc.text(companyProfile.selected_npwp, 340, signatureY + 50);
 
   doc.save(`${fileName}.pdf`);
 };
@@ -183,9 +185,8 @@ const ReportPage: React.FC = () => {
     []
   );
   const [summaryYearlyTaxes, setSummaryYearlyTaxes] = useState<any>();
-
   const [monthlyTaxes, setMonthlyTaxes] = useState<any>();
-  console.log("monthlyTaxes", monthlyTaxes);
+  const [companyProfile, setCompanyProfile] = useState<any>();
 
   const processYearlySummary = (monthlyData: any[]) => {
     const yearlyMap: Record<string, number> = {};
@@ -259,9 +260,26 @@ const ReportPage: React.FC = () => {
     }
   };
 
+  const fetchCompayProfile = async () => {
+    const { data: companyProfile, error: companyError } = await supabase
+      .from("company_profile")
+      .select("company_name, company_npwp, selected_npwp, selected_name")
+      .eq("id", 1)
+      .single();
+
+    if (companyError) {
+      message.error("Gagal mengambil data perusahaan");
+      console.log("fetch company profile error:", companyError);
+      return;
+    }
+
+    setCompanyProfile(companyProfile);
+  };
+
   useEffect(() => {
     fetchMonthlyTaxes();
     fetchSummary();
+    fetchCompayProfile();
   }, []);
 
   const handleMenuClick = ({ key }: { key: string }, record: any) => {
@@ -270,7 +288,7 @@ const ReportPage: React.FC = () => {
         (item: any) => item.id_summary === record.id
       );
 
-      exportToPDF(filteredData, "Laporan_Pajak");
+      exportToPDF(filteredData, companyProfile, "Laporan_Pajak");
     } else if (key === "2") {
       window.open(`/api/export-excel?id=${record.id}`);
     } else if (key === "3") {
