@@ -106,7 +106,8 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
       console.error("Logout error:", err);
     } finally {
       console.log("Router redirect triggered");
-      router.push("/"); // atau window.location.href = "/";
+      // router.push("/");
+      window.location.href = "/";
     }
   };
 
