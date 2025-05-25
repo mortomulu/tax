@@ -8,7 +8,6 @@ import { Breadcrumb } from "antd";
 import { HomeOutlined } from "@ant-design/icons";
 import { useEffect, useState } from "react";
 import { supabase } from "@/utils/supabase";
-import { BuildingOfficeIcon } from "@ant-design/icons";
 
 function toTitleCase(str: string) {
   return str
