@@ -1,11 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { Badge, Button, Dropdown, message, Space, Table, Tabs } from "antd";
+import { Button, Dropdown, message, Space, Table, Tabs } from "antd";
 import Layout from "@/components/layouts/Layout";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import { FaPlus } from "react-icons/fa6";
 import { useRouter } from "next/router";
-import * as XLSX from "xlsx";
-import { saveAs } from "file-saver";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { supabase } from "@/utils/supabase";
@@ -27,169 +25,151 @@ const items = [
   { key: "3", label: "Detail" },
 ];
 
-const exportToExcel = (data: any[], fileName: string) => {
-  const workbook = XLSX.utils.book_new();
-
-  // === SHEET 1: REKAP ===
-  const rekapData = [
-    Array(8).fill(null), // Row 1 (A1:H1) - gray
-    [null, "Tahun Pajak", null, 2024, "Masa Pajak", null, 1, null], // Row 2 (A2:H2)
-    [
-      null,
-      "Jumlah Bukti Potong PPh Pasal 21",
-      null,
-      null,
-      null,
-      null,
-      20,
-      null,
-    ], // Row 3
-    [null, "Jumlah Bukti Potong PPh Pasal 26", null, null, null, null, 0, null], // Row 4
-    Array(8).fill(null), // Row 5 (A5:H5) - gray
-  ];
-
-  const rekapSheet = XLSX.utils.aoa_to_sheet(rekapData);
-
-  // Merge cells (8 columns total, A-H)
-  rekapSheet["!merges"] = [
-    // Row 2 merges
-    { s: { r: 1, c: 1 }, e: { r: 1, c: 2 } }, // "Tahun Pajak" (B2:C2)
-    { s: { r: 1, c: 4 }, e: { r: 1, c: 5 } }, // "Masa Pajak" (E2:F2)
-
-    // Row 3 merges
-    { s: { r: 2, c: 1 }, e: { r: 2, c: 5 } }, // "Jumlah..." (B3:F3)
-
-    // Row 4 merges
-    { s: { r: 3, c: 1 }, e: { r: 3, c: 5 } }, // "Jumlah..." (B4:F4)
-  ];
-
-  // Column widths (A-H)
-  rekapSheet["!cols"] = [
-    { wch: 5 }, // A (gray)
-    { wch: 15 }, // B
-    { wch: 15 }, // C
-    { wch: 10 }, // D (2024)
-    { wch: 15 }, // E
-    { wch: 15 }, // F
-    { wch: 10 }, // G (numbers)
-    { wch: 5 }, // H (gray)
-  ];
-
-  // Style definitions
-  const grayStyle = {
-    fill: { fgColor: { rgb: "D9D9D9" } },
-  };
-
-  const headerStyle = {
-    font: { bold: true, color: { rgb: "FFFFFF" } },
-    fill: { fgColor: { rgb: "4472C4" } },
-    alignment: { horizontal: "center", vertical: "center" },
-  };
-
-  const dataLabelStyle = {
-    font: { bold: true },
-    alignment: { horizontal: "center", vertical: "center" },
-  };
-
-  const numberStyle = {
-    alignment: { horizontal: "center", vertical: "center" },
-  };
-
-  // Apply styles to all cells (A1:H5)
-  const range = XLSX.utils.decode_range("A1:H5");
-
-  for (let R = range.s.r; R <= range.e.r; ++R) {
-    for (let C = range.s.c; C <= range.e.c; ++C) {
-      const cellRef = XLSX.utils.encode_cell({ r: R, c: C });
-
-      if (!rekapSheet[cellRef]) {
-        rekapSheet[cellRef] = { t: "s", v: "", s: {} };
-      }
-
-      // Gray areas (columns A and H, rows 1 and 5)
-      if (C === 0 || C === 7 || R === 0 || R === 4) {
-        rekapSheet[cellRef].s = { ...rekapSheet[cellRef].s, ...grayStyle };
-      }
-
-      // Content styling with center alignment
-      if (R === 1) {
-        // Row 2
-        if (C === 1 || C === 4) {
-          // Header labels
-          rekapSheet[cellRef].s = { ...rekapSheet[cellRef].s, ...headerStyle };
-        } else if (C === 3 || C === 6) {
-          // Numbers
-          rekapSheet[cellRef].s = { ...rekapSheet[cellRef].s, ...numberStyle };
-        }
-      } else if (R === 2 || R === 3) {
-        // Rows 3-4
-        if (C === 1) {
-          // Data labels
-          rekapSheet[cellRef].s = {
-            ...rekapSheet[cellRef].s,
-            ...dataLabelStyle,
-          };
-        } else if (C === 6) {
-          // Numbers
-          rekapSheet[cellRef].s = { ...rekapSheet[cellRef].s, ...numberStyle };
-        }
-      }
-
-      // Center alignment for all content cells in the range (improved centering for all cells)
-      if (R >= 1 && R <= 3 && C >= 1 && C <= 6) {
-        if (!rekapSheet[cellRef].s) rekapSheet[cellRef].s = {};
-        rekapSheet[cellRef].s.alignment = {
-          horizontal: "center",
-          vertical: "center",
-        };
-      }
-    }
-  }
-
-  // Set the exact sheet range to only include A1:H5
-  rekapSheet["!ref"] = "A1:H5";
-
-  XLSX.utils.book_append_sheet(workbook, rekapSheet, "Rekap");
-
-  // === SHEET 2: 21 ===
-  const sheet21 = XLSX.utils.json_to_sheet(data);
-
-  if (data.length > 0) {
-    const header = Object.keys(data[0]);
-    sheet21["!cols"] = header.map(() => ({ wch: 20 }));
-
-    const range = XLSX.utils.decode_range(sheet21["!ref"] || "A1:Z1");
-    for (let C = range.s.c; C <= range.e.c; ++C) {
-      const cell = XLSX.utils.encode_cell({ r: range.s.r, c: C });
-      if (!sheet21[cell]) continue;
-      sheet21[cell].s = {
-        font: { bold: true, color: { rgb: "FFFFFF" } },
-        fill: { fgColor: { rgb: "4472C4" } },
-        alignment: { horizontal: "center", vertical: "center" },
-      };
-    }
-  }
-
-  XLSX.utils.book_append_sheet(workbook, sheet21, "21");
-
-  // Download
-  const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
-  const excelFile = new Blob([excelBuffer], {
-    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-  });
-  saveAs(excelFile, `${fileName}.xlsx`);
+const activeAdmin = {
+  idtype: "NPWP",
+  npwp: "09.876.543.2-109.876",
+  nik: "3210987654321098",
 };
 
-const exportToPDF = (data: any[], fileName: string) => {
-  const doc = new jsPDF();
+const headers = [
+  "No",
+  "Tanggal Pemotongan (dd/MM/yyyy)",
+  "Penerima Penghasilan? (NPWP/NIK)",
+  "NPWP (tanpa format)",
+  "NIK (tanpa format)",
+  "Nama Penerima Penghasilan",
+  "Alamat Penerima Penghasilan",
+  "Kode Objek Pajak",
+  "Penandatangan Menggunakan? (NPWP/NIK)",
+  "NPWP Penandatangan",
+  "NIK Penandatangan",
+  "Kode PTKP",
+  "Pegawai Harian? (Ya/Tidak)",
+  "Menggunakan Gross Up? (Ya/Tidak)",
+  "Penghasilan Bruto",
+  "Terdapat Akumulasi Bruto Sebelumnya?",
+  "Akumulasi Penghasilan Bruto Sebelumnya",
+  "Fasilitas (N/SKB/DTP)",
+  "Nomor SKB/Nomor DTP",
+];
 
-  doc.text("Data Karyawan", 14, 10);
+const exportToPDF = (data: any[], fileName: string) => {
+  const doc: any = new jsPDF({
+    orientation: "landscape",
+    unit: "mm",
+    format: [420, 297],
+  });
+
+  doc.setFontSize(14);
+
+  const tableData = data.map((item, index) => [
+    index + 1,
+    `1/${String(item.month).padStart(2, "0")}/${item.year}`,
+    item.type_id || "NIK",
+    (item.npwp || "").replace(/\D/g, ""),
+    (item.nik || "").replace(/\D/g, ""),
+    item.employee_name || "",
+    item.address || "",
+    "21-100-01",
+    activeAdmin.idtype || "NPWP",
+    (activeAdmin.npwp || "").replace(/\D/g, ""),
+    (activeAdmin.nik || "").replace(/\D/g, ""),
+    item.ptkp || "",
+    "Tidak",
+    "Tidak",
+    item.bruto_salary || 0,
+    "",
+    "",
+    "N",
+    "",
+  ]);
+
+  const columnWidths = [
+    10, 15, 20, 25, 25, 25, 30, 20, 25, 25, 25, 20, 15, 15, 20, 20, 20, 15, 20,
+  ];
+  const totalWidth = columnWidths.reduce((sum, width) => sum + width, 0);
+
+  doc.setFillColor(0, 176, 80);
+  doc.rect(14.2, 25, totalWidth, 8, "F");
 
   autoTable(doc, {
-    head: [["Nama", "NIK", "Status Pernikahan"]],
-    body: data.map((item) => [item.name, item.nik, item.maritalStatus]),
-    startY: 20,
+    startY: 28,
+    head: [headers],
+    body: tableData,
+    columnStyles: {
+      0: {
+        cellWidth: 10,
+        halign: "center",
+        valign: "middle",
+      },
+      1: { cellWidth: 15 },
+      2: { cellWidth: 20 },
+      3: { cellWidth: 25 },
+      4: { cellWidth: 25 },
+      5: { cellWidth: 25 },
+      6: { cellWidth: 30 },
+      7: { cellWidth: 20 },
+      8: { cellWidth: 25 },
+      9: { cellWidth: 25 },
+      10: { cellWidth: 25 },
+      11: { cellWidth: 20 },
+      12: { cellWidth: 15 },
+      13: { cellWidth: 15 },
+      14: { cellWidth: 20 },
+      15: { cellWidth: 20 },
+      16: { cellWidth: 20 },
+      17: { cellWidth: 15 },
+      18: {
+        cellWidth: 20,
+      },
+    },
+    //
+    styles: {
+      fontSize: 6.5,
+      cellPadding: 2,
+      valign: "top",
+    },
+    headStyles: {
+      fillColor: [238, 236, 225],
+      fontSize: 7,
+      textColor: [0, 0, 0],
+      fontStyle: "bold",
+      halign: "center",
+      valign: "top",
+    },
+    didParseCell: function (data) {
+      if (data.row.section === "head" && data.column.index === 18) {
+        data.cell.styles.fillColor = [79, 129, 189];
+        data.cell.styles.textColor = [255, 255, 255];
+        data.cell.styles.fontStyle = "bold";
+      }
+    },
+    didDrawPage: function (data: any) {
+      const headerRowY = data.table.headerRow
+        ? data.table.headerRow.y
+        : data.settings.startY;
+
+      const greenRowHeight = 8;
+      const greenRowY = headerRowY - greenRowHeight;
+
+      data.table.columns.forEach((col: any) => {
+        const cellX = col.x;
+        const cellWidth = col.width;
+
+        if (typeof cellX === "number" && typeof cellWidth === "number") {
+          doc.setFillColor(0, 176, 80);
+          doc.rect(cellX, greenRowY, cellWidth, greenRowHeight, "F");
+        }
+      });
+    },
   });
+
+  const finalY = doc.lastAutoTable.finalY || 300;
+  const signatureY = finalY + 20;
+
+  doc.setFontSize(10);
+  doc.text("Malang, 25 Mei 2025", 340, signatureY + 10);
+  doc.text("Kepala Staff Keuangan", 340, signatureY + 45);
 
   doc.save(`${fileName}.pdf`);
 };
@@ -203,6 +183,9 @@ const ReportPage: React.FC = () => {
     []
   );
   const [summaryYearlyTaxes, setSummaryYearlyTaxes] = useState<any>();
+
+  const [monthlyTaxes, setMonthlyTaxes] = useState<any>();
+  console.log("monthlyTaxes", monthlyTaxes);
 
   const processYearlySummary = (monthlyData: any[]) => {
     const yearlyMap: Record<string, number> = {};
@@ -224,6 +207,19 @@ const ReportPage: React.FC = () => {
     }));
 
     setSummaryYearlyTaxes(yearlySummary);
+  };
+
+  const fetchMonthlyTaxes = async () => {
+    const { data: monthlyTaxes, error: fetchMonthlyTaxesError } = await supabase
+      .from("monthly_tax_archive")
+      .select("*");
+
+    if (fetchMonthlyTaxesError) {
+      message.error("Gagal mengambil data pajak bulanan.");
+      return;
+    }
+
+    setMonthlyTaxes(monthlyTaxes);
   };
 
   const fetchSummary = async () => {
@@ -264,14 +260,18 @@ const ReportPage: React.FC = () => {
   };
 
   useEffect(() => {
+    fetchMonthlyTaxes();
     fetchSummary();
   }, []);
 
   const handleMenuClick = ({ key }: { key: string }, record: any) => {
     if (key === "1") {
-      exportToPDF([record], "Data_Karyawan");
+      const filteredData = monthlyTaxes.filter(
+        (item: any) => item.id_summary === record.id
+      );
+
+      exportToPDF(filteredData, "Laporan_Pajak");
     } else if (key === "2") {
-      // exportToExcel([record], "Data_Karyawan");
       window.open(`/api/export-excel?id=${record.id}`);
     } else if (key === "3") {
       router.push(`/dashboard/archive/${record.id}`);
