@@ -739,7 +739,7 @@ export default function Dashboard() {
                       updateConfig("bpjs_enabled", checked)
                     }
                   />
-                  <span className="font-medium">Jaminan Kematian (JKM)</span>
+                  <span className="font-medium">Jamsostek (BPJS)</span>
                 </div>
 
                 <p className="text-gray-500 text-sm mt-2">
