@@ -8,6 +8,7 @@ import { Breadcrumb } from "antd";
 import { HomeOutlined } from "@ant-design/icons";
 import { useEffect, useState } from "react";
 import { supabase } from "@/utils/supabase";
+import Cookies from "js-cookie";
 
 function toTitleCase(str: string) {
   return str
@@ -98,10 +99,11 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   const handleLogout = async () => {
     try {
       await axios.post("/api/logout");
-      router.push("/");
     } catch (err) {
       message.error("Gagal logout");
       console.error("Logout error:", err);
+    } finally {
+      router.push("/");
     }
   };
 
