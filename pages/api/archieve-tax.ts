@@ -38,6 +38,19 @@ export default async function handler(
     });
   }
 
+  const { data: companyProfile, error: companyError }: any = await supabase
+    .from("company_profile")
+    .select("company_name, company_npwp, selected_npwp")
+    .eq("id", 1)
+    .single();
+
+  if (companyError) {
+    return res.status(500).json({
+      message: "Gagal ambil data perusahaan",
+      error: companyError,
+    });
+  }
+
   const { data: taxes, error: fetchTaxesError } = await supabase
     .from("tax")
     .select("*");
@@ -52,7 +65,7 @@ export default async function handler(
   let totalTHP = 0;
 
   const financeEmployee = employees.filter(
-    (item: any) => item.positions.position == "MAN, KEU"
+    (item: any) => item?.is_finance_admin === true
   );
 
   const archiveData = employees
@@ -97,7 +110,7 @@ export default async function handler(
         bruto_salary: employeeTax?.brutosalary || 0,
         tax_total: taxValue,
         type_id_finance: financeEmployee[0].idtype,
-        npwp_finance: financeEmployee[0].npwp,
+        npwp_finance: companyProfile[0].selected_npwp,
         nik_finance: financeEmployee[0].nik,
       };
     })

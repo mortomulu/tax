@@ -109,6 +109,7 @@ const App: React.FC<any> = ({ month, year }) => {
 
   const [archieveData, setArchieveData] = useState<any>();
   const [ter, setTer] = useState<any>();
+  const [companyProfile, setCompanyProfile] = useState<any>();
 
   const [selectedRecord, setSelectedRecord] = useState<any>();
   const [isModalDetailOpen, setIsModalDetailOpen] = useState<boolean>(false);
@@ -238,6 +239,20 @@ const App: React.FC<any> = ({ month, year }) => {
     }
 
     setTaxes(taxess);
+
+    const { data: companyProfile, error: companyError } = await supabase
+      .from("company_profile")
+      .select("company_name, company_npwp, selected_npwp")
+      .eq("id", 1)
+      .single();
+
+    if (companyError) {
+      message.error("Gagal mengambil data perusahaan");
+      console.log("fetch company profile error:", companyError);
+      return;
+    }
+
+    setCompanyProfile(companyProfile);
   };
 
   const fetchTer = async () => {
@@ -374,6 +389,11 @@ const App: React.FC<any> = ({ month, year }) => {
         return;
       }
 
+      if (!companyProfile) {
+        message.error("Bagian keuangan tidak ditemukan");
+        return;
+      }
+
       let totalTax = 0;
       let totalTHP = 0;
 
@@ -421,7 +441,7 @@ const App: React.FC<any> = ({ month, year }) => {
             bruto_salary: employeeTax?.brutosalary || 0,
             tax_total: taxValue,
             type_id_finance: financeEmployee.idtype,
-            npwp_finance: financeEmployee.npwp,
+            npwp_finance: companyProfile.selected_npwp,
             nik_finance: financeEmployee.nik,
           };
         })
