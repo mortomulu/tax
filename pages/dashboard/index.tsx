@@ -739,7 +739,7 @@ export default function Dashboard() {
                       updateConfig("bpjs_enabled", checked)
                     }
                   />
-                  <span className="font-medium">Jamsostek (BPJS)</span>
+                  <span className="font-medium">BPJS</span>
                 </div>
 
                 <p className="text-gray-500 text-sm mt-2">
