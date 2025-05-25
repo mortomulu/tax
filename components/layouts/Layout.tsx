@@ -98,12 +98,15 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
 
   const handleLogout = async () => {
     try {
-      await axios.post("/api/logout");
+      const res = await axios.post("/api/logout");
+      console.log("Logout response:", res.data);
+      message.success("Logout berhasil");
     } catch (err) {
       message.error("Gagal logout");
       console.error("Logout error:", err);
     } finally {
-      router.push("/");
+      console.log("Router redirect triggered");
+      router.push("/"); // atau window.location.href = "/";
     }
   };
 
