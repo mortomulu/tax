@@ -6,6 +6,9 @@ import { message } from "antd";
 import axios from "axios";
 import { Breadcrumb } from "antd";
 import { HomeOutlined } from "@ant-design/icons";
+import { useEffect, useState } from "react";
+import { supabase } from "@/utils/supabase";
+import { BuildingOfficeIcon } from "@ant-design/icons";
 
 function toTitleCase(str: string) {
   return str
@@ -19,6 +22,38 @@ function toTitleCase(str: string) {
 const Layout = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter();
   const pathname = router.asPath;
+
+  const [companyData, setCompanyData] = useState({
+    company_name: "",
+    company_npwp: "",
+    loading: true,
+  });
+
+  const fetchCompanyProfile = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("company_profile")
+        .select("*")
+        .eq("id", 1)
+        .single();
+
+      if (error) throw error;
+
+      setCompanyData({
+        company_name: data?.company_name || "",
+        company_npwp: data?.company_npwp || "",
+        loading: false,
+      });
+    } catch (error) {
+      message.error("Gagal memuat data perusahaan");
+      console.error(error);
+      setCompanyData((prev) => ({ ...prev, loading: false }));
+    }
+  };
+
+  useEffect(() => {
+    fetchCompanyProfile();
+  }, []);
 
   const generateBreadcrumb = () => {
     const segments = pathname.split("/").filter((segment) => segment);
@@ -233,11 +268,72 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 p-6 overflow-auto bg-blue-50 min-h-screen">
-        <Breadcrumb items={generateBreadcrumb()} className="mb-4" />
-        <div className="bg-white p-6 rounded-lg shadow-md border-l-4 border-yellow-400">
+      <main className="flex-1 p-6 overflow-auto bg-gray-50 min-h-screen">
+        {/* Breadcrumb */}
+        <Breadcrumb items={generateBreadcrumb()} className="mb-6" />
+
+        {/* Enhanced Company Profile Card */}
+        <div className="relative mb-8">
+          <div className="bg-gradient-to-r from-blue-600 to-blue-800 rounded-xl p-6 shadow-lg">
+            <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
+              {/* Company Avatar/Initial */}
+              <div className="flex-shrink-0">
+                <div className="w-20 h-20 rounded-full bg-white/20 flex items-center justify-center text-white text-3xl font-bold border-4 border-white/30">
+                  {companyData.company_name.charAt(0)}
+                </div>
+              </div>
+
+              {/* Company Info */}
+              <div className="flex-1 text-white">
+                <div className="flex flex-col sm:flex-row sm:items-baseline gap-3 mb-2">
+                  <h1 className="text-2xl font-bold tracking-tight">
+                    {companyData.company_name}
+                  </h1>
+                  <span className="inline-flex items-center px-3 py-1 rounded-full bg-white/20 text-sm font-medium">
+                    {/* <BadgeCheckIcon className="w-4 h-4 mr-1" /> */}
+                    Verified
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="flex items-center">
+                    {/* <IdentificationIcon className="w-5 h-5 mr-2 opacity-80" /> */}
+                    <div>
+                      <p className="text-sm text-blue-100">Company NPWP</p>
+                      <p className="font-mono tracking-wider flex items-center">
+                        {companyData.company_npwp || "Not set"}
+                        <button
+                          // onClick={() =>
+                          //   copyToClipboard(companyData.company_npwp)
+                          // }
+                          className="ml-2 p-1 text-blue-200 hover:text-white transition-colors"
+                        >
+                          {/* <DocumentDuplicateIcon className="w-4 h-4" /> */}
+                        </button>
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Main Content Area */}
+        <div className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-200">
           {children}
         </div>
+
+        {/* Edit Modal */}
+        {/* <CompanyProfileEditModal
+          isOpen={isEditing}
+          onClose={() => setIsEditing(false)}
+          initialData={companyData}
+          onSave={(updatedData) => {
+            setCompanyData(updatedData);
+            setIsEditing(false);
+          }}
+        /> */}
       </main>
     </div>
   );
