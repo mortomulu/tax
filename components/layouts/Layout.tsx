@@ -325,7 +325,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
         </div>
 
         {/* Main Content Area */}
-        <div className="overflow-hidden">
+        <div>
           {children}
         </div>
 
