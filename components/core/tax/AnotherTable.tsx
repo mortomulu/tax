@@ -343,7 +343,18 @@ const AnotherTable: React.FC<AnotherTableProps> = ({
   ];
 
   const handleMenuClick = (key: string, record: any) => {
-    setSelectedRecord(record);
+    const formatted = {
+      ...record,
+      thp: record.thp === 0 ? undefined : record.thp,
+      incentive: record.incentive === 0 ? undefined : record.incentive,
+      overtimeAllowance:
+        record.overtimeAllowance === 0 ? undefined : record.overtimeAllowance,
+      bonus: record.bonus === 0 ? undefined : record.bonus,
+      thr: record.thr === 0 ? undefined : record.thr,
+    };
+
+    setSelectedRecord(formatted);
+
     if (key === "1") {
       router.push(`/dashboard/tax/${record.idName}`);
     } else if (key === "2") {
