@@ -89,6 +89,13 @@ const EmployeeDetailPage: React.FC = () => {
     useState<any>();
   const [taxEmployee, setTaxEmployee] = useState<any>();
 
+  const [config, setConfig] = useState({
+    jkk_enabled: false,
+    jkm_enabled: false,
+    bpjs_enabled: false,
+    loading: true,
+  });
+
   const fetchEmployee = async () => {
     if (!id) return;
 
@@ -183,8 +190,6 @@ const EmployeeDetailPage: React.FC = () => {
       (item) => parseInt(item.year) === year && parseInt(item.month) === month
     );
 
-    console.log("currentPeriod", currentPeriod);
-
     if (currentPeriod) {
       setTaxArchieveCurrentPeriod(currentPeriod);
     } else {
@@ -205,6 +210,7 @@ const EmployeeDetailPage: React.FC = () => {
           overtime_allowance,
           jkk,
           jkm,
+          bpjs,
           bonus,
           thr,
           brutosalary,
@@ -225,10 +231,20 @@ const EmployeeDetailPage: React.FC = () => {
     return data;
   };
 
+  const fetchConfig = async () => {
+    const { data } = await supabase
+      .from("tax_config")
+      .select("*")
+      .eq("id", 1)
+      .single();
+    setConfig({ ...data, loading: false });
+  };
+
   useEffect(() => {
     fetchEmployee();
     fetchTaxArchieve();
     fetchTaxEmployee();
+    fetchConfig();
   }, [id]);
 
   return (
@@ -349,7 +365,7 @@ const EmployeeDetailPage: React.FC = () => {
                         Take Home Pay (THP)
                       </span>
                       <span className="text-gray-900 font-semibold">
-                        Rp{taxEmployee.thp?.toLocaleString("id-ID")}
+                        Rp. {taxEmployee.thp?.toLocaleString("id-ID")}
                       </span>
                     </div>
 
@@ -358,14 +374,14 @@ const EmployeeDetailPage: React.FC = () => {
                         Tunjangan
                       </span>
                       <span className="text-gray-900 font-semibold">
-                        Rp{taxEmployee.incentive?.toLocaleString("id-ID")}
+                        Rp. {taxEmployee.incentive?.toLocaleString("id-ID")}
                       </span>
                     </div>
 
                     <div className="flex justify-between items-center p-3 hover:bg-gray-50 rounded transition-colors">
                       <span className="text-gray-600 font-medium">Lembur</span>
                       <span className="text-gray-900 font-semibold">
-                        Rp
+                        Rp.{" "}
                         {taxEmployee.overtime_allowance?.toLocaleString(
                           "id-ID"
                         )}
@@ -375,30 +391,46 @@ const EmployeeDetailPage: React.FC = () => {
                     <div className="flex justify-between items-center p-3 hover:bg-gray-50 rounded transition-colors">
                       <span className="text-gray-600 font-medium">JKK</span>
                       <span className="text-gray-900 font-semibold">
-                        Rp{taxEmployee.jkk?.toLocaleString("id-ID")}
+                        Rp.{" "}
+                        {config.jkk_enabled
+                          ? taxEmployee.jkk?.toLocaleString("id-ID")
+                          : 0}
                       </span>
                     </div>
 
                     <div className="flex justify-between items-center p-3 hover:bg-gray-50 rounded transition-colors">
                       <span className="text-gray-600 font-medium">JKM</span>
                       <span className="text-gray-900 font-semibold">
-                        Rp{taxEmployee.jkm?.toLocaleString("id-ID")}
+                        Rp.{" "}
+                        {config.jkm_enabled
+                          ? taxEmployee.jkm?.toLocaleString("id-ID")
+                          : 0}
                       </span>
                     </div>
                   </div>
 
                   <div className="space-y-3">
                     <div className="flex justify-between items-center p-3 hover:bg-gray-50 rounded transition-colors">
+                      <span className="text-gray-600 font-medium">BPJS</span>
+                      <span className="text-gray-900 font-semibold">
+                        Rp{" "}
+                        {config.bpjs_enabled
+                          ? taxEmployee.bpjs?.toLocaleString("id-ID")
+                          : 0}
+                      </span>
+                    </div>
+
+                    <div className="flex justify-between items-center p-3 hover:bg-gray-50 rounded transition-colors">
                       <span className="text-gray-600 font-medium">Bonus</span>
                       <span className="text-gray-900 font-semibold">
-                        Rp{taxEmployee.bonus?.toLocaleString("id-ID")}
+                        Rp. {taxEmployee.bonus?.toLocaleString("id-ID")}
                       </span>
                     </div>
 
                     <div className="flex justify-between items-center p-3 hover:bg-gray-50 rounded transition-colors">
                       <span className="text-gray-600 font-medium">THR</span>
                       <span className="text-gray-900 font-semibold">
-                        Rp{taxEmployee.thr?.toLocaleString("id-ID")}
+                        Rp. {taxEmployee.thr?.toLocaleString("id-ID")}
                       </span>
                     </div>
 
@@ -407,7 +439,7 @@ const EmployeeDetailPage: React.FC = () => {
                         Gaji Bruto
                       </span>
                       <span className="text-blue-900 font-bold">
-                        Rp{taxEmployee.brutosalary?.toLocaleString("id-ID")}
+                        Rp. {taxEmployee.brutosalary?.toLocaleString("id-ID")}
                       </span>
                     </div>
 
@@ -416,7 +448,7 @@ const EmployeeDetailPage: React.FC = () => {
                         Pajak Bulanan
                       </span>
                       <span className="text-red-900 font-bold">
-                        Rp{taxEmployee.monthlytax?.toLocaleString("id-ID")}
+                        Rp. {taxEmployee.monthlytax?.toLocaleString("id-ID")}
                       </span>
                     </div>
 
@@ -426,7 +458,7 @@ const EmployeeDetailPage: React.FC = () => {
                           Pajak Akhir Tahun (Desember)
                         </span>
                         <span className="text-purple-900 font-bold">
-                          Rp{taxEmployee.dectax?.toLocaleString("id-ID")}
+                          Rp. {taxEmployee.dectax?.toLocaleString("id-ID")}
                         </span>
                       </div>
                     )}

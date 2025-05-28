@@ -110,6 +110,12 @@ const App: React.FC<any> = ({ month, year }) => {
   const [archieveData, setArchieveData] = useState<any>();
   const [ter, setTer] = useState<any>();
   const [companyProfile, setCompanyProfile] = useState<any>();
+  const [config, setConfig] = useState({
+    jkk_enabled: false,
+    jkm_enabled: false,
+    bpjs_enabled: false,
+    loading: true,
+  });
 
   const [selectedRecord, setSelectedRecord] = useState<any>();
   const [isModalDetailOpen, setIsModalDetailOpen] = useState<boolean>(false);
@@ -266,9 +272,19 @@ const App: React.FC<any> = ({ month, year }) => {
     setTer(data);
   };
 
+  const fetchConfig = async () => {
+    const { data } = await supabase
+      .from("tax_config")
+      .select("*")
+      .eq("id", 1)
+      .single();
+    setConfig({ ...data, loading: false });
+  };
+
   useEffect(() => {
     fetchData();
     fetchTer();
+    fetchConfig();
   }, []);
 
   useEffect(() => {
@@ -432,9 +448,9 @@ const App: React.FC<any> = ({ month, year }) => {
             incentive: employeeTax?.incentive || 0,
             thp: thpValue,
             overtime_allowance: employeeTax?.overtime_allowance || 0,
-            jkk: employeeTax?.jkk || 0,
-            jkm: employeeTax?.jkm || 0,
-            bpjs: employeeTax?.bpjs || 0,
+            jkk: config.jkk_enabled ? employeeTax?.jkk || 0 : 0,
+            jkm: config.jkm_enabled ? employeeTax?.jkm || 0 : 0,
+            bpjs: config.bpjs_enabled ? employeeTax?.bpjs || 0 : 0,
             bonus: employeeTax?.bonus || 0,
             thr: employeeTax?.thr || 0,
             netto_salary: employeeTax?.nettosalary || 0,
@@ -555,13 +571,19 @@ const App: React.FC<any> = ({ month, year }) => {
               {formatRupiah(selectedRecord.overtime_allowance)}
             </Descriptions.Item>
             <Descriptions.Item label="JKK">
-              {formatRupiah(selectedRecord.jkk)}
+              {config.jkk_enabled
+                ? formatRupiah(selectedRecord.jkk)
+                : formatRupiah(0)}
             </Descriptions.Item>
             <Descriptions.Item label="JKM">
-              {formatRupiah(selectedRecord.jkm)}
+              {config.jkm_enabled
+                ? formatRupiah(selectedRecord.jkm)
+                : formatRupiah(0)}
             </Descriptions.Item>
             <Descriptions.Item label="BPJS">
-              {formatRupiah(selectedRecord.bpjs)}
+              {config.bpjs_enabled
+                ? formatRupiah(selectedRecord.bpjs)
+                : formatRupiah(0)}
             </Descriptions.Item>
             <Descriptions.Item label="Bonus">
               {formatRupiah(selectedRecord.bonus)}

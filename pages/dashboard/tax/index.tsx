@@ -79,6 +79,13 @@ export default function List() {
 
   const [ptkpOptions, setPtkpOptions] = useState<any>();
 
+  const [config, setConfig] = useState({
+    jkk_enabled: false,
+    jkm_enabled: false,
+    bpjs_enabled: false,
+    loading: true,
+  });
+
   const fetchAll = async () => {
     const { data: taxData, error: taxError } = await supabase.from("tax")
       .select(`
@@ -199,10 +206,20 @@ export default function List() {
     setPtkpOptions(ptkp);
   };
 
+  const fetchConfig = async () => {
+    const { data } = await supabase
+      .from("tax_config")
+      .select("*")
+      .eq("id", 1)
+      .single();
+    setConfig({ ...data, loading: false });
+  };
+
   useEffect(() => {
     fetchAll();
     fetchTer();
     fetchPtkp();
+    fetchConfig();
   }, []);
 
   useEffect(() => {
@@ -256,9 +273,9 @@ export default function List() {
       Number(positionAllowance) || 0,
       Number(incentive) || 0,
       Number(overtimeAllowance) || 0,
-      Number(jkk) || 0,
-      Number(jkm) || 0,
-      Number(bpjs) || 0,
+      config.jkk_enabled ? Number(jkk) || 0 : 0,
+      config.jkm_enabled ? Number(jkm) || 0 : 0,
+      config.bpjs_enabled ? Number(bpjs) || 0 : 0,
       Number(bonus) || 0,
       Number(thr) || 0
     );
@@ -574,7 +591,7 @@ export default function List() {
                 <Input
                   placeholder="Masukkan JKK"
                   type="text"
-                  value={anotherFormatRupiah(jkk)}
+                  value={config?.jkk_enabled ? anotherFormatRupiah(jkk) : 0}
                   onChange={(e) => setJkk(e.target.value)}
                   disabled
                 />
@@ -587,7 +604,7 @@ export default function List() {
                 <Input
                   placeholder="Masukkan JKM"
                   type="text"
-                  value={anotherFormatRupiah(jkm)}
+                  value={config?.jkm_enabled ? anotherFormatRupiah(jkm) : 0}
                   onChange={(e) => setJkm(e.target.value)}
                   disabled
                 />
@@ -600,7 +617,7 @@ export default function List() {
                 <Input
                   placeholder="Masukkan BPJS Kesehatan"
                   type="text"
-                  value={anotherFormatRupiah(bpjs)}
+                  value={config?.bpjs_enabled ? anotherFormatRupiah(bpjs) : 0}
                   onChange={(e) => setBpjs(e.target.value)}
                   disabled
                 />
