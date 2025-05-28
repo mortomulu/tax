@@ -122,8 +122,40 @@ export default function EmployeePage() {
       return;
     }
 
+    const { data: companyProfile, error: companyError } = await supabase
+      .from("company_profile")
+      .select("company_name, company_npwp, selected_npwp, selected_name")
+      .eq("id", 1)
+      .single();
+
+    if (companyError) {
+      message.error("Gagal mengambil data perusahaan");
+      console.log("fetch company profile error:", companyError);
+      return;
+    }
+
+    if (!companyProfile) {
+      message.error("Data perusahaan tidak ditemukan");
+      return;
+    }
+
+    if (!companyProfile.selected_npwp || !companyProfile.selected_name) {
+      const { error: updateError } = await supabase
+        .from("company_profile")
+        .update({
+          selected_npwp: companyProfile.company_npwp,
+          selected_name: companyProfile.company_name, 
+        })
+        .eq("id", 1);
+
+      if (updateError) {
+        message.error("Gagal mengupdate data perusahaan");
+        console.log("update company profile error:", updateError);
+      }
+    }
+
     const formatted = data
-      .map((item: any) => ({
+      ?.map((item: any) => ({
         id: item.id,
         name: item.name,
         idType: item.idtype,

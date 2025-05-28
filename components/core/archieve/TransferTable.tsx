@@ -400,12 +400,12 @@ const App: React.FC<any> = ({ month, year }) => {
         (item: any) => item?.is_finance_admin === true
       );
 
-      if (!financeEmployee) {
-        message.error("Bagian keuangan tidak ditemukan");
-        return;
-      }
+      // if (!financeEmployee) {
+      //   message.error("Bagian keuangan tidak ditemukan ini");
+      //   return;
+      // }
 
-      if (!companyProfile) {
+      if (!companyProfile.selected_npwp) {
         message.error("Bagian keuangan tidak ditemukan");
         return;
       }
@@ -456,9 +456,9 @@ const App: React.FC<any> = ({ month, year }) => {
             netto_salary: employeeTax?.nettosalary || 0,
             bruto_salary: employeeTax?.brutosalary || 0,
             tax_total: taxValue,
-            type_id_finance: financeEmployee.idtype,
+            type_id_finance: financeEmployee?.idtype,
             npwp_finance: companyProfile.selected_npwp,
-            nik_finance: financeEmployee.nik,
+            nik_finance: financeEmployee?.nik,
           };
         })
         .filter(Boolean);
