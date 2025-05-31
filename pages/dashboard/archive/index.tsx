@@ -53,6 +53,22 @@ const headers = [
   "Nomor SKB/Nomor DTP",
 ];
 
+const headersNewFormat = [
+  "Masa Pajak",
+  "Tahun Pajak",
+  "Status Pegawai",
+  "NPWP/NIK/TIN",
+  "Nomor Passport",
+  "Status",
+  "Posisi",
+  "Sertifikat/Fasilitas",
+  "Kode Objek Pajak",
+  "Penghasilan Kotor",
+  "tarif",
+  "ID TKU",
+  "Tgl Pemotongan",
+];
+
 const exportToPDF = (data: any[], companyProfile: any, fileName: string) => {
   const doc: any = new jsPDF({
     orientation: "landscape",
@@ -178,6 +194,155 @@ const exportToPDF = (data: any[], companyProfile: any, fileName: string) => {
   doc.save(`${fileName}.pdf`);
 };
 
+const exportToPDFNewFormat = (
+  data: any[],
+  companyProfile: any,
+  fileName: string
+) => {
+  const doc: any = new jsPDF({
+    orientation: "portrait",
+    unit: "mm",
+    format: [297, 420],
+  });
+
+  doc.setFontSize(14);
+
+  const tableData = data.map((item, index) => [
+    item.month,
+    item.year,
+    "Resident",
+    item.nik,
+    "",
+    item.ptkp,
+    "STAFF",
+    "N/A",
+    "21-100-01",
+    item.bruto_salary,
+    item.ter,
+    `${companyProfile.selected_npwp}000000`,
+    `1/${String(item.month).padStart(2, "0")}/${item.year}`,
+  ]);
+
+ doc.setFont("helvetica", "bold");
+doc.text("NIK Pemotong:", 14.2, 20);
+
+doc.setFont("helvetica", "normal");
+doc.text(companyProfile.selected_npwp, 50, 20);
+
+
+  autoTable(doc, {
+    startY: 28,
+    head: [headersNewFormat],
+    body: tableData,
+    columnStyles: {
+      0: { cellWidth: 15, halign: "center", valign: "middle" },
+      1: { cellWidth: 13 },
+      2: { cellWidth: 15 },
+      3: { cellWidth: 23 },
+      4: { cellWidth: 23 },
+      5: { cellWidth: 20 },
+      6: { cellWidth: 20 },
+      7: { cellWidth: 20 },
+      8: { cellWidth: 25 },
+      9: { cellWidth: 25 },
+      10: { cellWidth: 15 },
+      11: { cellWidth: 20 },
+      12: { cellWidth: 15 },
+      13: { cellWidth: 15 },
+    },
+    styles: {
+      fontSize: 6.5,
+      cellPadding: 2,
+      valign: "top",
+      lineColor: [142, 169, 219],
+      lineWidth: 0.1,
+    },
+    headStyles: {
+      fillColor: [68, 114, 196],
+      fontSize: 7,
+      textColor: [255, 255, 255],
+      fontStyle: "bold",
+      halign: "left",
+      valign: "top",
+      lineColor: [142, 169, 219],
+      lineWidth: 0.3,
+    },
+    didParseCell(data: any) {
+      const rowIndex = data.row.index;
+
+      // Baris data (bukan header)
+      if (data.section === "body") {
+        const isEvenRow = rowIndex % 2 === 1;
+
+        // Warna latar belakang untuk baris genap
+        if (isEvenRow) {
+          data.cell.styles.fillColor = [217, 225, 242]; // biru muda
+        } else {
+          data.cell.styles.fillColor = [255, 255, 255]; // putih
+        }
+
+        // Border horizontal tengah (TOP & BOTTOM)
+        data.cell.styles.lineColor = {
+          top:
+            rowIndex === 0
+              ? [142, 169, 219]
+              : isEvenRow
+              ? [191, 191, 191]
+              : [255, 255, 255],
+          bottom:
+            rowIndex === tableData.length - 1
+              ? [142, 169, 219]
+              : isEvenRow
+              ? [191, 191, 191]
+              : [255, 255, 255],
+          left: [142, 169, 219],
+          right: [142, 169, 219],
+        };
+
+        data.cell.styles.lineWidth = {
+          top: rowIndex === 0 || isEvenRow ? 0.1 : 0,
+          bottom: rowIndex === tableData.length - 1 || isEvenRow ? 0.1 : 0,
+          left: 0.1,
+          right: 0.1,
+        };
+      }
+    },
+    didDrawPage(data: any) {
+      const headerRowY = data.table.headerRow
+        ? data.table.headerRow.y
+        : data.settings.startY;
+
+      const greenRowHeight = 8;
+      const greenRowY = headerRowY - greenRowHeight;
+
+      data.table.columns.forEach((col: any) => {
+        const cellX = col.x;
+        const cellWidth = col.width;
+
+        if (typeof cellX === "number" && typeof cellWidth === "number") {
+          doc.setFillColor(0, 176, 80);
+          doc.rect(cellX, greenRowY, cellWidth, greenRowHeight, "F");
+        }
+      });
+    },
+  });
+
+  const finalY = doc.lastAutoTable.finalY || 300;
+  const signatureY = finalY + 25;
+
+  doc.setFontSize(10);
+
+  // Geser ke kanan tapi masih di dalam halaman portrait (maks x = 297)
+  const signatureX = 228;
+
+  doc.text("Malang, 25 Mei 2025", signatureX, signatureY + 10);
+
+  doc.text(companyProfile.selected_name, signatureX, signatureY + 45);
+  doc.text(companyProfile.selected_npwp, signatureX, signatureY + 50);
+
+  doc.save(`${fileName}.pdf`);
+};
+
 const ReportPage: React.FC = () => {
   const router = useRouter();
 
@@ -290,9 +455,9 @@ const ReportPage: React.FC = () => {
         (item: any) => item.id_summary === record.id
       );
 
-      exportToPDF(filteredData, companyProfile, "Laporan_Pajak");
+      exportToPDFNewFormat(filteredData, companyProfile, "Laporan_Pajak");
     } else if (key === "2") {
-      window.open(`/api/export-excel?id=${record.id}`);
+      window.open(`/api/export-excel-newest-format?id=${record.id}`);
     } else if (key === "3") {
       router.push(`/dashboard/archive/${record.id}`);
     }
