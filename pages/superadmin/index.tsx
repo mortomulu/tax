@@ -99,7 +99,7 @@ export default function UserList() {
       await supabaseAdmin.auth.admin.createUser({
         email,
         password,
-        email_confirm: true,
+        email_confirm: false, 
       });
 
     if (signUpError || !signUpData.user) {
@@ -108,6 +108,18 @@ export default function UserList() {
     }
 
     const userId = signUpData.user.id;
+
+    const { error: verifyEmailError } = await supabase.auth.signInWithOtp({
+      email,
+      options: {
+        shouldCreateUser: false,
+        emailRedirectTo: "https://your-domain.com/verify-success",
+      },
+    });
+
+    if (verifyEmailError) {
+      message.warning("User dibuat, tapi gagal mengirim email verifikasi");
+    }
 
     const { error: profileError } = await supabase
       .from("profiles")
