@@ -41,7 +41,20 @@ export default async function handler(
     });
   }
 
-  const activeAdmin = employees.find((emp) => emp.is_finance_admin);
+  const { data: companyProfile, error: companyError } = await supabase
+    .from("company_profile")
+    .select("company_name, company_npwp, selected_npwp, selected_name")
+    .eq("id", 1)
+    .single();
+
+  if (companyError) {
+    return res.status(500).json({
+      message: "Gagal ambil data profil perusahaan",
+      error: companyError,
+    });
+  }
+
+  // const activeAdmin = employees.find((emp) => emp.is_finance_admin);
 
   const workbook = new ExcelJS.Workbook();
 
@@ -175,13 +188,11 @@ export default async function handler(
     "Nama Penerima Penghasilan Sesuai NIK": item.employee_name || "",
     "Alamat Penerima Penghasilan Sesuai NIK": item.address || "",
     "Kode Objek Pajak": "21-100-01",
-    "Penandatangan Menggunakan? (NPWP/NIK)": activeAdmin.idtype || "NPWP",
+    "Penandatangan Menggunakan? (NPWP/NIK)": "NPWP",
     "NPWP Penandatangan (tanpa format/tanda baca)": (
-      activeAdmin.npwp || ""
+      companyProfile.selected_npwp || ""
     ).replace(/\D/g, ""),
-    "NIK Penandatangan (tanpa format/tanda baca)": (
-      activeAdmin.nik || ""
-    ).replace(/\D/g, ""),
+    "NIK Penandatangan (tanpa format/tanda baca)": "".replace(/\D/g, ""),
     "Kode PTKP": item.ptkp || "",
     "Pegawai Harian? (Ya/Tidak)": "Tidak",
     "Menggunakan Gross Up? (Ya/Tidak)": "Tidak",
