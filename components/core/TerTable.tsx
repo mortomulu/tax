@@ -255,7 +255,7 @@ const TerTable: React.FC<TerTable> = ({ data, fetchTers }) => {
     }
   };
 
-  const handleEdit = async (values: any) => {
+  const handleEditConfirmed = async (values: any) => {
     const { error } = await supabase
       .from("ter")
       .update(values)
@@ -271,6 +271,18 @@ const TerTable: React.FC<TerTable> = ({ data, fetchTers }) => {
       fetchTers();
       setIsEditModalOpen(false);
     }
+  };
+
+  const handleEdit = (values: any) => {
+    Modal.confirm({
+      title: "Konfirmasi Edit",
+      content: "Apakah Anda yakin ingin mengubah data ini?",
+      okText: "Ya",
+      cancelText: "Batal",
+      onOk() {
+        handleEditConfirmed(values);
+      },
+    });
   };
 
   const handleDeleteData = async () => {
@@ -301,6 +313,8 @@ const TerTable: React.FC<TerTable> = ({ data, fetchTers }) => {
         dataSource={filteredData}
         pagination={{ pageSize: 10 }}
       />
+
+      {/* modal detail */}
       <Modal
         title="Detail Data"
         open={isDetailModalOpen}
@@ -348,8 +362,9 @@ const TerTable: React.FC<TerTable> = ({ data, fetchTers }) => {
           </div>
         </div>
       </Modal>
+
       <Modal
-        title="Edit Data Jabatan"
+        title="Edit Data TER"
         open={isEditModalOpen}
         onCancel={() => {
           setIsEditModalOpen(false);

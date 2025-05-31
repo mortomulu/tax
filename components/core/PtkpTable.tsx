@@ -235,7 +235,19 @@ const PtkpTable: React.FC<PtkpTable> = ({ data, fetchPtkps }) => {
     }
   };
 
-  const handleEdit = async (values: any) => {
+  const handleEdit = (values: any) => {
+    Modal.confirm({
+      title: "Konfirmasi Edit",
+      content: "Apakah Anda yakin ingin mengubah data ini?",
+      okText: "Ya",
+      cancelText: "Batal",
+      onOk() {
+        handleEditConfirmed(values);
+      },
+    });
+  };
+
+  const handleEditConfirmed = async (values: any) => {
     const { error } = await supabase
       .from("ptkp")
       .update(values)
