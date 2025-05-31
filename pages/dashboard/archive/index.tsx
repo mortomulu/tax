@@ -218,7 +218,7 @@ const exportToPDFNewFormat = (
     "N/A",
     "21-100-01",
     item.bruto_salary,
-    item.ter,
+    item.tarif,
     `${companyProfile.selected_npwp}000000`,
     `1/${String(item.month).padStart(2, "0")}/${item.year}`,
   ]);

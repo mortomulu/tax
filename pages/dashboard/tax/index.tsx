@@ -353,6 +353,7 @@ export default function List() {
         thr: thr || 0,
         brutosalary: brutoSalary,
         monthlytax: monthlyTax,
+        tarif: terArt,
         ...(month === 12 && { dectax: Number(decTax) }),
       },
     ]);

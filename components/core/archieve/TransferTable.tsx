@@ -455,6 +455,7 @@ const App: React.FC<any> = ({ month, year }) => {
             thr: employeeTax?.thr || 0,
             netto_salary: employeeTax?.nettosalary || 0,
             bruto_salary: employeeTax?.brutosalary || 0,
+            tarif: employeeTax?.tarif || 0,
             tax_total: taxValue,
             type_id_finance: financeEmployee?.idtype,
             npwp_finance: companyProfile.selected_npwp,

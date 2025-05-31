@@ -465,6 +465,7 @@ const AnotherTable: React.FC<AnotherTableProps> = ({
         thr: Number(selectedRecord?.thr),
         brutosalary: Number(brutoSalary),
         monthlytax: Number(monthlyTax),
+        tarif: terArt,
         ...(month === 12 && { dectax: Number(decTax) }),
       })
       .eq("id", selectedRecord?.id);
