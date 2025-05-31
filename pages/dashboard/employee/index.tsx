@@ -48,7 +48,7 @@ export default function EmployeePage() {
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [name, setName] = useState("");
-  const [idType, setIdType] = useState<any>();
+  const [idType, setIdType] = useState<any>("NPWP");
   const [idValue, setIdValue] = useState<any>();
   const [nik, setNik] = useState("");
   const [npwp, setNpwp] = useState("");
@@ -144,7 +144,7 @@ export default function EmployeePage() {
         .from("company_profile")
         .update({
           selected_npwp: companyProfile.company_npwp,
-          selected_name: companyProfile.company_name, 
+          selected_name: companyProfile.company_name,
         })
         .eq("id", 1);
 
@@ -376,6 +376,7 @@ export default function EmployeePage() {
               className="w-full"
               onChange={(val) => setIdType(val)}
               placeholder="Pilih NIK/NPWP"
+              disabled
             >
               <Select.Option value="NIK">NIK</Select.Option>
               <Select.Option value="NPWP">NPWP</Select.Option>

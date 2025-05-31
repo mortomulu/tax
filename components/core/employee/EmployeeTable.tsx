@@ -281,9 +281,11 @@ const EmployeeTable: any = ({
           className="w-32" // Equivalent to width: 128px (Tailwind's w-32)
           dropdownClassName="[&_.ant-select-item]:px-4 [&_.ant-select-item]:py-2" // Styling dropdown items
         >
-          <Select.Option 
+          <Select.Option
             value={true}
-            className={`${value ? 'bg-green-50 text-green-600' : ''} hover:bg-green-100`}
+            className={`${
+              value ? "bg-green-50 text-green-600" : ""
+            } hover:bg-green-100`}
           >
             <span className="flex items-center">
               {value && (
@@ -292,9 +294,11 @@ const EmployeeTable: any = ({
               Aktif
             </span>
           </Select.Option>
-          <Select.Option 
+          <Select.Option
             value={false}
-            className={`${!value ? 'bg-red-50 text-red-600' : ''} hover:bg-red-100`}
+            className={`${
+              !value ? "bg-red-50 text-red-600" : ""
+            } hover:bg-red-100`}
           >
             <span className="flex items-center">
               {!value && (
@@ -561,6 +565,7 @@ const EmployeeTable: any = ({
               value={idType || undefined}
               onChange={(val) => setIdType(val)}
               placeholder="Pilih NIK/NPWP"
+              disabled
             >
               <Select.Option value="NIK">NIK</Select.Option>
               <Select.Option value="NPWP">NPWP</Select.Option>
