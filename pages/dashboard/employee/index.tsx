@@ -48,7 +48,7 @@ export default function EmployeePage() {
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [name, setName] = useState("");
-  const [idType, setIdType] = useState<any>("NPWP");
+  const [idType, setIdType] = useState<any>("NIK");
   const [idValue, setIdValue] = useState<any>();
   const [nik, setNik] = useState("");
   const [npwp, setNpwp] = useState("");
@@ -367,7 +367,7 @@ export default function EmployeePage() {
           </div>
 
           {/* Jenis Identitas */}
-          <div className="flex flex-col gap-1">
+          {/* <div className="flex flex-col gap-1">
             <label className="text-sm font-medium text-gray-700">
               Jenis Identitas
             </label>
@@ -381,7 +381,7 @@ export default function EmployeePage() {
               <Select.Option value="NIK">NIK</Select.Option>
               <Select.Option value="NPWP">NPWP</Select.Option>
             </Select>
-          </div>
+          </div> */}
 
           {/* Nomor Identitas */}
           <div className="flex flex-col gap-1">

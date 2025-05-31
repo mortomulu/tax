@@ -72,7 +72,7 @@ const EmployeeTable: any = ({
     useState(false);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
 
-  const [idType, setIdType] = useState<any>();
+  const [idType, setIdType] = useState<any>("NIK");
   const [idValue, setIdValue] = useState<any>();
   const [newName, setNewName] = useState("");
   const [nik, setNik] = useState("");
@@ -556,7 +556,7 @@ const EmployeeTable: any = ({
           </div>
 
           {/* Jenis Identitas */}
-          <div className="flex flex-col gap-1">
+          {/* <div className="flex flex-col gap-1">
             <label className="text-sm font-medium text-gray-700">
               Jenis Identitas
               <span className="text-red-500">*</span>
@@ -570,7 +570,7 @@ const EmployeeTable: any = ({
               <Select.Option value="NIK">NIK</Select.Option>
               <Select.Option value="NPWP">NPWP</Select.Option>
             </Select>
-          </div>
+          </div> */}
 
           {/* Nomor Identitas */}
           <div className="flex flex-col gap-1">
