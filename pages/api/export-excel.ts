@@ -189,9 +189,8 @@ export default async function handler(
     "Alamat Penerima Penghasilan Sesuai NIK": item.address || "",
     "Kode Objek Pajak": "21-100-01",
     "Penandatangan Menggunakan? (NPWP/NIK)": "NPWP",
-    "NPWP Penandatangan (tanpa format/tanda baca)": (
-      companyProfile.selected_npwp || ""
-    ).replace(/\D/g, ""),
+    "NPWP Penandatangan (tanpa format/tanda baca)":
+      companyProfile.selected_npwp || "",
     "NIK Penandatangan (tanpa format/tanda baca)": "".replace(/\D/g, ""),
     "Kode PTKP": item.ptkp || "",
     "Pegawai Harian? (Ya/Tidak)": "Tidak",
