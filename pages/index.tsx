@@ -11,29 +11,83 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const router = useRouter();
 
+  // const handleSubmit = async (e: React.FormEvent) => {
+  //   e.preventDefault();
+
+  //   const res = await fetch("/api/login", {
+  //     method: "POST",
+  //     headers: {
+  //       "Content-Type": "application/json",
+  //     },
+  //     body: JSON.stringify({ email, password }),
+  //   });
+
+  //   if (!res.ok) {
+  //     message.error("Login gagal!");
+  //     return;
+  //   }
+
+  //   const { role } = await res.json();
+  //   message.success("Login berhasil!");
+
+  //   if (role === "superadmin") {
+  //     router.push("/superadmin");
+  //   } else {
+  //     router.push("/dashboard");
+  //   }
+  // };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const res = await fetch("/api/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ email, password }),
-    });
+    try {
+      const { data: loginData, error } = await supabase.auth.signInWithPassword(
+        {
+          email,
+          password,
+        }
+      );
 
-    if (!res.ok) {
-      message.error("Login gagal!");
-      return;
-    }
+      if (error || !loginData.user) {
+        message.error("Login gagal: email atau password salah.");
+        return;
+      }
 
-    const { role } = await res.json();
-    message.success("Login berhasil!");
+      const userId = loginData.user.id;
 
-    if (role === "superadmin") {
-      router.push("/superadmin");
-    } else {
-      router.push("/dashboard");
+      const { data: profile, error: profileError } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", userId)
+        .single();
+
+      if (profileError || !profile?.role) {
+        message.error("Gagal mengambil role user.");
+        return;
+      }
+
+      if (loginData.session) {
+        document.cookie = `sb-access-token=${
+          loginData.session.access_token
+        }; path=/; max-age=${60 * 60 * 24}`; // 1 hari
+        document.cookie = `sb-refresh-token=${
+          loginData.session.refresh_token
+        }; path=/; max-age=${60 * 60 * 24 * 7}`; // 7 hari
+        document.cookie = `role=${profile.role}; path=/; max-age=${
+          60 * 60 * 24
+        }`;
+      }
+
+      message.success("Login berhasil!");
+
+      if (profile.role === "superadmin") {
+        router.push("/superadmin");
+      } else {
+        router.push("/dashboard");
+      }
+    } catch (err) {
+      console.error("Login error:", err);
+      message.error("Terjadi kesalahan saat login");
     }
   };
 
