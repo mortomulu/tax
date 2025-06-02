@@ -73,7 +73,7 @@ export default async function handler(
     "Kode Objek Pajak": "21-100-01",
     "Penghasilan Kotor": item.bruto_salary,
     Tarif: item.tarif,
-    "ID TKU": `${companyProfile.selected_npwp}000000`,
+    "ID TKU": `${companyProfile.selected_npwp.replace(/\D/g, "")}000000`,
     "Tgl Pemotongan": `1/${String(item.month).padStart(2, "0")}/${item.year}`,
   }));
 

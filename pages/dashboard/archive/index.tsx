@@ -219,16 +219,15 @@ const exportToPDFNewFormat = (
     "21-100-01",
     item.bruto_salary,
     item.tarif,
-    `${companyProfile.selected_npwp}000000`,
+    `${companyProfile.selected_npwp.replace(/\D/g, "")}000000`,
     `1/${String(item.month).padStart(2, "0")}/${item.year}`,
   ]);
 
- doc.setFont("helvetica", "bold");
-doc.text("NIK Pemotong:", 14.2, 20);
+  doc.setFont("helvetica", "bold");
+  doc.text("NIK Pemotong:", 14.2, 20);
 
-doc.setFont("helvetica", "normal");
-doc.text(companyProfile.selected_npwp, 50, 20);
-
+  doc.setFont("helvetica", "normal");
+  doc.text(companyProfile.selected_npwp, 50, 20);
 
   autoTable(doc, {
     startY: 28,
