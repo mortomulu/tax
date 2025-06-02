@@ -58,7 +58,7 @@ export default async function handler(
 
   // Set A1 and B1 values
   dataSheet.getCell("A1").value = "NIK Pemotong";
-  dataSheet.getCell("B1").value = monthlyTaxes[0].npwp_finance;
+  dataSheet.getCell("B1").value = monthlyTaxes[0].npwp_finance.replace(/\D/g, "");
 
   // Generate data rows
   const data = monthlyTaxes?.map((item, index) => ({

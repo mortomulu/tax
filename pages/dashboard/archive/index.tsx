@@ -227,7 +227,7 @@ const exportToPDFNewFormat = (
   doc.text("NIK Pemotong:", 14.2, 20);
 
   doc.setFont("helvetica", "normal");
-  doc.text(companyProfile.selected_npwp, 50, 20);
+  doc.text(companyProfile.selected_npwp.replace(/\D/g, ""), 50, 20);
 
   autoTable(doc, {
     startY: 28,
