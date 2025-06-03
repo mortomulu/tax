@@ -14,7 +14,7 @@ import { TbTax } from "react-icons/tb";
 import { Button, Card, DatePicker, Spin, Switch, Tag, Upload } from "antd";
 import { useEffect, useState } from "react";
 import { message } from "antd";
-import dayjs from "dayjs";
+import dayjs, { Dayjs } from "dayjs";
 import { supabase } from "@/utils/supabase";
 import { formatRupiah } from "@/utils/currency";
 import {
@@ -71,6 +71,9 @@ export default function Dashboard() {
   const [missingSummaryMonths, setMissingSummaryMonths] = useState<number[]>(
     []
   );
+
+  const [selectedDate, setSelectedDate] = useState<Dayjs | null>(null);
+  const [loadingDate, setLoadingDate] = useState<any>(false);
 
   const [config, setConfig] = useState({
     jkk_enabled: false,
@@ -208,10 +211,32 @@ export default function Dashboard() {
     setSummaryTaxLastMonth(summaryTaxLastMonth);
   };
 
+  const fetchSchedule = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from("cron_jobs")
+        .select("execution_date")
+        .eq("script_name", "archive-tax")
+        .eq("month", monthNumber)
+        .eq("is_active", true)
+        .single();
+
+      if (data?.execution_date) {
+        setSelectedDate(dayjs(data.execution_date));
+      }
+    } catch (error) {
+      message.error("Gagal memuat jadwal");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchEmployeesAndCompany();
     fetchTaxesSummary();
     fetchConfig();
+    fetchSchedule();
   }, []);
 
   const handleUpload = async ({ file, onSuccess, onError }: any) => {
@@ -348,6 +373,39 @@ export default function Dashboard() {
       message.success("Konfigurasi diperbarui!");
     } catch (error) {
       message.error("Gagal menyimpan perubahan");
+    }
+  };
+
+  const handleDateChange = async (date: Dayjs | null) => {
+    if (!date) return;
+
+    setLoading(true);
+    try {
+      const { error } = await supabase.from("cron_jobs").upsert(
+        {
+          script_name: "archive-tax",
+          execution_date: date.format("YYYY-MM-DD"),
+          month: monthNumber,
+          schedule_type: "one-time",
+          is_active: true,
+          cron_schedule: `0 0 ${date.date()} ${monthNumber} *`,
+          updated_at: new Date().toISOString(),
+        },
+        {
+          onConflict: "script_name,month",
+        }
+      );
+
+      if (error) throw error;
+
+      setSelectedDate(date);
+      message.success(
+        `Jadwal untuk ${monthNames[monthNumber - 1]} berhasil disimpan`
+      );
+    } catch (error) {
+      message.error("Gagal menyimpan jadwal");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -600,11 +658,32 @@ export default function Dashboard() {
                 Laporan Pajak Bulan {monthNames[monthNumber - 1]} Diarsipkan
                 Secara Otomatis pada Tanggal Berikut
               </h2>
+
               <DatePicker
                 value={defaultValue}
+                onChange={handleDateChange}
+                disabledDate={(current) =>
+                  current < dayjs().startOf("day") ||
+                  current.month() !== monthNumber - 1
+                }
                 className="w-full md:w-64 !bg-white !text-black"
+                format="DD MMMM YYYY"
+                // loading={loading}
+                placeholder="Pilih tanggal arsip"
                 disabled
               />
+
+              <p className="mt-2 text-sm text-gray-300">
+                Sistem akan menjalankan arsip otomatis pukul 00:00 pada tanggal
+                terpilih
+              </p>
+
+              {/* {selectedDate && (
+                <p className="mt-2 text-sm text-green-300">
+                  Jadwal aktif: {selectedDate.format("DD MMMM YYYY")} pukul
+                  00:00
+                </p>
+              )} */}
             </div>
           </div>
 
@@ -636,7 +715,7 @@ export default function Dashboard() {
                       disabled={updating}
                     >
                       <option value="">-- Pilih Karyawan --</option>
-                      {npwpOptions.map((emp: any) => (
+                      {npwpOptions?.map((emp: any) => (
                         <option key={emp.id} value={emp.id}>
                           {emp.name}{" "}
                           {emp.npwp ? `(NPWP: ${emp.npwp})` : "(NPWP Kosong)"}
