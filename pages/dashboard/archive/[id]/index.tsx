@@ -13,6 +13,21 @@ interface EmployeeData {
   monthlyTax: number;
 }
 
+const monthNames = [
+  "Januari",
+  "Februari",
+  "Maret",
+  "April",
+  "Mei",
+  "Juni",
+  "Juli",
+  "Agustus",
+  "September",
+  "Oktober",
+  "November",
+  "Desember",
+];
+
 export default function MonthlyReportDetail() {
   const router = useRouter();
   const { id } = router.query;
@@ -189,11 +204,13 @@ export default function MonthlyReportDetail() {
     setFileList([]);
   };
 
+  console.log("taxSummary", taxSummary);
+
   return (
     <Layout>
       <div className="bg-white p-6 rounded-lg shadow-md">
         <h1 className="text-2xl font-bold mb-4">
-          Detail Laporan Pajak Bulan Maret
+          Detail Laporan Pajak Bulan {monthNames[taxSummary?.month]}
         </h1>
 
         <Tabs activeKey={activeTab} onChange={setActiveTab}>
