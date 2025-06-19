@@ -324,53 +324,52 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
         )}
 
         {/* Enhanced Company Profile Card */}
-        {requiresVerification && isVerified && (
-          <div className="relative mb-8">
-            <div className="bg-gradient-to-r from-blue-600 to-blue-800 rounded-xl p-6 shadow-lg">
-              <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
-                {/* Company Avatar/Initial */}
-                <div className="flex-shrink-0">
-                  <div className="w-20 h-20 rounded-full bg-white/20 flex items-center justify-center text-white text-3xl font-bold border-4 border-white/30">
-                    {companyData.company_name.charAt(0)}
-                  </div>
+
+        <div className="relative mb-8">
+          <div className="bg-gradient-to-r from-blue-600 to-blue-800 rounded-xl p-6 shadow-lg">
+            <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
+              {/* Company Avatar/Initial */}
+              <div className="flex-shrink-0">
+                <div className="w-20 h-20 rounded-full bg-white/20 flex items-center justify-center text-white text-3xl font-bold border-4 border-white/30">
+                  {companyData.company_name.charAt(0)}
+                </div>
+              </div>
+
+              {/* Company Info */}
+              <div className="flex-1 text-white">
+                <div className="flex flex-col sm:flex-row sm:items-baseline gap-3 mb-2">
+                  <h1 className="text-2xl font-bold tracking-tight">
+                    {companyData.company_name}
+                  </h1>
+                  <span className="inline-flex items-center px-3 py-1 rounded-full bg-white/20 text-sm font-medium">
+                    {/* <BadgeCheckIcon className="w-4 h-4 mr-1" /> */}
+                    Verified
+                  </span>
                 </div>
 
-                {/* Company Info */}
-                <div className="flex-1 text-white">
-                  <div className="flex flex-col sm:flex-row sm:items-baseline gap-3 mb-2">
-                    <h1 className="text-2xl font-bold tracking-tight">
-                      {companyData.company_name}
-                    </h1>
-                    <span className="inline-flex items-center px-3 py-1 rounded-full bg-white/20 text-sm font-medium">
-                      {/* <BadgeCheckIcon className="w-4 h-4 mr-1" /> */}
-                      Verified
-                    </span>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="flex items-center">
-                      {/* <IdentificationIcon className="w-5 h-5 mr-2 opacity-80" /> */}
-                      <div>
-                        <p className="text-sm text-blue-100">Company NPWP</p>
-                        <p className="font-mono tracking-wider flex items-center">
-                          {companyData.company_npwp || "Not set"}
-                          <button
-                            // onClick={() =>
-                            //   copyToClipboard(companyData.company_npwp)
-                            // }
-                            className="ml-2 p-1 text-blue-200 hover:text-white transition-colors"
-                          >
-                            {/* <DocumentDuplicateIcon className="w-4 h-4" /> */}
-                          </button>
-                        </p>
-                      </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="flex items-center">
+                    {/* <IdentificationIcon className="w-5 h-5 mr-2 opacity-80" /> */}
+                    <div>
+                      <p className="text-sm text-blue-100">Company NPWP</p>
+                      <p className="font-mono tracking-wider flex items-center">
+                        {companyData.company_npwp || "Not set"}
+                        <button
+                          // onClick={() =>
+                          //   copyToClipboard(companyData.company_npwp)
+                          // }
+                          className="ml-2 p-1 text-blue-200 hover:text-white transition-colors"
+                        >
+                          {/* <DocumentDuplicateIcon className="w-4 h-4" /> */}
+                        </button>
+                      </p>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-        )}
+        </div>
 
         {/* Main Content Area */}
         <div
